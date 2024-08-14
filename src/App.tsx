@@ -1,25 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
+// css imports
+import 'primereact/resources/primereact.min.css';
+import "primereact/resources/themes/lara-dark-indigo/theme.css";
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
+
 import './App.css';
+import { PrimeReactProvider } from 'primereact/api';
+import { Button } from 'primereact/button';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <PrimeReactProvider>
+      <div className='flex justify-content-center align-items-center'>
+        <Button label='hello world'></Button>
+      </div>
+    </PrimeReactProvider>
   );
 }
 
