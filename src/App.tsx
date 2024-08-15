@@ -6,16 +6,16 @@ import 'primeflex/primeflex.css';
 
 import './App.css';
 import { PrimeReactProvider } from 'primereact/api';
-import { Button } from 'primereact/button';
+import TransactionTag from './components/TransactionTag';
 
 function App() {
   return (
     <PrimeReactProvider>
       <div className='flex justify-content-center align-items-center'>
-        <Button label='hello world'></Button>
+        <TransactionTag money={100} tag="pen"></TransactionTag>
       </div>
     </PrimeReactProvider>
   );
-}
+}       
 
 export default App;
