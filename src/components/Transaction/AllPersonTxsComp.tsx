@@ -2,7 +2,7 @@ import { Panel } from 'primereact/panel';
 import PersonTxsComp from './PersonTxsComp';
 
 
-export default function AllPersonTxComp({allPersonTxs}: {allPersonTxs: AllPersonTxs}) {
+export default function AllPersonTxComp({allPersonTxs, onItemAdded, onItemUpdated}: {allPersonTxs: AllPersonTxs} & {onItemAdded: (name: string) => void, onItemUpdated: () => void}) {
   const personTotal = (txs: Tx[]) => txs.reduce((acc, cur) => acc + (cur.money??0), 0);
   const total = allPersonTxs.persons.reduce((acc, cur) => acc + personTotal(cur.txs), 0);
   return (
@@ -19,7 +19,7 @@ export default function AllPersonTxComp({allPersonTxs}: {allPersonTxs: AllPerson
           <p className="m-0">
             {
               allPersonTxs.persons.map(e => <div>
-                <PersonTxsComp {...e} ></PersonTxsComp>
+                <PersonTxsComp {...e} onItemAdd={(name) => onItemAdded(name)} ></PersonTxsComp>
               </div>)
             }
           </p>

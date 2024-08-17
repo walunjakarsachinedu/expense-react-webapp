@@ -24,9 +24,9 @@ export default function NavBar() {
         <div style={{width: 70}}></div>
 
         <Row>
-          <div className="pi pi-calendar cursor-pointer"></div>
-          <div className='mr-4'></div>
-          <div className="pi pi-sign-out cursor-pointer"></div>
+          <div className="pi pi-calendar icon-btn cursor-pointer"></div>
+          <div className='mr-3'></div>
+          <div className="pi pi-sign-out icon-btn cursor-pointer"></div>
         </Row>
       </div>
     </div>

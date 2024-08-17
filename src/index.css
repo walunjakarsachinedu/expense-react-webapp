@@ -49,3 +49,22 @@ body {
 .all-border {
   border: solid 1px var(--surface-border);
 }
+
+
+.hover-grow:hover {
+  transform: scale(1.3);
+  transition: transform 0.2s ease-in-out; 
+}
+
+
+.icon-btn {
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 5px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  font-size: 0.9rem;
+}
+
+.icon-btn:active, .icon-btn:hover {
+  border-color: var(--primary-color);
+}

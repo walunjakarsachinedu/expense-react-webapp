@@ -1,0 +1,7 @@
+.PersonTxsComp .add-btn {
+  font-size: 10px;
+}
+
+.PersonTxsComp:not(:hover) .add-btn {
+  visibility: hidden;
+}
