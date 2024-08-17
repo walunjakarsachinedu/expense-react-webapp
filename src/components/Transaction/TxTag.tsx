@@ -1,8 +1,8 @@
 import { Tag } from "primereact/tag";
-import "./TransactionTag.css";
+import "./TxTag.css";
 import { useState } from "react";
 
-export default function TransactionTag({money, tag}: {money?: number, tag?: string}) {
+export default function TxTag({money, tag}: Tx) {
   const [isEditing, setIsEditing] = useState(false);
 
   return (

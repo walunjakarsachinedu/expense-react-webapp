@@ -44,3 +44,8 @@ body {
 .unselectable {
   user-select: none; 
 }
+
+
+.all-border {
+  border: solid 1px var(--surface-border);
+}

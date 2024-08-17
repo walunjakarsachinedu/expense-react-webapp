@@ -7,17 +7,20 @@ import './theme/colors.css';
 
 import './App.css';
 import { PrimeReactProvider } from 'primereact/api';
-import TransactionTag from './components/TransactionTag';
 import NavBar from './components/NavBar';
+import AllPersonTxsComp from './components/Transaction/AllPersonTxsComp';
+import transactionData, { incomeData, upcomingExpenseData } from './DummyData';
 
 function App() {
   return (
     <PrimeReactProvider>
       <NavBar></NavBar>
       <div style={{height: 70}}></div>
-      <div className='flex'> <div style={{width: 20}}></div>
-        <TransactionTag money={10} tag="installment"></TransactionTag>
-      </div>
+      <AllPersonTxsComp allPersonTxs={transactionData}></AllPersonTxsComp>
+      <br /> <br />
+      <AllPersonTxsComp allPersonTxs={upcomingExpenseData}></AllPersonTxsComp>
+      <br /> <br />
+      <AllPersonTxsComp allPersonTxs={incomeData}></AllPersonTxsComp>
     </PrimeReactProvider>
   );
 }       

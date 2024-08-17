@@ -13,6 +13,7 @@ export default function NavBar() {
           padding: 10,
           paddingRight: 15, 
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          background: "rgba(255,255,255,0.05)"
         }}
       > 
         <Row>
