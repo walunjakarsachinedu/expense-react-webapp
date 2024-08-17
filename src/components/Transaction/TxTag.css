@@ -1,4 +1,17 @@
 .hover-grow:hover {
   transform: scale(1.3);
-  transition: transform 0.3s ease-in-out; 
+  transition: transform 0.1s ease-in-out; 
+}
+
+
+.remove-btn {
+  position: absolute;
+  top: -0.3rem; right: -0.4rem;
+  background-color: var(--highlight-bg); 
+  color: white;
+  font-size: 9px;
+  padding: 2px;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  cursor: pointer;
 }

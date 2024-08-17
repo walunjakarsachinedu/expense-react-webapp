@@ -6,10 +6,10 @@ export default function TxTag({money, tag}: Tx) {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <div className="Tag">
+    <div className="Tag relative">
       <Tag 
         style={{
-          border: "solid 1px var(--surface-border)", 
+          border: "solid 1px var(" + (isEditing ? "--primary-color" : "--surface-border") + ")", 
           backgroundColor: 'var(--highlight-bg)', 
           color: "white"
       }}>
@@ -39,15 +39,7 @@ export default function TxTag({money, tag}: Tx) {
           {
             isEditing ?
             <span 
-              className="ml-2 pi pi-times hover-grow" 
-              style={{
-                fontSize: 9, 
-                color: '#f07d79', 
-                backgroundColor: "rgba(255,255,255,0.1)", 
-                padding: 2, 
-                borderRadius: 2,
-                cursor: "pointer"
-              }}
+              className="remove-btn pi pi-times hover-grow" 
             ></span> : ""
           }
         </div>
