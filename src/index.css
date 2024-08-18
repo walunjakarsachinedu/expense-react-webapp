@@ -63,6 +63,9 @@ body {
   border-radius: 4px;
   background: rgba(255,255,255,0.05);
   font-size: 0.9rem;
+  backdrop-filter: blur(15px); 
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  cursor: pointer;
 }
 
 .icon-btn:active, .icon-btn:hover {
