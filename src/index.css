@@ -58,13 +58,8 @@ body {
 
 
 .icon-btn {
-  border: 1px solid rgba(255,255,255,0.1);
   padding: 5px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.05);
-  font-size: 0.9rem;
-  backdrop-filter: blur(15px); 
-  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  font-size: 1rem;
   cursor: pointer;
 }
 

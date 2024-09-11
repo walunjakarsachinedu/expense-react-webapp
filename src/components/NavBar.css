@@ -7,7 +7,10 @@
 }
 
 .blur-bg {
-  background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(15px); 
-  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  background-color: rgba(--surface-ground,0.8) !important;
+  backdrop-filter: blur(3px); 
+  border-bottom: 0px !important;
+  box-shadow: none !important;
+  backdrop-filter: saturate(120%) blur(20px);
+  -webkit-backdrop-filter: saturate(120%) blur(20px);
 }
