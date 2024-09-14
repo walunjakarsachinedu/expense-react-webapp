@@ -23,11 +23,11 @@ export default function NavBar() {
         <div style={{width: 70}}></div>
 
         <Row>
+          <ThemeBtn></ThemeBtn>
+          <div className='mr-3'></div>
           <div className="pi pi-calendar icon-btn cursor-pointer"></div>
           <div className='mr-3'></div>
           <div className="pi pi-sign-out icon-btn cursor-pointer"></div>
-          <div className='mr-3'></div>
-          <ThemeBtn></ThemeBtn>
         </Row>
       </div>
     </div>
