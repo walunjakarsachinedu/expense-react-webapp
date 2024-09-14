@@ -19,9 +19,9 @@ export default function TxTag({money, tag}: Tx) {
     <div className="Tag relative">
       <Tag 
         style={{
-          border: "solid 1px var(" + (isEditing ? "--primary-color" : "--surface-border") + ")", 
+          border: "solid 1px var(" + (isEditing ? "--surface-border-highlighted" : "--surface-border") + ")", 
           backgroundColor: 'var(--highlight-bg)', 
-          color: "white"
+          color: "var(--text-color)"
       }}>
         <div className="flex align-items-center" style={{fontSize: 12, fontWeight: "normal" }}>
           <span 
@@ -34,7 +34,7 @@ export default function TxTag({money, tag}: Tx) {
           <div 
             style={{
               height: "10px", width: "1px", 
-              backgroundColor: "var(--surface-border1)", 
+              backgroundColor: "var(--surface-border)", 
               marginRight: 5, marginLeft: 5
           }}></div>
           <span 
@@ -46,7 +46,7 @@ export default function TxTag({money, tag}: Tx) {
           >{money ?? ""}</span> 
           <span 
             className="unselectable" 
-            style={{color: "rgba(255,255,255,0.85)"}}
+            style={{color: "var(--text-unselectable)"}}
           >&nbsp;/-</span>
           {
             isEditing ?

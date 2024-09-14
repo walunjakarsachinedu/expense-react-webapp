@@ -1,6 +1,7 @@
 import './NavBar.css'
 import moneyIcon from '../images/money-icon.svg';
 import { PropsWithChildren } from 'react';
+import ThemeBtn from './ThemeBtn';
 
 export default function NavBar() {
   return (
@@ -25,6 +26,8 @@ export default function NavBar() {
           <div className="pi pi-calendar icon-btn cursor-pointer"></div>
           <div className='mr-3'></div>
           <div className="pi pi-sign-out icon-btn cursor-pointer"></div>
+          <div className='mr-3'></div>
+          <ThemeBtn></ThemeBtn>
         </Row>
       </div>
     </div>

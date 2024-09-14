@@ -1,3 +1,8 @@
-:root {
-  --surface-border1: rgba(255,255,255,0.3)
+.p-panel .p-panel-header, .p-panel .p-panel-content {
+  background-color: var(--surface-ground);
+  border-color: var(--surface-border)
+}
+
+.p-tag {
+  background-color: var(--surface-ground) !important;
 }

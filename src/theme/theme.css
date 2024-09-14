@@ -1,0 +1,21 @@
+html[data-theme="indigo"] {
+  --surface-border-highlighted: var(--primary-color);
+  --surface-ground-light: rgba(255,255,255,0.1);
+  --selected-text-bg: rgba(255, 255, 255, 0.3);
+}
+
+html[data-theme="dark"] {
+  --surface-border: rgba(255,255,255,0.1);
+  --surface-border-highlighted: #818cf8;
+
+  --text-unselectable: rgba(255,255,255,0.85);
+  --text-light: white;
+  --selected-text-bg: rgba(255, 255, 255, 0.3);
+
+  --primary-color: black;
+
+  --surface-ground: rgba(255, 255, 255, 0.01);
+  --surface-ground-light: rgba(255, 255, 255, 0.05);
+  --highlight-bg: rgba(255,255,255,0.85);
+}
+

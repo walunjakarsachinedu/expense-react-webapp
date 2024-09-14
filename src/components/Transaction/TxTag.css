@@ -2,11 +2,11 @@
 .remove-btn {
   position: absolute;
   top: -0.3rem; right: -0.4rem;
-  background-color: var(--highlight-bg); 
-  color: white;
+  background-color: var(--surface-ground-light); 
+  color: var(--text-color);
   font-size: 9px;
   padding: 2px;
-  border: 1px solid var(--primary-color);
+  border: 1px solid var(--surface-border-highlighted);
   border-radius: 4px;
   cursor: pointer;
 }
