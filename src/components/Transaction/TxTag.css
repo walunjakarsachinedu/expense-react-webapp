@@ -1,8 +1,8 @@
 
 .remove-btn {
   position: absolute;
-  top: -0.3rem; right: -0.4rem;
-  background-color: var(--surface-ground-light); 
+  top: -0.3rem; right: -0.35rem;
+  /* background-color: var(--surface-ground-light);  */
   color: var(--text-color);
   font-size: 9px;
   padding: 2px;

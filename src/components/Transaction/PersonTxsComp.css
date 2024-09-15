@@ -5,3 +5,7 @@
 .PersonTxsComp:not(:hover) .add-btn {
   visibility: hidden;
 }
+
+.p-panel .p-panel-content {
+  padding: 0px;
+}

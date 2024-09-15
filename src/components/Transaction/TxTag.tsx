@@ -2,9 +2,21 @@ import { Tag } from "primereact/tag";
 import "./TxTag.css";
 import { KeyboardEvent, useState } from "react";
 import getKeyName from "../../utils/keyboard";
+import TxTagService from "../../services/implemenation/TxTagService";
+import { Tx } from "../../types/Transaction";
 
-export default function TxTag({money, tag}: Tx) {
-  const [isEditing, setIsEditing] = useState(false);
+type TxTagInput = Tx & {personId: String, onTagDelete: (tagId: String) => void}
+
+export default function TxTag({_id, money, tag, personId, onTagDelete} : TxTagInput) {
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const saveState = async () => {
+    await TxTagService.provider.update({_id, money, tag}, personId);
+  }
+
+  const deleteTag = () => {
+    onTagDelete(_id);
+  }
 
   const preventNewLine = (event: KeyboardEvent<HTMLSpanElement>) => {
     if (event.key === 'Enter') event.preventDefault();
@@ -26,7 +38,10 @@ export default function TxTag({money, tag}: Tx) {
         <div className="flex align-items-center" style={{fontSize: 12, fontWeight: "normal" }}>
           <span 
             onFocus={() => setIsEditing(true)}
-            onBlur={() => setIsEditing(false)}
+            onBlur={() => {
+              setIsEditing(false);
+              saveState();
+            }}
             onKeyDown={(e) => {preventNewLine(e);}}
             contentEditable suppressContentEditableWarning 
             data-placeholder="tag"
@@ -39,7 +54,10 @@ export default function TxTag({money, tag}: Tx) {
           }}></div>
           <span 
             onFocus={() => setIsEditing(true)}
-            onBlur={() => setIsEditing(false)}
+            onBlur={() => {
+              setIsEditing(false);
+              saveState();
+            }}
             onKeyDown={(e) => {preventNewLine(e); preventAtoZ(e);}}
             contentEditable suppressContentEditableWarning 
             data-placeholder="money"
@@ -51,6 +69,7 @@ export default function TxTag({money, tag}: Tx) {
           {
             isEditing ?
             <span 
+            onMouseDown={deleteTag}
               className="remove-btn pi pi-times hover-grow" 
             ></span> : ""
           }
