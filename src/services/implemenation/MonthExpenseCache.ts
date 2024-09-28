@@ -1,3 +1,4 @@
+import { produce } from "immer";
 import { PersonTx, TableType, Tx } from "../../types/Transaction";
 import Utility from "../../utils/Utility";
 import IMonthExpenseCache from "../interface/IMonthExpenseCache";
@@ -49,7 +50,7 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   }
 
 
-  updatePersonName(id: String, name: String): void {
+  updatePersonName(id: string, name: string): void {
     const person = this.getPersonTx(id);
     person.name = name;
   }
@@ -70,10 +71,18 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
     personList!.splice(index, 1);
   }
 
+  updatePersonTx(updatedPersonTx: PersonTx) {
+    const expense = this.getExpenseOfType(updatedPersonTx.type);
+    if(!expense) return;
+    const index = expense.findIndex(person => updatedPersonTx._id === person._id);
+    expense[index] = updatedPersonTx;
+  }
 
-  addTxTag(tx: Tx, personId: String): Tx {
+
+  addTxTag(tx: Tx, personId: string): Tx {
     const personTx = this.getPersonTx(personId);
-    personTx!.txs.unshift(tx);
+    const updatedPersonTx = produce(personTx, (personTx: PersonTx) => {personTx!.txs.unshift(tx)});
+    this.updatePersonTx(updatedPersonTx);
     return tx;
   }
 
@@ -86,15 +95,17 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   
   updateTxTag(tx: Tx, personId: String): void {
     const index = this._getTxTagIndex(tx._id, personId);
-    const tagList = this.getPersonTx(personId)!.txs;
-    tagList[index] = tx;
+    const person = this.getPersonTx(personId)!;
+    const updatedPersonTx = produce(person, (personTx: PersonTx) => {personTx.txs[index] = tx});
+    this.updatePersonTx(updatedPersonTx);
   }
 
 
-  deleteTxTag(id: String, personId: String): void {
+  deleteTxTag(id: String, personId: string): void {
     const index = this._getTxTagIndex(id, personId);
     const personTx = this.getPersonTx(personId);
-    personTx!.txs.splice(index, 1);
+    const updatedPersonTx = produce(personTx, (personTx: PersonTx) => {personTx!.txs.splice(index, 1)});
+    this.updatePersonTx(updatedPersonTx);
   }
 
   reorderTxTag(id: String, toIndex: number, personId: String): void {

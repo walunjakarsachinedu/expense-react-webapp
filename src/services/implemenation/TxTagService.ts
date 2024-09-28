@@ -3,6 +3,7 @@ import { Tx } from "../../types/Transaction";
 import ITxTagService from "../interface/ITxTagService";
 import MonthExpenseCache from "./MonthExpenseCache";
 import { v4 as uuidv4 } from 'uuid';
+import PersonExpenseService from "./PersonExpenseService";
 
 
 export default class TxTagService implements ITxTagService {
@@ -18,7 +19,8 @@ export default class TxTagService implements ITxTagService {
 
   async add(personId: String): Promise<Tx> {
     const tagId: string = uuidv4();
-    const tx: Tx = {_id: tagId, money: "", tag: ""};
+    const index = PersonExpenseService.provider.get(personId).txs.length;
+    const tx: Tx = {_id: tagId, money: "", tag: "", index: index};
     await TxTagApi.provider.add(personId);
     const addedTx = MonthExpenseCache.provider.addTxTag(tx, personId);
     return addedTx;

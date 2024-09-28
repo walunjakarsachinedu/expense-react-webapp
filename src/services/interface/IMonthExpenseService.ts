@@ -1,4 +1,4 @@
-import { PersonTx } from "../../types/Transaction";
+import { PersonTx, TableType } from "../../types/Transaction";
 
 /** contains all operations related to month transactions. */
 export default interface IMonthExpenseService {
@@ -8,6 +8,7 @@ export default interface IMonthExpenseService {
   getMonthExpense(): PersonTx[] | undefined;
   /** get all person income of selected month. */
   getMonthIncome(): PersonTx[] | undefined; 
-
+  /** get list of person of specified `type`. */
+  getExpenseOfType(type: TableType): PersonTx[] | undefined 
 
 }

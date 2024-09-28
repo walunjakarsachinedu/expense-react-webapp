@@ -1,5 +1,5 @@
 import MonthExpenseApi from "../../api/MonthExpenseApi";
-import { PersonTx } from "../../types/Transaction";
+import { PersonTx, TableType } from "../../types/Transaction";
 import IMonthExpenseService from "../interface/IMonthExpenseService";
 import MonthExpenseCache from "./MonthExpenseCache";
 
@@ -25,5 +25,9 @@ export class MonthExpenseService implements IMonthExpenseService {
 
   getMonthIncome(): PersonTx[] | undefined {
     return MonthExpenseCache.provider.getMonthIncome();
+  }
+
+  getExpenseOfType(type: TableType): PersonTx[] | undefined {
+    return MonthExpenseCache.provider.getExpenseOfType(type);
   }
 }

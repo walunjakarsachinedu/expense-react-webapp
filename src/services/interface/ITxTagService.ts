@@ -4,7 +4,7 @@ import { Tx } from "../../types/Transaction";
 export default interface ITxTagService {
   /** get person details & transaction. */
   get(id: String, personId: String): Tx;
-  /** get expense tag. */
+  /** add & get added expense tag. */
   add(personId: String): Promise<Tx>;
   /** get expense tag. */
   update(tx: Tx, personId: String): Promise<Tx>;

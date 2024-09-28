@@ -5,6 +5,7 @@ import { MonthExpenseService } from '../../services/implemenation/MonthExpenseSe
 import Utility from '../../utils/Utility';
 import LocalStorageApi from '../../api/LocalStorageApi';
 import { PersonTx } from '../../types/Transaction';
+import PersonProvider from '../../providers/PersonProvider';
 
 
 export default function ExpensePanel() {
@@ -23,7 +24,11 @@ export default function ExpensePanel() {
   },[]);
 
   const personList = (monthExpense ?? []).map(e => 
-    <div key={e._id.toString()}> <PersonTxsComp id={e._id} ></PersonTxsComp> </div>
+    <div key={e._id.toString()}> 
+      <PersonProvider id={e._id}>
+        <PersonTxsComp></PersonTxsComp> 
+      </PersonProvider>
+    </div>
   )
   return (
     <div>

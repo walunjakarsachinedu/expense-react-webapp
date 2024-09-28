@@ -1,21 +1,23 @@
 import { Tag } from "primereact/tag";
 import "./TxTag.css";
-import { KeyboardEvent, useState } from "react";
+import { KeyboardEvent, useContext, useState } from "react";
 import getKeyName from "../../utils/keyboard";
 import TxTagService from "../../services/implemenation/TxTagService";
 import { Tx } from "../../types/Transaction";
+import { PersonDispatchContext } from "../../providers/PersonProvider";
 
-type TxTagInput = Tx & {personId: String, onTagDelete: (tagId: String) => void}
+type TxTagInput = Tx & {personId: String}
 
-export default function TxTag({_id, money, tag, personId, onTagDelete} : TxTagInput) {
+export default function TxTag({_id, money, tag, personId, index} : TxTagInput) {
+  const personDispatchAction = useContext(PersonDispatchContext); 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const saveState = async () => {
-    await TxTagService.provider.update({_id, money, tag}, personId);
+    await TxTagService.provider.update({_id, money, tag, index}, personId);
   }
 
   const deleteTag = () => {
-    onTagDelete(_id);
+    personDispatchAction?.({type: "removeExpense", _id: _id})
   }
 
   const preventNewLine = (event: KeyboardEvent<HTMLSpanElement>) => {

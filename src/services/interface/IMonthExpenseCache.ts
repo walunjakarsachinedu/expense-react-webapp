@@ -6,7 +6,7 @@ export default interface IMonthExpenseCache {
   getMonthExpense(): PersonTx[] | undefined;
   /** get list of person ids in income table for current month. */
   getMonthIncome(): PersonTx[] | undefined;
-  /** get list of person ids of specified `type`. */
+  /** get list of person of specified `type`. */
   getExpenseOfType(type: TableType): PersonTx[] | undefined 
 
 

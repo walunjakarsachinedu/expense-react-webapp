@@ -3,6 +3,7 @@ import IPersonExpenseService from "../interface/IPersonExpenseService";
 import MonthExpenseCache from "./MonthExpenseCache";
 import PersonExpenseApi from "../../api/PersonExpenseApi";
 import { PersonTx, TableType } from "../../types/Transaction";
+import { MonthExpenseService } from "./MonthExpenseService";
 
 export default class PersonExpenseService implements IPersonExpenseService {
 
@@ -14,14 +15,16 @@ export default class PersonExpenseService implements IPersonExpenseService {
   }
 
   async add(type: TableType): Promise<PersonTx> {
+    const index = MonthExpenseService.provider.getExpenseOfType(type)?.length ?? 0;
     const personTx: PersonTx = {
       _id: v4(),
       name: "",
       txs: [],
       type: type,
+      index: index
     }
 
-    await PersonExpenseApi.provider.add(personTx);
+    PersonExpenseApi.provider.add(personTx);
     MonthExpenseCache.provider.addPerson(personTx);
     return personTx;
   }
