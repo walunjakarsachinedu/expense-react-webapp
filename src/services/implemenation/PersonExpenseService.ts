@@ -10,7 +10,7 @@ export default class PersonExpenseService implements IPersonExpenseService {
   static readonly provider: IPersonExpenseService = new PersonExpenseService();
 
 
-  get(id: String): PersonTx {
+  get(id: string): PersonTx {
     return MonthExpenseCache.provider.getPersonTx(id)!;
   }
 
@@ -30,20 +30,20 @@ export default class PersonExpenseService implements IPersonExpenseService {
   }
 
 
-  async updateName(id: String, name: String): Promise<PersonTx> {
+  async updateName(id: string, name: string): Promise<PersonTx> {
     await PersonExpenseApi.provider.updateName(id, name);
     MonthExpenseCache.provider.updatePersonName(id, name);
     return this.get(id);
   }
 
 
-  async delete(id: String): Promise<void> {
+  async delete(id: string): Promise<void> {
     await PersonExpenseApi.provider.delete(id);
     MonthExpenseCache.provider.deletePerson(id);
   }
 
 
-  async reorder(id: String, index: number): Promise<void> {
+  async reorder(id: string, index: number): Promise<void> {
     await PersonExpenseApi.provider.reorder(id, index);
     MonthExpenseCache.provider.reorderPerson(id, index);
   }

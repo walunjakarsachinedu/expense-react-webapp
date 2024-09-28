@@ -6,13 +6,13 @@ import IMonthExpenseCache from "../interface/IMonthExpenseCache";
 export default class MonthExpenseCache implements IMonthExpenseCache {
   monthExpense?: PersonTx[];
   monthIncome?: PersonTx[];
-  month?: String;
-  year?: String;
+  month?: string;
+  year?: string;
 
   static readonly provider: IMonthExpenseCache = new MonthExpenseCache();
 
 
-  cacheAllData({month, year, personList}: {month: String, year: String, personList: PersonTx[]}): void {
+  cacheAllData({month, year, personList}: {month: string, year: string, personList: PersonTx[]}): void {
     this.month = month;
     this.year = year;
     this.monthExpense = personList.filter(person => person.type === TableType.Expense);
@@ -36,7 +36,7 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   }
 
 
-  getPersonTx(id: String): PersonTx {
+  getPersonTx(id: string): PersonTx {
     let personTx: PersonTx|undefined;
     personTx = this.monthExpense?.find(person => person._id === id);
     personTx ??= this.monthIncome?.find(person => person._id === id);
@@ -56,7 +56,7 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   }
 
 
-  reorderPerson(id: String, toIndex: number): void {
+  reorderPerson(id: string, toIndex: number): void {
     const person = this.getPersonTx(id);
     const personList = this.getExpenseOfType(person.type);
     const fromIndex = this._getPersonIndex(id, person.type);
@@ -64,7 +64,7 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   }
 
 
-  deletePerson(id: String): void {
+  deletePerson(id: string): void {
     const person = this.getPersonTx(id);
     const personList = this.getExpenseOfType(person.type);
     const index = this._getPersonIndex(id, person.type);
@@ -87,13 +87,13 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   }
 
 
-  getTxTag(id: String, personId: String): Tx {
+  getTxTag(id: string, personId: string): Tx {
     const personTx = this.getPersonTx(personId);
     return personTx!.txs.find(txs => txs._id === id)!;
   }
 
   
-  updateTxTag(tx: Tx, personId: String): void {
+  updateTxTag(tx: Tx, personId: string): void {
     const index = this._getTxTagIndex(tx._id, personId);
     const person = this.getPersonTx(personId)!;
     const updatedPersonTx = produce(person, (personTx: PersonTx) => {personTx.txs[index] = tx});
@@ -101,26 +101,26 @@ export default class MonthExpenseCache implements IMonthExpenseCache {
   }
 
 
-  deleteTxTag(id: String, personId: string): void {
+  deleteTxTag(id: string, personId: string): void {
     const index = this._getTxTagIndex(id, personId);
     const personTx = this.getPersonTx(personId);
     const updatedPersonTx = produce(personTx, (personTx: PersonTx) => {personTx!.txs.splice(index, 1)});
     this.updatePersonTx(updatedPersonTx);
   }
 
-  reorderTxTag(id: String, toIndex: number, personId: String): void {
+  reorderTxTag(id: string, toIndex: number, personId: string): void {
     const fromIndex = this._getTxTagIndex(id, personId);
     const personTx = this.getPersonTx(personId);
     personTx!.txs = Utility.provider.reorder(personTx!.txs, {fromIndex, toIndex});
   }
 
 
-  private _getPersonIndex(id: String, type: TableType): number {
+  private _getPersonIndex(id: string, type: TableType): number {
     const personList = this.getExpenseOfType(type);
     return personList!.findIndex(person => person._id === id);
   }
 
-  private _getTxTagIndex(id: String, personId: String): number {
+  private _getTxTagIndex(id: string, personId: string): number {
     const personTx = this.getPersonTx(personId);
     return personTx!.txs.findIndex(tx => tx._id === id);;
   }

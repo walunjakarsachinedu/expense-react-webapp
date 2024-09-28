@@ -22,7 +22,7 @@ export default function PersonTxsComp() {
 
   const tags = (person: PersonTx) => person.txs.map((tx) => 
     <TxTag 
-      key={tx._id.toString()}
+      key={tx._id.tostring()}
       _id={tx._id} 
       money={tx.money} 
       tag={tx.tag} 

@@ -11,13 +11,13 @@ export default class TxTagService implements ITxTagService {
   static readonly provider: ITxTagService = new TxTagService();
 
 
-  get(id: String, personId: String): Tx {
+  get(id: string, personId: string): Tx {
     const txTag = MonthExpenseCache.provider.getTxTag(id, personId);
     return txTag;
   }
 
 
-  async add(personId: String): Promise<Tx> {
+  async add(personId: string): Promise<Tx> {
     const tagId: string = uuidv4();
     const index = PersonExpenseService.provider.get(personId).txs.length;
     const tx: Tx = {_id: tagId, money: "", tag: "", index: index};
@@ -27,20 +27,20 @@ export default class TxTagService implements ITxTagService {
   }
 
 
-  async update(tx: Tx, personId: String): Promise<Tx> {
+  async update(tx: Tx, personId: string): Promise<Tx> {
     await TxTagApi.provider.update(tx, personId);
     MonthExpenseCache.provider.updateTxTag(tx, personId);
     return tx;
   }
 
 
-  async delete(id: String, personId: String): Promise<void> {
+  async delete(id: string, personId: string): Promise<void> {
     await TxTagApi.provider.delete(id, personId);
     MonthExpenseCache.provider.deleteTxTag(id, personId);
   }
 
 
-  async reorder(id: String, index: number, personId: String): Promise<void> {
+  async reorder(id: string, index: number, personId: string): Promise<void> {
     await TxTagApi.provider.reorder(id, index, personId);
     MonthExpenseCache.provider.reorderTxTag(id, index, personId);
   }

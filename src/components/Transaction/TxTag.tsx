@@ -6,7 +6,7 @@ import TxTagService from "../../services/implemenation/TxTagService";
 import { Tx } from "../../types/Transaction";
 import { PersonDispatchContext } from "../../providers/PersonProvider";
 
-type TxTagInput = Tx & {personId: String}
+type TxTagInput = Tx & {personId: string}
 
 export default function TxTag({_id, money, tag, personId, index} : TxTagInput) {
   const personDispatchAction = useContext(PersonDispatchContext); 

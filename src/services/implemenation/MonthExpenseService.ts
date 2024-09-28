@@ -11,7 +11,7 @@ export class MonthExpenseService implements IMonthExpenseService {
 
 
   /** get and cache month expense */
-  async getAndCacheMonthAllTxs(month: String, year: String): Promise<PersonTx[]> {
+  async getAndCacheMonthAllTxs(month: string, year: string): Promise<PersonTx[]> {
     var personList: PersonTx[] = [];
     personList = await MonthExpenseApi.provider.getMonthExpense();
     MonthExpenseCache.provider.cacheAllData({month, year, personList});

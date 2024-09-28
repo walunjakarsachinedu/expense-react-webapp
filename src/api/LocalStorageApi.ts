@@ -4,7 +4,7 @@ import { Themes } from "../types/Theme";
 export default class LocalStorageApi {
   static readonly provider = new LocalStorageApi();
 
-  getSelectedMonthYear() : {month: String, year: String} {
+  getSelectedMonthYear() : {month: string, year: string} {
     const now: Date = new Date();
     const month = localStorage.getItem(LocalStorageValues.month);
     const year = localStorage.getItem(LocalStorageValues.year);
@@ -14,9 +14,9 @@ export default class LocalStorageApi {
     };
   }
 
-  storeSelectedMonthYear({month, year} : {month: String, year: String}) {
-    localStorage.setItem(LocalStorageValues.month, month.toString());
-    localStorage.setItem(LocalStorageValues.year, year.toString());
+  storeSelectedMonthYear({month, year} : {month: string, year: string}) {
+    localStorage.setItem(LocalStorageValues.month, month.tostring());
+    localStorage.setItem(LocalStorageValues.year, year.tostring());
   }
 
 

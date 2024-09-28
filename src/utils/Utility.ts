@@ -10,10 +10,10 @@ export default class Utility {
     return arr;
   }
 
-  parseNumber(numStr?: String): number|undefined {
+  parseNumber(numStr?: string): number|undefined {
     try {
       if(numStr) {
-        return parseInt(numStr.toString());
+        return parseInt(numStr.tostring());
       }
     }
     catch { }

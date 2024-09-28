@@ -10,15 +10,15 @@ export default class PersonExpenseApi {
     return personTx;
   }
 
-  async updateName(id: String, name: String): Promise<void> {
+  async updateName(id: string, name: string): Promise<void> {
     // TODO: logic to update person name from backend
   }
 
-  async delete(id: String): Promise<void> {
+  async delete(id: string): Promise<void> {
     // Todo: logic to delete person from backend
   }
 
-  async reorder(id: String, index: number): Promise<void> {
+  async reorder(id: string, index: number): Promise<void> {
     // Todo: logic to delete person from backend
   }
 }
