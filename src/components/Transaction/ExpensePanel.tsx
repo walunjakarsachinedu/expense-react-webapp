@@ -24,7 +24,7 @@ export default function ExpensePanel() {
   },[]);
 
   const personList = (monthExpense ?? []).map(e => 
-    <div key={e._id.tostring()}> 
+    <div key={e._id}> 
       <PersonProvider id={e._id}>
         <PersonTxsComp></PersonTxsComp> 
       </PersonProvider>

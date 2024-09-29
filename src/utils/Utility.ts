@@ -13,7 +13,7 @@ export default class Utility {
   parseNumber(numStr?: string): number|undefined {
     try {
       if(numStr) {
-        return parseInt(numStr.tostring());
+        return parseInt(numStr);
       }
     }
     catch { }

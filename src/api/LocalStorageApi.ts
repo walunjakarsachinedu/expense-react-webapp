@@ -15,8 +15,8 @@ export default class LocalStorageApi {
   }
 
   storeSelectedMonthYear({month, year} : {month: string, year: string}) {
-    localStorage.setItem(LocalStorageValues.month, month.tostring());
-    localStorage.setItem(LocalStorageValues.year, year.tostring());
+    localStorage.setItem(LocalStorageValues.month, month);
+    localStorage.setItem(LocalStorageValues.year, year);
   }
 
 
