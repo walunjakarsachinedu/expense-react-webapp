@@ -1,12 +1,11 @@
-import { createContext, ReactNode } from "react"
+import { createContext, ReactNode, useReducer } from "react"
 import { MonthExpenseService } from "../services/implemenation/MonthExpenseService";
 import { TableType } from "../types/Transaction";
-import { useImmerReducer } from "use-immer";
 
 
 function PersonIdListProvider({children, type}: {children: ReactNode|undefined, type: TableType}) {
   const  initialState = MonthExpenseService.provider.getExpenseOfType(type)?.map(person => person._id);
-  const [personIdList, dispatch] = useImmerReducer(personIdsReducer, initialState);
+  const [personIdList, dispatch] = useReducer(personIdsReducer, initialState);
 
   return <PersonIdListContext.Provider value={personIdList} >
       <PersonIdListDispatchContext.Provider value={dispatch}>
