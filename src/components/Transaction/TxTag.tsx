@@ -1,33 +1,29 @@
 import { Tag } from "primereact/tag";
 import "./TxTag.css";
-import { KeyboardEvent, useContext, useState } from "react";
-import getKeyName from "../../utils/keyboard";
-import TxTagService from "../../services/implemenation/TxTagService";
+import { useContext, useRef, useState } from "react";
 import { Tx } from "../../types/Transaction";
 import { PersonDispatchContext } from "../../providers/PersonProvider";
+import EditableElem from "../common/EditableElement";
 
 type TxTagInput = Tx & {personId: string}
 
 export default function TxTag({_id, money, tag, personId, index} : TxTagInput) {
   const personDispatchAction = useContext(PersonDispatchContext); 
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const moneyValue = useRef(money??"")
+  const tagValue = useRef(tag)
 
   const saveState = async () => {
-    await TxTagService.provider.update({_id, money, tag, index}, personId);
+    personDispatchAction?.({type: "updateExpense", txTag: {
+      _id, 
+      money: moneyValue.current, 
+      tag: tagValue.current, index
+    }})
   }
 
   const deleteTag = () => {
     personDispatchAction?.({type: "removeExpense", _id: _id})
   }
-
-  const preventNewLine = (event: KeyboardEvent<HTMLSpanElement>) => {
-    if (event.key === 'Enter') event.preventDefault();
-  }
-
-  const preventAtoZ = (event: KeyboardEvent<HTMLSpanElement>) => {
-    const code = getKeyName(event.code);
-    if(code.length === 1 && /[a-z]/.test(code)) event.preventDefault();
-  };
 
   return (
     <div className="Tag relative">
@@ -38,32 +34,36 @@ export default function TxTag({_id, money, tag, personId, index} : TxTagInput) {
           color: "var(--text-color)"
       }}>
         <div className="flex align-items-center" style={{fontSize: 12, fontWeight: "normal" }}>
-          <span 
+          <EditableElem
+            initialText={tag}
+            preventNewline={true}
+            placeHolder="tag"
             onFocus={() => setIsEditing(true)}
-            onBlur={() => {
+            onBlur={(e) => {
+              tagValue.current = e.target.textContent ?? "";
               setIsEditing(false);
               saveState();
             }}
-            onKeyDown={(e) => {preventNewLine(e);}}
-            contentEditable suppressContentEditableWarning 
-            data-placeholder="tag"
-          >{tag ?? ""}</span> 
+          ></EditableElem>
           <div 
             style={{
               height: "10px", width: "1px", 
               backgroundColor: "var(--surface-border)", 
               marginRight: 5, marginLeft: 5
           }}></div>
-          <span 
+          <EditableElem
+            initialText={money}
+            placeHolder="money"
+            numberOnly={true}
+            preventNewline={true}
             onFocus={() => setIsEditing(true)}
-            onBlur={() => {
-              setIsEditing(false);
+            onBlur={() => setIsEditing(false)}
+            onKeyUp={(e) => {
+              const target = e.target as HTMLElement;
+              moneyValue.current = target.textContent ?? "";
               saveState();
             }}
-            onKeyDown={(e) => {preventNewLine(e); preventAtoZ(e);}}
-            contentEditable suppressContentEditableWarning 
-            data-placeholder="money"
-          >{money ?? ""}</span> 
+          ></EditableElem>
           <span 
             className="unselectable" 
             style={{color: "var(--text-unselectable)"}}

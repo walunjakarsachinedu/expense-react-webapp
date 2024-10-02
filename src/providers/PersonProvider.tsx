@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useReducer } from "react";
 import PersonExpenseService from "../services/implemenation/PersonExpenseService";
-import { PersonTx } from "../types/Transaction";
+import { PersonTx, Tx } from "../types/Transaction";
 import TxTagService from "../services/implemenation/TxTagService";
 
 
@@ -31,11 +31,15 @@ async function personReducer(person: Promise<PersonTx>, action: PersonReducerAct
     case "removeExpense":
       await TxTagService.provider.delete(action._id, personData._id);
       break;
+    case "updateExpense":
+      await TxTagService.provider.update({...action.txTag}, personData._id);
+      break;
     default:
       return person;
   }
 
-  return PersonExpenseService.provider.get(personData._id);
+  const updatedPerson = PersonExpenseService.provider.get(personData._id);
+  return updatedPerson;
 }
 
 
@@ -53,7 +57,12 @@ type PersonReducerRemoveExpense = {
   _id: string;
 }
 
-type PersonReducerAction = PersonReducerAddExpense|PersonReducerRemoveExpense;
+type PersonReducerUpdateExpense = {
+  type: "updateExpense";
+  txTag: Tx;
+}
+
+type PersonReducerAction = PersonReducerAddExpense|PersonReducerRemoveExpense|PersonReducerUpdateExpense;
 
 
 
