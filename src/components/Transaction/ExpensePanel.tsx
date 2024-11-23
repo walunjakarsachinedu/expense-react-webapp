@@ -1,53 +1,39 @@
-import { Panel } from 'primereact/panel';
-import PersonTxsComp from './PersonTxsComp';
-import { useEffect, useState } from 'react';
-import { MonthExpenseService } from '../../services/implemenation/MonthExpenseService';
-import Utility from '../../utils/Utility';
-import LocalStorageApi from '../../api/LocalStorageApi';
-import { PersonTx } from '../../types/Transaction';
-import PersonProvider from '../../providers/PersonProvider';
-
+import { Panel } from "primereact/panel";
+import PersonTxsComp from "./PersonTxsComp";
+import usePersonStore from "../../store/usePersonStore";
+import { TableType } from "../../types/Transaction";
+import { utils } from "../../utils/Utility";
 
 export default function ExpensePanel() {
-  const [monthExpense, setMonthExpense] = useState<PersonTx[]|undefined>();
-  const total = Utility.provider.personTotal(monthExpense??[]);
+  const persons = usePersonStore((store) => store.persons);
 
-  const loadExpenseData = async () => {
-    const date = LocalStorageApi.provider.getSelectedMonthYear();
-    await MonthExpenseService.provider.getAndCacheMonthAllTxs(date.month, date.year);
-    const monthExpense = MonthExpenseService.provider.getMonthExpense();
-    setMonthExpense(monthExpense);
-  }
+  const personList = persons
+    .filter((person) => person.type === TableType.Expense)
+    .map((person) => <PersonTxsComp id={person._id}></PersonTxsComp>);
 
-  useEffect(() => {
-    loadExpenseData();
-  },[]);
-
-  const personList = (monthExpense ?? []).map(e => 
-    <div key={e._id}> 
-      <PersonProvider id={e._id}>
-        <PersonTxsComp></PersonTxsComp> 
-      </PersonProvider>
-    </div>
-  )
+  const total = persons.reduce(
+    (total, person) =>
+      total +
+      person.txs.reduce((total, tx) => utils.parseNumber(tx.money) ?? 0, 0),
+    0
+  );
   return (
     <div>
       <div className="flex justify-content-center align-items-center flex-wrap">
-        <div className="col-12 md:col-10" style={{maxWidth: 1000}}>
-          <Panel 
+        <div className="col-12 md:col-10" style={{ maxWidth: 1000 }}>
+          <Panel
             headerTemplate={
-            <div className='p-panel-header flex justify-content-between align-items-center'>
-              <div> Expense History </div>
-              <div className="flex align-items-center">
-                <div className="pi pi-cog"></div>
-                <div className="mx-3"></div>
-                <div> Total: {total}/- </div>
+              <div className="p-panel-header flex justify-content-between align-items-center">
+                <div> Expense History </div>
+                <div className="flex align-items-center">
+                  <div className="pi pi-cog"></div>
+                  <div className="mx-3"></div>
+                  <div> Total: {total}/- </div>
+                </div>
               </div>
-            </div>}
+            }
           >
-            <div className="m-0 p-4">
-              { personList }
-            </div>
+            <div className="m-0 p-4">{personList}</div>
           </Panel>
         </div>
       </div>

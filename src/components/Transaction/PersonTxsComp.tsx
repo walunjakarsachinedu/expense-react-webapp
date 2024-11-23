@@ -1,52 +1,61 @@
 import { Divider } from "primereact/divider";
+import usePersonStore from "../../store/usePersonStore";
+import { PersonTx, TableType } from "../../types/Transaction";
+import { utils } from "../../utils/Utility";
+import "./PersonTxsComp.css";
 import TxTag from "./TxTag";
-import './PersonTxsComp.css';
-import { useContext, useEffect, useState } from "react";
-import Utility from "../../utils/Utility";
-import { PersonContext, PersonDispatchContext } from "../../providers/PersonProvider";
-import { PersonTx } from "../../types/Transaction";
 
-export default function PersonTxsComp() {
-  const [person, setPerson] = useState<PersonTx|undefined>();
-  const personPromise = useContext(PersonContext);
-  const personAction = useContext(PersonDispatchContext);
+type Props = {
+  id: string;
+};
+export default function PersonTxsComp({ id }: Props) {
+  const person = usePersonStore(
+    (store) => store.persons.filter((person) => person._id === id)[0]
+  );
+  const addPerson = usePersonStore((store) => store.addPerson);
 
-  useEffect(() => {
-    personPromise?.then(person => {
-      setPerson(person);
-    });
-  }, [personPromise]);
-
-  const total = (person: PersonTx) => Utility.provider.txsTotal(person?.txs??[]);
-  const name = (person: PersonTx) => person?.name ?? ""; 
-
-  const tags = (person: PersonTx) => person.txs.map((tx) => 
-    <TxTag 
-      key={tx._id}
-      _id={tx._id} 
-      money={tx.money} 
-      tag={tx.tag} 
-      index={tx.index}
-      personId={person?._id??""}
-    ></TxTag>
+  const total = person.txs.reduce(
+    (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),
+    0
   );
 
-  const addButton = (person: PersonTx) => <div 
-    className="mr-2 pi pi-plus icon-btn add-btn" 
-    onClick={() => {
-      personAction?.({type: "addExpense"})
-    }}
-  ></div>
-  
+  const tags = (person: PersonTx) =>
+    person.txs.map((tx) => (
+      <TxTag
+        key={tx._id}
+        _id={tx._id}
+        money={tx.money}
+        tag={tx.tag}
+        index={tx.index}
+        personId={person?._id ?? ""}
+      ></TxTag>
+    ));
 
-  return person ? <div className="PersonTxsComp">
+  const addButton = (
+    <div
+      className="mr-2 pi pi-plus icon-btn add-btn"
+      onClick={() => {
+        addPerson(TableType.Expense);
+      }}
+    ></div>
+  );
+
+  return person ? (
+    <div className="PersonTxsComp">
       <div className="flex justify-content-between align-items-center">
-        <div className="mr-2"> {name(person)} : {total(person)}/-  </div>
-        { addButton(person) }
+        <div className="mr-2">
+          {person.name} : {total}/-
+        </div>
+        {addButton}
       </div>
       <br />
-      <div className="flex align-items-center flex-wrap gap-2"> {tags(person)} </div>
+      <div className="flex align-items-center flex-wrap gap-2">
+        {tags(person)}
+      </div>
       <br />
       <Divider className="mt-2"></Divider>
-    </div> : <div></div>;
+    </div>
+  ) : (
+    <div></div>
+  );
 }

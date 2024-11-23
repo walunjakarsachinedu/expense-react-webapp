@@ -1,6 +1,12 @@
-import React, { useRef, useState, FocusEventHandler, KeyboardEventHandler, useEffect } from 'react';
+import React, {
+  useRef,
+  useState,
+  FocusEventHandler,
+  KeyboardEventHandler,
+  useEffect,
+} from "react";
 
-interface EditableElemProps {
+interface Props {
   placeHolder?: string;
   preventNewline?: boolean;
   numberOnly?: boolean;
@@ -10,22 +16,22 @@ interface EditableElemProps {
   initialText?: string;
 }
 
-export default function EditableElem({ 
-  numberOnly = false, 
+export default function EditableElem({
+  numberOnly = false,
   preventNewline = false,
-  initialText = "", 
-  placeHolder="", 
-  onFocus, 
-  onBlur, 
-  onKeyUp, 
-} :  EditableElemProps) {
-
+  initialText = "",
+  placeHolder = "",
+  onFocus,
+  onBlur,
+  onKeyUp,
+}: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<number|null>(null);
-  const [state, setState] = useState<string>(initialText??"");
+  const cursorRef = useRef<number | null>(null);
+  const [state, setState] = useState<string>(initialText ?? "");
 
   useEffect(() => {
-    if(!cursorRef.current || contentRef.current !== document.activeElement) return;
+    if (!cursorRef.current || contentRef.current !== document.activeElement)
+      return;
     _setCursorPosition(contentRef.current!, cursorRef.current);
   }, [state]);
 
@@ -33,30 +39,33 @@ export default function EditableElem({
     const content = e.currentTarget.textContent || "";
     var filteredContent = content;
 
-    if(numberOnly) filteredContent = filteredContent.replace(/[^0-9]/g, "");
-    if(preventNewline) filteredContent = filteredContent.replace(/\n/g, "");
+    if (numberOnly) filteredContent = filteredContent.replace(/[^0-9]/g, "");
+    if (preventNewline) filteredContent = filteredContent.replace(/\n/g, "");
 
     if (numberOnly || preventNewline) updateTextContent(e, filteredContent);
     setState(filteredContent);
   };
 
-  function updateTextContent(e: React.FormEvent<HTMLDivElement>, filteredContent: string) {
+  function updateTextContent(
+    e: React.FormEvent<HTMLDivElement>,
+    filteredContent: string
+  ) {
     const content = e.currentTarget.textContent || "";
     const initialCursorPosition = _getCursorPosition(contentRef.current!);
     const initialLength = content!.length;
 
-    e.currentTarget.textContent = filteredContent; 
+    e.currentTarget.textContent = filteredContent;
 
     const afterLength = filteredContent.length;
     const dx = initialLength - afterLength;
-    const newCursorPosition = initialCursorPosition-dx;
+    const newCursorPosition = initialCursorPosition - dx;
 
     _setCursorPosition(e.currentTarget, newCursorPosition);
     cursorRef.current = newCursorPosition;
   }
 
   return (
-    <span 
+    <span
       ref={contentRef}
       suppressContentEditableWarning={true}
       contentEditable={true}
@@ -65,15 +74,19 @@ export default function EditableElem({
       onKeyUp={onKeyUp}
       onFocus={onFocus}
       onBlur={onBlur}
-      {...(preventNewline ? {onKeyDown: (event) => {
-        if (event.key === 'Enter') event.preventDefault(); 
-      } } : {})}
-      {...(numberOnly ? { inputMode: 'decimal' } : {})}
-    >{state}</span>
+      {...(preventNewline
+        ? {
+            onKeyDown: (event) => {
+              if (event.key === "Enter") event.preventDefault();
+            },
+          }
+        : {})}
+      {...(numberOnly ? { inputMode: "decimal" } : {})}
+    >
+      {state}
+    </span>
   );
-};
-
-
+}
 
 function _getCursorPosition(element: HTMLElement) {
   const selection = document.getSelection()!;
@@ -81,14 +94,14 @@ function _getCursorPosition(element: HTMLElement) {
 }
 
 function _setCursorPosition(element: HTMLElement, position: number) {
-  if(element.childNodes.length === 0) return;
+  if (element.childNodes.length === 0) return;
 
   const range = document.createRange();
   const selection = window.getSelection()!;
-  
+
   range.setStart(element.childNodes[0], position);
   range.collapse(true);
-  
+
   selection.removeAllRanges();
   selection.addRange(range);
 }
