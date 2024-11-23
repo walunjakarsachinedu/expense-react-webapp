@@ -1,6 +1,6 @@
 import { Tag } from "primereact/tag";
 import { useRef, useState } from "react";
-import usePersonStore from "../../store/usePersonStore";
+import useExpenseStore from "../../store/usePersonStore";
 import { Tx } from "../../types/Transaction";
 import EditableElem from "../common/EditableElement";
 import "./TxTag.css";
@@ -8,8 +8,8 @@ import "./TxTag.css";
 type Props = Tx & { personId: string };
 
 export default function TxTag({ _id, money, tag, personId, index }: Props) {
-  const updateExpense = usePersonStore((store) => store.updateExpense);
-  const deleteExpense = usePersonStore((store) => store.deleteExpense);
+  const updateExpense = useExpenseStore((store) => store.updateExpense);
+  const deleteExpense = useExpenseStore((store) => store.deleteExpense);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const moneyValue = useRef(money ?? "");

@@ -1,15 +1,17 @@
 import { Panel } from "primereact/panel";
-import PersonTxsComp from "./PersonTxsComp";
-import usePersonStore from "../../store/usePersonStore";
+import useExpenseStore from "../../store/usePersonStore";
 import { TableType } from "../../types/Transaction";
 import { utils } from "../../utils/Utility";
+import PersonTxsComp from "./PersonTxsComp";
 
 export default function ExpensePanel() {
-  const persons = usePersonStore((store) => store.persons);
+  const persons = useExpenseStore((store) => store.persons);
 
   const personList = persons
     .filter((person) => person.type === TableType.Expense)
-    .map((person) => <PersonTxsComp id={person._id}></PersonTxsComp>);
+    .map((person) => (
+      <PersonTxsComp key={person._id} id={person._id}></PersonTxsComp>
+    ));
 
   const total = persons.reduce(
     (total, person) =>

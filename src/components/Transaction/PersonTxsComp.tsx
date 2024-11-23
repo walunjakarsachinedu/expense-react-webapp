@@ -1,5 +1,5 @@
 import { Divider } from "primereact/divider";
-import usePersonStore from "../../store/usePersonStore";
+import useExpenseStore from "../../store/usePersonStore";
 import { PersonTx, TableType } from "../../types/Transaction";
 import { utils } from "../../utils/Utility";
 import "./PersonTxsComp.css";
@@ -9,10 +9,10 @@ type Props = {
   id: string;
 };
 export default function PersonTxsComp({ id }: Props) {
-  const person = usePersonStore(
+  const person = useExpenseStore(
     (store) => store.persons.filter((person) => person._id === id)[0]
   );
-  const addPerson = usePersonStore((store) => store.addPerson);
+  const addPerson = useExpenseStore((store) => store.addPerson);
 
   const total = person.txs.reduce(
     (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),

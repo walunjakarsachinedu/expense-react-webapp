@@ -2,13 +2,15 @@ import { v4 } from "uuid";
 import { create } from "zustand";
 import { Person } from "../models/Person";
 import Tx from "../models/Tx";
-import { TableType } from "../types/Transaction";
 import { Prettify } from "../types/Prettify";
+import { TableType } from "../types/Transaction";
 import { utils } from "../utils/Utility";
 
-type PersonStore = {
+type ExpenseStore = {
   monthYear: string;
   persons: Person[];
+
+  setMonthData: (monthYear: string, persons: Person[]) => void;
   addPerson: (type: TableType) => void;
   deletePerson: (id: string) => void;
   updateName: (id: string, name: string) => void;
@@ -24,7 +26,7 @@ type PersonStore = {
   updateExpenseIndex: (id: string, index: number, personId: string) => void;
 };
 
-const usePersonStore = create<PersonStore>((set) => {
+const useExpenseStore = create<ExpenseStore>((set) => {
   const updatePersonWithId = (
     id: string,
     personList: Person[],
@@ -49,6 +51,9 @@ const usePersonStore = create<PersonStore>((set) => {
   return {
     monthYear: utils.formatToMonthYear(Date.now()),
     persons: [],
+    setMonthData: (monthYear, persons) => {
+      set(() => ({ monthYear, persons }));
+    },
     addPerson: (type) => {
       set((store) => ({
         persons: [
@@ -116,4 +121,4 @@ const usePersonStore = create<PersonStore>((set) => {
   };
 });
 
-export default usePersonStore;
+export default useExpenseStore;
