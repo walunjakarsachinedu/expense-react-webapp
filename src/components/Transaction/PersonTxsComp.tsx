@@ -12,7 +12,7 @@ export default function PersonTxsComp({ id }: Props) {
   const person = useExpenseStore(
     (store) => store.persons.filter((person) => person._id === id)[0]
   );
-  const addPerson = useExpenseStore((store) => store.addPerson);
+  const addExpense = useExpenseStore((store) => store.addExpense);
 
   const total = person.txs.reduce(
     (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),
@@ -35,7 +35,7 @@ export default function PersonTxsComp({ id }: Props) {
     <div
       className="mr-2 pi pi-plus icon-btn add-btn"
       onClick={() => {
-        addPerson(TableType.Expense);
+        addExpense(id);
       }}
     ></div>
   );
