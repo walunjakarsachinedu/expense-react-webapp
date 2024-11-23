@@ -37,7 +37,7 @@ export default function EditableElem({
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const content = e.currentTarget.textContent || "";
-    var filteredContent = content;
+    let filteredContent = content;
 
     if (numberOnly) filteredContent = filteredContent.replace(/[^0-9]/g, "");
     if (preventNewline) filteredContent = filteredContent.replace(/\n/g, "");

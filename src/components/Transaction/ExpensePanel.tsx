@@ -14,7 +14,10 @@ export default function ExpensePanel() {
   const total = persons.reduce(
     (total, person) =>
       total +
-      person.txs.reduce((total, tx) => utils.parseNumber(tx.money) ?? 0, 0),
+      person.txs.reduce(
+        (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),
+        0
+      ),
     0
   );
   return (

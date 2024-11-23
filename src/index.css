@@ -23,7 +23,7 @@ body {
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 [contentEditable]:empty:before {
@@ -38,24 +38,21 @@ body {
 }
 
 [contentEditable]::selection {
-  background-color: var(--selected-text-bg); 
+  background-color: var(--selected-text-bg);
 }
 
 .unselectable {
-  user-select: none; 
+  user-select: none;
 }
-
 
 .all-border {
   border: solid 1px var(--surface-border);
 }
 
-
 .hover-grow:hover {
   transform: scale(1.3);
-  transition: transform 0.2s ease-in-out; 
+  transition: transform 0.2s ease-in-out;
 }
-
 
 .icon-btn {
   padding: 5px;
@@ -63,6 +60,7 @@ body {
   cursor: pointer;
 }
 
-.icon-btn:active, .icon-btn:hover {
+.icon-btn:active,
+.icon-btn:hover {
   border-color: var(--primary-color);
 }
