@@ -1,29 +1,29 @@
 import { Tag } from "primereact/tag";
 import { useRef, useState } from "react";
 import useExpenseStore from "../../store/usePersonStore";
-import { Tx } from "../../types/Transaction";
 import EditableElem from "../common/EditableElement";
 import "./TxTag.css";
 
-type Props = Tx & { personId: string };
+type Props = { id: string; personId: string };
 
-export default function TxTag({ _id, money, tag, personId, index }: Props) {
+const TxTag = ({ id, personId }: Props) => {
+  const tx = useExpenseStore((store) => store.persons[personId].txs[id]);
   const updateExpense = useExpenseStore((store) => store.updateExpense);
   const deleteExpense = useExpenseStore((store) => store.deleteExpense);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const moneyValue = useRef(money ?? "");
-  const tagValue = useRef(tag);
+  const moneyValue = useRef(tx.money ?? "");
+  const tagValue = useRef(tx.tag);
 
   const saveState = async () => {
-    updateExpense(_id, personId, {
+    updateExpense(id, personId, {
       money: moneyValue.current,
       tag: tagValue.current,
     });
   };
 
   const deleteTag = () => {
-    deleteExpense(_id, personId);
+    deleteExpense(id, personId);
   };
 
   return (
@@ -43,7 +43,7 @@ export default function TxTag({ _id, money, tag, personId, index }: Props) {
           style={{ fontSize: 12, fontWeight: "normal" }}
         >
           <EditableElem
-            initialText={tag}
+            initialText={tx.tag}
             preventNewline={true}
             placeHolder="tag"
             onFocus={() => setIsEditing(true)}
@@ -63,7 +63,7 @@ export default function TxTag({ _id, money, tag, personId, index }: Props) {
             }}
           ></div>
           <EditableElem
-            initialText={money}
+            initialText={tx.money}
             placeHolder="money"
             numberOnly={true}
             preventNewline={true}
@@ -93,4 +93,6 @@ export default function TxTag({ _id, money, tag, personId, index }: Props) {
       </Tag>
     </div>
   );
-}
+};
+
+export default TxTag;

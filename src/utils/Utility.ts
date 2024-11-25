@@ -6,7 +6,9 @@ export default class Utility {
       if (numStr) {
         return parseInt(numStr);
       }
-    } catch {}
+    } catch {
+      // error
+    }
   }
 
   formatToMonthYear(timestamp: number): string {

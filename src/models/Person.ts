@@ -7,6 +7,7 @@ export interface Person {
   _id: string;
   name: string;
   type: TableType;
-  txs: Tx[];
+  txs: Record<string, Tx>;
+  txIds: string[];
   index: number;
 }

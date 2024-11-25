@@ -1,14 +1,16 @@
 import { v4 } from "uuid";
 import { create } from "zustand";
 import { Person } from "../models/Person";
-import Tx from "../models/Tx";
 import { Prettify } from "../types/Prettify";
 import { TableType } from "../types/Transaction";
 import { utils } from "../utils/Utility";
+import { produce, produceWithPatches } from "immer";
+import Tx from "../models/Tx";
 
 type ExpenseStore = {
   monthYear: string;
-  persons: Person[];
+  persons: Record<string, Person>;
+  personIds: string[]; // for maintaining order
 
   setMonthData: (monthYear: string, persons: Person[]) => void;
   addPerson: (type: TableType) => void;
@@ -27,96 +29,105 @@ type ExpenseStore = {
 };
 
 const useExpenseStore = create<ExpenseStore>((set) => {
-  const updatePersonWithId = (
-    id: string,
-    personList: Person[],
-    update: (person: Person) => Person
-  ) => {
-    return personList.map((person) =>
-      person._id === id ? update(person) : person
-    );
-  };
-
-  const updateTxs = (
-    id: string,
-    personList: Person[],
-    update: (txs: Tx[]) => Tx[]
-  ): Person[] => {
-    return updatePersonWithId(id, personList, (person) => ({
-      ...person,
-      txs: update(person.txs),
-    }));
-  };
-
   return {
     monthYear: utils.formatToMonthYear(Date.now()),
-    persons: [],
+    persons: {},
+    personIds: [],
     setMonthData: (monthYear, persons) => {
-      set(() => ({ monthYear, persons }));
+      set(
+        produce<ExpenseStore>((store) => {
+          store.monthYear = monthYear;
+          persons.forEach((person) => (store.persons[person._id] = person));
+          store.personIds = persons
+            .sort((a, b) => a.index - b.index)
+            .map((person) => person._id);
+        })
+      );
     },
-    addPerson: (type) => {
-      set((store) => ({
-        persons: [
-          ...store.persons,
-          { _id: v4(), index: store.persons.length, name: "", txs: [], type },
-        ],
-      }));
-    },
+    addPerson: (type) =>
+      set(
+        produce<ExpenseStore>((store) => {
+          const id = v4();
+          const index = Object.keys(store.persons).length;
+          store.persons[id] = {
+            _id: v4(),
+            index: index,
+            name: "",
+            txs: {},
+            txIds: [],
+            type,
+          };
+          store.personIds.push(id);
+        })
+      ),
     deletePerson: (id) => {
-      set((store) => ({
-        persons: store.persons.filter((person) => person._id !== id),
-      }));
+      set(
+        produce<ExpenseStore>((store) => {
+          delete store.persons[id];
+          store.personIds = store.personIds.filter(
+            (personId) => personId != id
+          );
+        })
+      );
     },
     updateName: (id, name) => {
-      set((store) => ({
-        persons: updatePersonWithId(id, store.persons, (person) => ({
-          ...person,
-          name,
-        })),
-      }));
+      set(
+        produce((store) => {
+          store.persons[id].name = name;
+        })
+      );
     },
     updatePersonIndex: (id, index) => {
-      set((store) => ({
-        persons: updatePersonWithId(id, store.persons, (person) => ({
-          ...person,
-          index,
-        }))
-          .sort((a, b) => a.index - b.index)
-          .map((person, index) => ({ ...person, index })),
-      }));
+      set(
+        produce<ExpenseStore>((store) => {
+          store.persons[id].index = index;
+          store.personIds = Object.values(store.persons)
+            .sort((a, b) => a.index - b.index)
+            .map((person) => person._id);
+        })
+      );
     },
-
     addExpense: (personId) => {
-      set((store) => ({
-        persons: updateTxs(personId, store.persons, (txs) => [
-          ...txs,
-          { _id: v4(), index: txs.length },
-        ]),
-      }));
+      set(
+        produce<ExpenseStore>((store) => {
+          const length = Object.keys(store.persons[personId].txs).length;
+          const id = v4();
+          store.persons[personId].txs[id] = { _id: id, index: length };
+          store.persons[personId].txIds.push(id);
+        })
+      );
     },
     deleteExpense: (id, personId) => {
-      set((store) => ({
-        persons: updateTxs(personId, store.persons, (txs) =>
-          txs.filter((tx) => tx._id !== id)
-        ),
-      }));
+      set(
+        produce<ExpenseStore>((store) => {
+          delete store.persons[personId].txs[id];
+          store.persons[personId].txIds = store.persons[personId].txIds.filter(
+            (txId) => txId != id
+          );
+        })
+      );
     },
     updateExpense: (id: string, personId, updates) => {
-      set((store) => ({
-        persons: updateTxs(personId, store.persons, (txs) =>
-          txs.map((tx) => (tx._id === id ? { ...tx, ...updates } : tx))
-        ),
-      }));
+      set(
+        produce<ExpenseStore>((store) => {
+          store.persons[personId].txs[id] = {
+            ...store.persons[personId].txs[id],
+            ...updates,
+          };
+        })
+      );
     },
     updateExpenseIndex: (id, index, personId) => {
-      set((store) => ({
-        persons: updateTxs(personId, store.persons, (txs) =>
-          txs
-            .map((tx) => (tx._id === id ? { ...tx, index } : tx))
+      set(
+        produce<ExpenseStore>((store) => {
+          store.persons[personId].txs[id].index = index;
+          store.persons[personId].txIds = Object.values(
+            store.persons[personId].txs
+          )
             .sort((a, b) => a.index - b.index)
-            .map((tx, index) => ({ ...tx, index }))
-        ),
-      }));
+            .map((tx) => tx._id);
+        })
+      );
     },
   };
 });
