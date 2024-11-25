@@ -14,7 +14,7 @@ const PersonTxsComp = ({ id }: Props) => {
 
   const addButton = (
     <div
-      className="mr-2 pi pi-plus icon-btn add-btn"
+      className="mr-2 pi pi-plus icon-btn add-btn "
       onClick={() => {
         addExpense(id);
       }}
