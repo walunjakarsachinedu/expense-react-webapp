@@ -76,3 +76,8 @@ body {
   pointer-events: none;
   display: block;
 }
+
+.p-button:focus {
+  outline: none;
+  box-shadow: none;
+}
