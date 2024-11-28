@@ -1,8 +1,9 @@
 import { Divider } from "primereact/divider";
 import useExpenseStore from "../../store/usePersonStore";
+import { utils } from "../../utils/Utility";
+import SimpleContentEditable from "../common/SimpleContentEditable";
 import "./PersonTxsComp.css";
 import TxTag from "./TxTag";
-import { utils } from "../../utils/Utility";
 
 type Props = {
   id: string;
@@ -44,7 +45,14 @@ const PersonTxsComp = ({ id }: Props) => {
 
 const PersonName = ({ id }: Props) => {
   const name = useExpenseStore((store) => store.persons[id].name);
-  return <>{name}</>;
+  const updateName = useExpenseStore((store) => store.updateName);
+  return (
+    <SimpleContentEditable
+      initialText={name}
+      placeHolder="Person Name"
+      onChange={(value) => updateName(id, value)}
+    />
+  );
 };
 
 const PersonTotal = ({ id }: Props) => {

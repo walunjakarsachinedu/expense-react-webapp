@@ -64,3 +64,15 @@ body {
 .icon-btn:hover {
   border-color: var(--primary-color);
 }
+
+.editable {
+  min-height: 20px;
+  display: inline-block;
+}
+
+.editable:empty::before {
+  content: attr(data-placeholder);
+  color: gray;
+  pointer-events: none;
+  display: block;
+}

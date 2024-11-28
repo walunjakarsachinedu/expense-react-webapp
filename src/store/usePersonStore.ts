@@ -6,6 +6,7 @@ import { TableType } from "../types/Transaction";
 import { utils } from "../utils/Utility";
 import { produce, produceWithPatches } from "immer";
 import Tx from "../models/Tx";
+import { mountStoreDevtool } from "simple-zustand-devtools";
 
 type ExpenseStore = {
   monthYear: string;
@@ -133,3 +134,7 @@ const useExpenseStore = create<ExpenseStore>((set) => {
 });
 
 export default useExpenseStore;
+
+if (process.env.NODE_ENV === "development") {
+  mountStoreDevtool("ExpenseStore", useExpenseStore);
+}
