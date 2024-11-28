@@ -30,14 +30,21 @@ const PersonTxsComp = ({ id }: Props) => {
     <div className="PersonTxsComp">
       <div className="flex justify-content-between align-items-center">
         <div className="mr-2">
-          <PersonName id={id} /> : <PersonTotal id={id} />
-          /-
+          <PersonName id={id} /> <PersonTotal id={id} />
         </div>
         {addButton}
       </div>
-      <br />
-      <div className="flex align-items-center flex-wrap gap-2">{txList}</div>
-      <br />
+      {txList.length > 0 ? (
+        <>
+          <br />
+          <div className="flex align-items-center flex-wrap gap-2">
+            {txList}
+          </div>
+          <br />
+        </>
+      ) : (
+        <br />
+      )}
       <Divider className="mt-2"></Divider>
     </div>
   );
@@ -61,7 +68,8 @@ const PersonTotal = ({ id }: Props) => {
     (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),
     0
   );
-  return <>{total}</>;
+  if (Object.keys(person.txs).length == 0 || total == 0) return null;
+  return <>: {total}/-</>;
 };
 
 export default PersonTxsComp;

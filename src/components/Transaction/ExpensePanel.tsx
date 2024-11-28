@@ -29,10 +29,11 @@ const ExpensePanel = () => {
               </div>
             }
           >
-            <div className="m-0 p-4">{personList}</div>
+            <div className="m-0 p-4 pb-2">{personList}</div>
             <Button
               className="m-4 mt-0"
               outlined
+              size="small"
               onClick={() => addPerson(TableType.Expense)}
             >
               Add Person
