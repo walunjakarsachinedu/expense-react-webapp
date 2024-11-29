@@ -1,7 +1,9 @@
 import { Divider } from "primereact/divider";
+import { MenuItem } from "primereact/menuitem";
 import useExpenseStore from "../../store/usePersonStore";
 import { utils } from "../../utils/Utility";
 import SimpleContentEditable from "../common/SimpleContentEditable";
+import SimpleContextMenu from "../SimpleContextMenu";
 import "./PersonTxsComp.css";
 import TxTag from "./TxTag";
 
@@ -11,20 +13,26 @@ type Props = {
 
 const PersonTxsComp = ({ id }: Props) => {
   const addExpense = useExpenseStore((store) => store.addExpense);
+  const deletePerson = useExpenseStore((store) => store.deletePerson);
+  const copyPerson = useExpenseStore((store) => store.copyPerson);
   const txIds = useExpenseStore((store) => store.persons[id].txIds);
-
-  const addButton = (
-    <div
-      className="mr-2 pi pi-plus icon-btn add-btn "
-      onClick={() => {
-        addExpense(id);
-      }}
-    ></div>
-  );
 
   const txList = txIds.map((txId) => (
     <TxTag key={txId} id={txId} personId={id} />
   ));
+
+  const actionItems: MenuItem[] = [
+    {
+      icon: "pi pi-trash",
+      label: "delete",
+      command: () => deletePerson(id),
+    },
+    {
+      icon: "pi pi-clipboard",
+      label: "copy",
+      command: () => copyPerson(id),
+    },
+  ];
 
   return (
     <div className="PersonTxsComp">
@@ -32,7 +40,15 @@ const PersonTxsComp = ({ id }: Props) => {
         <div className="mr-2">
           <PersonName id={id} /> <PersonTotal id={id} />
         </div>
-        {addButton}
+        <div className="flex align-items-center">
+          <SimpleContextMenu items={actionItems}></SimpleContextMenu>
+          <div
+            className="mr-2 pi pi-plus icon-btn add-btn"
+            onClick={() => {
+              addExpense(id);
+            }}
+          ></div>
+        </div>
       </div>
       {txList.length > 0 ? (
         <>

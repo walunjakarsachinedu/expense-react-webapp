@@ -1,12 +1,12 @@
+import { produce } from "immer";
+import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
 import { create } from "zustand";
 import { Person } from "../models/Person";
+import Tx from "../models/Tx";
 import { Prettify } from "../types/Prettify";
 import { TableType } from "../types/Transaction";
 import { utils } from "../utils/Utility";
-import { produce, produceWithPatches } from "immer";
-import Tx from "../models/Tx";
-import { mountStoreDevtool } from "simple-zustand-devtools";
 
 type ExpenseStore = {
   monthYear: string;
@@ -18,6 +18,7 @@ type ExpenseStore = {
   deletePerson: (id: string) => void;
   updateName: (id: string, name: string) => void;
   updatePersonIndex: (id: string, index: number) => void;
+  copyPerson: (id: string) => void;
 
   addExpense: (personId: string) => void;
   deleteExpense: (id: string, personId: string) => void;
@@ -29,7 +30,7 @@ type ExpenseStore = {
   updateExpenseIndex: (id: string, index: number, personId: string) => void;
 };
 
-const useExpenseStore = create<ExpenseStore>((set) => {
+const useExpenseStore = create<ExpenseStore>((set, get) => {
   return {
     monthYear: utils.formatToMonthYear(Date.now()),
     persons: {},
@@ -87,6 +88,10 @@ const useExpenseStore = create<ExpenseStore>((set) => {
             .map((person) => person._id);
         })
       );
+    },
+    copyPerson: (id) => {
+      const textToCopy = utils.personToString(get().persons[id]);
+      navigator.clipboard.writeText(textToCopy);
     },
     addExpense: (personId) => {
       set(
