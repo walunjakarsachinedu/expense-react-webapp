@@ -46,6 +46,7 @@ const TxTag = ({ id, personId }: Props) => {
             initialText={tx.tag}
             preventNewline={true}
             trimInput={true}
+            maxCharacter={24}
             placeHolder="tag"
             onFocus={() => setIsEditing(true)}
             onBlur={(e) => {
