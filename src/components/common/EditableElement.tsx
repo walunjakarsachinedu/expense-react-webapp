@@ -10,6 +10,7 @@ interface Props {
   placeHolder?: string;
   preventNewline?: boolean;
   numberOnly?: boolean;
+  maxCharacter?: number;
   onFocus?: FocusEventHandler<HTMLSpanElement> | undefined;
   onBlur?: FocusEventHandler<HTMLSpanElement> | undefined;
   onKeyUp?: KeyboardEventHandler<HTMLSpanElement> | undefined;
@@ -21,6 +22,7 @@ interface Props {
 export default function EditableElem({
   numberOnly = false,
   preventNewline = false,
+  maxCharacter,
   initialText = "",
   placeHolder = "",
   onChange,
@@ -30,13 +32,13 @@ export default function EditableElem({
 }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<number | null>(null);
-  const [state, setState] = useState<string>(initialText ?? "");
+  const [textState, setState] = useState<string>(initialText ?? "");
 
   useEffect(() => {
     if (!cursorRef.current || contentRef.current !== document.activeElement)
       return;
     _setCursorPosition(contentRef.current!, cursorRef.current);
-  }, [state]);
+  }, [textState]);
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const content = e.currentTarget.textContent || "";
@@ -44,8 +46,13 @@ export default function EditableElem({
 
     if (numberOnly) filteredContent = filteredContent.replace(/[^0-9]/g, "");
     if (preventNewline) filteredContent = filteredContent.replace(/\n/g, "");
+    if (maxCharacter && filteredContent.length > maxCharacter) {
+      filteredContent = textState;
+    }
 
-    if (numberOnly || preventNewline) updateTextContent(e, filteredContent);
+    if (numberOnly || preventNewline || maxCharacter) {
+      updateTextContent(e, filteredContent);
+    }
     if (onChange) onChange(e.currentTarget.textContent ?? "");
     setState(filteredContent);
   };
@@ -88,7 +95,7 @@ export default function EditableElem({
         : {})}
       {...(numberOnly ? { inputMode: "decimal" } : {})}
     >
-      {state}
+      {textState}
     </span>
   );
 }

@@ -89,6 +89,7 @@ const PersonName = ({ id }: Props) => {
     <EditableElem
       initialText={name}
       preventNewline={true}
+      maxCharacter={17}
       placeHolder="Person Name"
       onChange={(value) => updateName(id, value)}
     />
