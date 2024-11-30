@@ -25,6 +25,11 @@ const PersonTxsComp = ({ id }: Props) => {
 
   const actionItems: MenuItem[] = [
     {
+      icon: "pi pi-clipboard",
+      label: "copy",
+      command: () => copyPerson(id),
+    },
+    {
       icon: "pi pi-trash",
       label: "delete",
       command: () => {
@@ -33,11 +38,6 @@ const PersonTxsComp = ({ id }: Props) => {
           deletePerson(id);
         });
       },
-    },
-    {
-      icon: "pi pi-clipboard",
-      label: "copy",
-      command: () => copyPerson(id),
     },
   ];
 
