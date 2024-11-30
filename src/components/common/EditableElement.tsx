@@ -13,6 +13,8 @@ interface Props {
   onFocus?: FocusEventHandler<HTMLSpanElement> | undefined;
   onBlur?: FocusEventHandler<HTMLSpanElement> | undefined;
   onKeyUp?: KeyboardEventHandler<HTMLSpanElement> | undefined;
+  onChange?: (value: string) => void;
+
   initialText?: string;
 }
 
@@ -21,6 +23,7 @@ export default function EditableElem({
   preventNewline = false,
   initialText = "",
   placeHolder = "",
+  onChange,
   onFocus,
   onBlur,
   onKeyUp,
@@ -43,6 +46,7 @@ export default function EditableElem({
     if (preventNewline) filteredContent = filteredContent.replace(/\n/g, "");
 
     if (numberOnly || preventNewline) updateTextContent(e, filteredContent);
+    if (onChange) onChange(e.currentTarget.textContent ?? "");
     setState(filteredContent);
   };
 
@@ -73,6 +77,7 @@ export default function EditableElem({
       onInput={handleInput}
       onKeyUp={onKeyUp}
       onFocus={onFocus}
+      className="editable"
       onBlur={onBlur}
       {...(preventNewline
         ? {

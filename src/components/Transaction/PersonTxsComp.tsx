@@ -3,7 +3,7 @@ import { MenuItem } from "primereact/menuitem";
 import useToast from "../../hooks/useToast";
 import useExpenseStore from "../../store/usePersonStore";
 import { utils } from "../../utils/Utility";
-import SimpleContentEditable from "../common/SimpleContentEditable";
+import EditableElem from "../common/EditableElement";
 import SimpleContextMenu from "../SimpleContextMenu";
 import "./PersonTxsComp.css";
 import TxTag from "./TxTag";
@@ -86,8 +86,9 @@ const PersonName = ({ id }: Props) => {
   const name = useExpenseStore((store) => store.persons[id].name);
   const updateName = useExpenseStore((store) => store.updateName);
   return (
-    <SimpleContentEditable
+    <EditableElem
       initialText={name}
+      preventNewline={true}
       placeHolder="Person Name"
       onChange={(value) => updateName(id, value)}
     />
