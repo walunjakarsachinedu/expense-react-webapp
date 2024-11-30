@@ -45,6 +45,7 @@ const TxTag = ({ id, personId }: Props) => {
           <EditableElem
             initialText={tx.tag}
             preventNewline={true}
+            trimInput={true}
             placeHolder="tag"
             onFocus={() => setIsEditing(true)}
             onBlur={(e) => {

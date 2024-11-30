@@ -9,6 +9,7 @@ import React, {
 interface Props {
   placeHolder?: string;
   preventNewline?: boolean;
+  trimInput?: boolean;
   numberOnly?: boolean;
   maxCharacter?: number;
   onFocus?: FocusEventHandler<HTMLSpanElement> | undefined;
@@ -22,6 +23,7 @@ interface Props {
 export default function EditableElem({
   numberOnly = false,
   preventNewline = false,
+  trimInput = false,
   maxCharacter,
   initialText = "",
   placeHolder = "",
@@ -42,21 +44,27 @@ export default function EditableElem({
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const content = e.currentTarget.textContent || "";
-    let filteredContent = content;
+    const filteredContent = applyFilters(content);
 
-    if (numberOnly) filteredContent = filteredContent.replace(/[^0-9]/g, "");
-    if (preventNewline) filteredContent = filteredContent.replace(/\n/g, "");
-    if (maxCharacter && filteredContent.length > maxCharacter) {
-      filteredContent = textState;
-    }
-
-    if (numberOnly || preventNewline || maxCharacter) {
+    if (numberOnly || preventNewline || maxCharacter || trimInput) {
       updateTextContent(e, filteredContent);
     }
-    if (onChange) onChange(e.currentTarget.textContent ?? "");
+    onChange?.(e.currentTarget.textContent ?? "");
     setState(filteredContent);
   };
 
+  const applyFilters = (str: string) => {
+    if (numberOnly) str = str.replace(/[^0-9]/g, "");
+    if (preventNewline) str = str.replace(/\n/g, "");
+    if (maxCharacter && str.length > maxCharacter) {
+      str = textState;
+    }
+    return str;
+  };
+
+  /**
+   * updates the content of a contenteditable element and restores the cursor position
+   */
   function updateTextContent(
     e: React.FormEvent<HTMLDivElement>,
     filteredContent: string
@@ -75,6 +83,13 @@ export default function EditableElem({
     cursorRef.current = newCursorPosition;
   }
 
+  const handleOnBlur = (e: React.FocusEvent<HTMLSpanElement, Element>) => {
+    if (trimInput && e.currentTarget.textContent) {
+      e.currentTarget.textContent = e.currentTarget.textContent?.trim();
+    }
+    onBlur?.(e);
+  };
+
   return (
     <span
       ref={contentRef}
@@ -85,7 +100,7 @@ export default function EditableElem({
       onKeyUp={onKeyUp}
       onFocus={onFocus}
       className="editable"
-      onBlur={onBlur}
+      onBlur={handleOnBlur}
       {...(preventNewline
         ? {
             onKeyDown: (event) => {
