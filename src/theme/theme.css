@@ -1,10 +1,4 @@
-html[data-theme="indigo"] {
-  --surface-border-highlighted: var(--primary-color);
-  --surface-ground-light: rgba(255, 255, 255, 0.1);
-  --selected-text-bg: rgba(255, 255, 255, 0.3);
-}
-
-html[data-theme="dark"] {
+:root {
   --surface-border: rgba(255, 255, 255, 0.1);
   --surface-border-highlighted: #818cf8;
 
@@ -19,8 +13,4 @@ html[data-theme="dark"] {
   --highlight-bg: rgba(255, 255, 255, 0.85);
 
   --dark-bg: rgb(25, 25, 25);
-}
-
-.p-listbox .p-listbox-list .p-listbox-item.p-highlight {
-  background: rgba(255, 255, 255, 0.03);
 }
