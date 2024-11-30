@@ -1,5 +1,6 @@
 import { Divider } from "primereact/divider";
 import { MenuItem } from "primereact/menuitem";
+import useToast from "../../hooks/useToast";
 import useExpenseStore from "../../store/usePersonStore";
 import { utils } from "../../utils/Utility";
 import SimpleContentEditable from "../common/SimpleContentEditable";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 const PersonTxsComp = ({ id }: Props) => {
+  const toast = useToast();
   const addExpense = useExpenseStore((store) => store.addExpense);
   const deletePerson = useExpenseStore((store) => store.deletePerson);
   const copyPerson = useExpenseStore((store) => store.copyPerson);
@@ -25,7 +27,12 @@ const PersonTxsComp = ({ id }: Props) => {
     {
       icon: "pi pi-trash",
       label: "delete",
-      command: () => deletePerson(id),
+      command: () => {
+        showDeletionToast();
+        setTimeout(() => {
+          deletePerson(id);
+        });
+      },
     },
     {
       icon: "pi pi-clipboard",
@@ -33,6 +40,15 @@ const PersonTxsComp = ({ id }: Props) => {
       command: () => copyPerson(id),
     },
   ];
+
+  const showDeletionToast = () => {
+    toast.current?.show({
+      severity: "success",
+      summary: "Success",
+      detail: "Person Deleted Successfully",
+      life: 2000,
+    });
+  };
 
   return (
     <div className="PersonTxsComp">

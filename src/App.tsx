@@ -12,6 +12,7 @@ import { PrimeReactProvider } from "primereact/api";
 import { RouterProvider } from "react-router-dom";
 import "./App.css";
 import router from "./router";
+import { ToastProvider } from "./services/ToasterContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <PrimeReactProvider>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
       </PrimeReactProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
