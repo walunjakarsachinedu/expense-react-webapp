@@ -18,6 +18,7 @@ interface Props {
   onChange?: (value: string) => void;
 
   initialText?: string;
+  className?: string;
 }
 
 export default function EditableElem({
@@ -27,6 +28,7 @@ export default function EditableElem({
   maxCharacter,
   initialText = "",
   placeHolder = "",
+  className = "",
   onChange,
   onFocus,
   onBlur,
@@ -99,7 +101,7 @@ export default function EditableElem({
       onInput={handleInput}
       onKeyUp={onKeyUp}
       onFocus={onFocus}
-      className="editable"
+      className={`editable ${className}`}
       onBlur={handleOnBlur}
       {...(preventNewline
         ? {

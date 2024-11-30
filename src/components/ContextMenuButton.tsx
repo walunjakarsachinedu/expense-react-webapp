@@ -5,13 +5,13 @@ import { useRef } from "react";
 type Props = {
   items: MenuItem[];
 };
-const SimpleContextMenu = ({ items }: Props) => {
+const ContextMenuButton = ({ items }: Props) => {
   const cm = useRef<ContextMenu>(null);
 
   return (
     <div>
       <div
-        className="mr-2 pi pi-bars icon-btn add-btn"
+        className="mr-2 pi pi-bars icon-btn add-btn font-semibold"
         onClick={(e) => cm.current?.show(e)}
       ></div>
 
@@ -25,4 +25,4 @@ const SimpleContextMenu = ({ items }: Props) => {
   );
 };
 
-export default SimpleContextMenu;
+export default ContextMenuButton;

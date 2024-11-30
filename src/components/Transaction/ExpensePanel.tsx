@@ -58,7 +58,7 @@ const ExpenseTotal = () => {
     0
   );
 
-  return <div>Total: {total}/-</div>;
+  return <div className="mr-1">Total: {total}/-</div>;
 };
 
 export default ExpensePanel;

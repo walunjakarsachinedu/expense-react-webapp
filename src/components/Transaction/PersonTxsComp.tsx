@@ -4,7 +4,7 @@ import useToast from "../../hooks/useToast";
 import useExpenseStore from "../../store/usePersonStore";
 import { utils } from "../../utils/Utility";
 import EditableElem from "../common/EditableElement";
-import SimpleContextMenu from "../SimpleContextMenu";
+import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxsComp.css";
 import TxTag from "./TxTag";
 
@@ -18,10 +18,6 @@ const PersonTxsComp = ({ id }: Props) => {
   const deletePerson = useExpenseStore((store) => store.deletePerson);
   const copyPerson = useExpenseStore((store) => store.copyPerson);
   const txIds = useExpenseStore((store) => store.persons[id].txIds);
-
-  const txList = txIds.map((txId) => (
-    <TxTag key={txId} id={txId} personId={id} />
-  ));
 
   const actionItems: MenuItem[] = [
     {
@@ -50,33 +46,46 @@ const PersonTxsComp = ({ id }: Props) => {
     });
   };
 
+  const txList =
+    txIds.length > 0 ? (
+      <>
+        <br />
+        <div className="flex align-items-center flex-wrap gap-2">
+          {txIds
+            .slice()
+            .reverse()
+            .map((txId) => (
+              <TxTag key={txId} id={txId} personId={id} />
+            ))}
+        </div>
+        <br />
+      </>
+    ) : (
+      <br />
+    );
+
+  const addTxTagButton = (
+    <div
+      className="ml-3 pi pi-plus icon-btn add-btn border-primary font-semibold"
+      onClick={() => {
+        addExpense(id);
+      }}
+    ></div>
+  );
+
   return (
     <div className="PersonTxsComp">
       <div className="flex justify-content-between align-items-center">
-        <div className="mr-2">
-          <PersonName id={id} /> <PersonTotal id={id} />
+        <div className="mr-2 flex align-items-center">
+          <ContextMenuButton items={actionItems} />
+          <PersonName id={id} />
+          {addTxTagButton}
         </div>
         <div className="flex align-items-center">
-          <SimpleContextMenu items={actionItems}></SimpleContextMenu>
-          <div
-            className="mr-2 pi pi-plus icon-btn add-btn"
-            onClick={() => {
-              addExpense(id);
-            }}
-          ></div>
+          <PersonTotal id={id} />
         </div>
       </div>
-      {txList.length > 0 ? (
-        <>
-          <br />
-          <div className="flex align-items-center flex-wrap gap-2">
-            {txList}
-          </div>
-          <br />
-        </>
-      ) : (
-        <br />
-      )}
+      {txList}
       <Divider className="mt-2"></Divider>
     </div>
   );
@@ -91,6 +100,7 @@ const PersonName = ({ id }: Props) => {
       preventNewline={true}
       trimInput={true}
       maxCharacter={17}
+      className="text-500"
       placeHolder="Person Name"
       onChange={(value) => updateName(id, value)}
     />
@@ -104,7 +114,7 @@ const PersonTotal = ({ id }: Props) => {
     0
   );
   if (Object.keys(person.txs).length == 0 || total == 0) return null;
-  return <>: {total}/-</>;
+  return <> {total}/-</>;
 };
 
 export default PersonTxsComp;
