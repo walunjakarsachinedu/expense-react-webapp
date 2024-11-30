@@ -27,11 +27,11 @@ export default class Utility {
       0
     );
 
-    let result = `Name: ${name}\nTotal: ${total}/-\n\nTransactions:\n`;
+    let result = `Name: ${name}\nTotal: ${total}/-\n\nTransactions:`;
 
     txIds.forEach((id, index) => {
       const { money = "N/A", tag = "N/A" } = txs[id] || {};
-      result += `${index + 1}. ${money} - ${tag}\n`;
+      result += `\n${money} - ${tag}`;
     });
 
     return result;
