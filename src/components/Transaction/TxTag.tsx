@@ -44,14 +44,15 @@ const TxTag = ({ id, personId }: Props) => {
         >
           <EditableElem
             initialText={tx.tag}
+            placeHolder="tag"
             preventNewline={true}
             trimInput={true}
             maxCharacter={24}
-            placeHolder="tag"
             onFocus={() => setIsEditing(true)}
-            onBlur={(e) => {
-              tagValue.current = e.target.textContent ?? "";
-              setIsEditing(false);
+            onBlur={(e) => setIsEditing(false)}
+            onKeyUp={(e) => {
+              const target = e.target as HTMLElement;
+              tagValue.current = target.textContent ?? "";
               saveState();
             }}
           ></EditableElem>
@@ -67,8 +68,8 @@ const TxTag = ({ id, personId }: Props) => {
           <EditableElem
             initialText={tx.money}
             placeHolder="money"
-            numberOnly={true}
             preventNewline={true}
+            numberOnly={true}
             onFocus={() => setIsEditing(true)}
             onBlur={() => setIsEditing(false)}
             onKeyUp={(e) => {
