@@ -9,7 +9,7 @@ type Props = {
   children: ReactNode;
 };
 
-export const ToastProvider = ({ children }: Props) => {
+const ToastProvider = ({ children }: Props) => {
   const toastRef = useRef(null);
 
   return (
@@ -20,4 +20,4 @@ export const ToastProvider = ({ children }: Props) => {
   );
 };
 
-export { ToastContext };
+export { ToastProvider, ToastContext };

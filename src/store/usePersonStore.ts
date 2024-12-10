@@ -1,14 +1,17 @@
+import * as jsonpatch from "fast-json-patch";
 import { produce } from "immer";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
-import { create } from "zustand";
+import { create, StateCreator } from "zustand";
+import applyMiddleware from "../middleware/core/applyMiddleware";
 import { Person } from "../models/Person";
 import Tx from "../models/Tx";
 import { Prettify } from "../types/Prettify";
 import { TableType } from "../types/Transaction";
+import Timer from "../utils/Timer";
 import { utils } from "../utils/Utility";
 
-type ExpenseStore = {
+export type ExpenseStore = {
   monthYear: string;
   persons: Record<string, Person>;
   personIds: string[]; // for maintaining order
@@ -30,7 +33,14 @@ type ExpenseStore = {
   updateExpenseIndex: (id: string, index: number, personId: string) => void;
 };
 
-const useExpenseStore = create<ExpenseStore>((set, get) => {
+let startOrDelay: () => void;
+
+const personStore: StateCreator<ExpenseStore, [], []> = (
+  set,
+  get,
+  storeApi
+) => {
+  startOrDelay = setupDebounceTimer(get);
   return {
     monthYear: utils.formatToMonthYear(Date.now()),
     persons: {},
@@ -73,6 +83,7 @@ const useExpenseStore = create<ExpenseStore>((set, get) => {
       );
     },
     updateName: (id, name) => {
+      console.log("updating person name");
       set(
         produce((store) => {
           store.persons[id].name = name;
@@ -136,7 +147,49 @@ const useExpenseStore = create<ExpenseStore>((set, get) => {
       );
     },
   };
-});
+};
+
+const useExpenseStore = create<ExpenseStore>(
+  applyMiddleware({
+    store: personStore,
+    beforeMiddlware: (action) => {
+      const ignoreActions: (keyof ExpenseStore)[] = [
+        "setMonthData",
+        "copyPerson",
+      ];
+      if (ignoreActions.includes(action as keyof ExpenseStore)) return;
+      // delay save
+      startOrDelay();
+    },
+  })
+);
+
+function setupDebounceTimer(get: () => ExpenseStore): () => void {
+  const timer = new Timer({
+    debounceTime: 2000,
+    thresholdTime: 10000,
+    stopTimerOnWindowBlur: true,
+  });
+
+  let expenseStore: ExpenseStore;
+
+  timer.startEvent.subscribe(() => {
+    expenseStore = get();
+  });
+
+  timer.stopEvent.subscribe(() => {
+    console.log(
+      "compare",
+      expenseStore,
+      "with",
+      get(),
+      "is",
+      jsonpatch.compare(expenseStore, get())
+    );
+  });
+
+  return timer.startOrDelay;
+}
 
 export default useExpenseStore;
 

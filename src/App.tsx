@@ -12,6 +12,7 @@ import { PrimeReactProvider } from "primereact/api";
 import { RouterProvider } from "react-router-dom";
 import "./App.css";
 import router from "./router";
+import { TimerProvider } from "./services/TimerContext";
 import { ToastProvider } from "./services/ToasterContext";
 
 const queryClient = new QueryClient({
@@ -25,12 +26,14 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <PrimeReactProvider>
-        <ToastProvider>
-          <RouterProvider router={router} />
-        </ToastProvider>
-      </PrimeReactProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <TimerProvider>
+        <PrimeReactProvider>
+          <ToastProvider>
+            <RouterProvider router={router} />
+          </ToastProvider>
+        </PrimeReactProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </TimerProvider>
     </QueryClientProvider>
   );
 }
