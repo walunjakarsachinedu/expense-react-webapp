@@ -9,5 +9,6 @@ export interface Person {
   type: TableType;
   txs: Record<string, Tx>;
   txIds: string[];
+  hash?: string;
   index: number;
 }

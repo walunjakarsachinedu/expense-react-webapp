@@ -1,4 +1,4 @@
-/** Represents a single transaction's information. */
+/** Structure of transaction tag for backend interaction. */
 export interface Tx {
   _id: string;
   money?: string;
@@ -7,17 +7,18 @@ export interface Tx {
   index: number;
 }
 
-/** Represents all person's transaction's information. */
+/** Structure of person for backend interaction. */
 export interface PersonTx {
   _id: string;
-  name: string; 
+  name: string;
   type: TableType;
   txs: Tx[];
+  hash?: string;
   index: number;
 }
 
 /** define type of transaction */
 export enum TableType {
-  Expense="Expense",
-  Income="Income"
-};
+  Expense = "Expense",
+  Income = "Income",
+}
