@@ -15,6 +15,7 @@ export interface PersonTx {
   txs: Tx[];
   hash?: string;
   index: number;
+  month: string;
 }
 
 /** define type of transaction */

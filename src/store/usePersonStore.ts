@@ -10,6 +10,7 @@ import { Prettify } from "../types/Prettify";
 import { TableType } from "../types/Transaction";
 import Timer from "../utils/Timer";
 import { utils } from "../utils/Utility";
+import MonthExpenseRepository from "../api/MonthExpenseRepository";
 
 export type ExpenseStore = {
   monthYear: string;
@@ -67,7 +68,8 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
             name: "",
             txs: {},
             txIds: [],
-            type,
+            month: utils.formatToMonthYear(Date.now()),
+            type: type,
           };
           store.personIds.push(id);
         })
@@ -83,7 +85,6 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
       );
     },
     updateName: (id, name) => {
-      console.log("updating person name");
       set(
         produce((store) => {
           store.persons[id].name = name;
@@ -166,7 +167,7 @@ const useExpenseStore = create<ExpenseStore>(
 
 function setupDebounceTimer(get: () => ExpenseStore): () => void {
   const timer = new Timer({
-    debounceTime: 2000,
+    debounceTime: 1500,
     thresholdTime: 10000,
     stopTimerOnWindowBlur: true,
   });
@@ -178,14 +179,15 @@ function setupDebounceTimer(get: () => ExpenseStore): () => void {
   });
 
   timer.stopEvent.subscribe(() => {
-    console.log(
-      "compare",
-      expenseStore,
-      "with",
-      get(),
-      "is",
-      jsonpatch.compare(expenseStore, get())
+    // todo: use jsonpatch to send batch of patch of changes
+    console.info("saving data to local storage");
+    const persons = Object.values(get().persons);
+    const oldPersons = Object.values(expenseStore.persons);
+    const deletedPersons = oldPersons.filter(
+      (person) => !persons.some((oldPerson) => oldPerson._id == person._id)
     );
+    MonthExpenseRepository.provider.deletePersonData(deletedPersons);
+    MonthExpenseRepository.provider.storePersonData(persons);
   });
 
   return timer.startOrDelay;

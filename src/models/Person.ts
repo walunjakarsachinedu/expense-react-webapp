@@ -11,4 +11,5 @@ export interface Person {
   txIds: string[];
   hash?: string;
   index: number;
+  month: string;
 }

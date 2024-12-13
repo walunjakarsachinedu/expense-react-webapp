@@ -5,6 +5,7 @@ export const dummyPersonTx: PersonTx[] = [
     _id: "1",
     name: "John Doe",
     type: TableType.Expense,
+    month: "12-2024",
     txs: [
       {
         _id: "tx1",
@@ -153,6 +154,7 @@ export const dummyPersonTx: PersonTx[] = [
     _id: "2",
     name: "Jane Smith",
     type: TableType.Income,
+    month: "12-2024",
     txs: [
       {
         _id: "tx21",
