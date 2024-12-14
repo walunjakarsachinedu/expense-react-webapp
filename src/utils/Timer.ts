@@ -23,9 +23,9 @@ class Timer {
   }) {
     this._debounceTime = debounceTime;
     this._thresholdTime = thresholdTime;
-    // if (stopTimerOnWindowBlur) {
-    //   window.addEventListener("blur", this._handleWindowBlur);
-    // }
+    if (stopTimerOnWindowBlur) {
+      window.addEventListener("beforeunload", this._handleWindowBlur);
+    }
   }
 
   start = () => {
@@ -79,12 +79,12 @@ class Timer {
     this._thresholdTimer = undefined;
   };
 
-  // private _handleWindowBlur = () => {
-  //   if (this.isRunning()) {
-  //     this.timeout();
-  //     alert("You have unsaved changes. Are you sure you want to leave?");
-  //   }
-  // };
+  private _handleWindowBlur = () => {
+    if (this.isRunning()) {
+      this.timeout();
+      alert("You have unsaved changes. Are you sure you want to leave?");
+    }
+  };
 }
 
 export default Timer;
