@@ -5,14 +5,15 @@ import useExpenseStore from "../../store/usePersonStore";
 import { utils } from "../../utils/Utility";
 import EditableElem from "../common/EditableElement";
 import ContextMenuButton from "../ContextMenuButton";
-import "./PersonTxsComp.css";
+import "./PersonTxs.css";
 import TxTag from "./TxTag";
+import { memo } from "react";
 
 type Props = {
   id: string;
 };
 
-const PersonTxsComp = ({ id }: Props) => {
+const PersonTxs = memo(({ id }: Props) => {
   const toast = useToast();
   const addExpense = useExpenseStore((store) => store.addExpense);
   const deletePerson = useExpenseStore((store) => store.deletePerson);
@@ -72,6 +73,7 @@ const PersonTxsComp = ({ id }: Props) => {
       }}
     ></div>
   );
+  console.log("rendering PersonTxs");
 
   return (
     <div className="PersonTxsComp">
@@ -89,7 +91,7 @@ const PersonTxsComp = ({ id }: Props) => {
       <Divider className="mt-2"></Divider>
     </div>
   );
-};
+});
 
 const PersonName = ({ id }: Props) => {
   const name = useExpenseStore((store) => store.persons[id].name);
@@ -117,4 +119,4 @@ const PersonTotal = ({ id }: Props) => {
   return <> {total}/-</>;
 };
 
-export default PersonTxsComp;
+export default PersonTxs;

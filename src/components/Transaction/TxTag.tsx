@@ -1,12 +1,12 @@
 import { Tag } from "primereact/tag";
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import useExpenseStore from "../../store/usePersonStore";
 import EditableElem from "../common/EditableElement";
 import "./TxTag.css";
 
 type Props = { id: string; personId: string };
 
-const TxTag = ({ id, personId }: Props) => {
+const TxTag = memo(({ id, personId }: Props) => {
   const tx = useExpenseStore((store) => store.persons[personId].txs[id]);
   const updateExpense = useExpenseStore((store) => store.updateExpense);
   const deleteExpense = useExpenseStore((store) => store.deleteExpense);
@@ -25,6 +25,8 @@ const TxTag = ({ id, personId }: Props) => {
   const deleteTag = () => {
     deleteExpense(id, personId);
   };
+
+  console.log("rendering Tx");
 
   return (
     <div className="Tag relative">
@@ -96,6 +98,6 @@ const TxTag = ({ id, personId }: Props) => {
       </Tag>
     </div>
   );
-};
+});
 
 export default TxTag;

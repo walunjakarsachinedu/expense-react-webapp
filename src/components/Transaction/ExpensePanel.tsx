@@ -1,6 +1,6 @@
 import { Panel } from "primereact/panel";
 import useExpenseStore from "../../store/usePersonStore";
-import PersonTxsComp from "./PersonTxsComp";
+import PersonTxs from "./PersonTxs";
 import { utils } from "../../utils/Utility";
 import { Button } from "primereact/button";
 import { TableType } from "../../types/Transaction";
@@ -10,7 +10,7 @@ const ExpensePanel = () => {
   const addPerson = useExpenseStore((store) => store.addPerson);
 
   const personList = personIds.map((personId) => (
-    <PersonTxsComp key={personId} id={personId}></PersonTxsComp>
+    <PersonTxs key={personId} id={personId}></PersonTxs>
   ));
 
   return (
