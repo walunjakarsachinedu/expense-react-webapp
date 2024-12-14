@@ -23,6 +23,9 @@ class Timer {
   }) {
     this._debounceTime = debounceTime;
     this._thresholdTime = thresholdTime;
+    // if (stopTimerOnWindowBlur) {
+    //   window.addEventListener("blur", this._handleWindowBlur);
+    // }
   }
 
   start = () => {
@@ -46,7 +49,7 @@ class Timer {
   };
 
   isRunning = (): boolean => {
-    return !!this._debounceTimer || !!this._thresholdTime;
+    return !!this._debounceTimer || !!this._thresholdTimer;
   };
 
   timeout = () => {
@@ -75,6 +78,13 @@ class Timer {
     clearTimeout(this._thresholdTimer);
     this._thresholdTimer = undefined;
   };
+
+  // private _handleWindowBlur = () => {
+  //   if (this.isRunning()) {
+  //     this.timeout();
+  //     alert("You have unsaved changes. Are you sure you want to leave?");
+  //   }
+  // };
 }
 
 export default Timer;
