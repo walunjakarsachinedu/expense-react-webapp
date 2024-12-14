@@ -67,6 +67,7 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
             index: index,
             name: "",
             txs: {},
+            hash: v4(),
             txIds: [],
             month: utils.formatToMonthYear(Date.now()),
             type: type,
@@ -77,16 +78,25 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
     deletePerson: (id) => {
       set(
         produce<ExpenseStore>((store) => {
+          // removing person
           delete store.persons[id];
           store.personIds = store.personIds.filter(
             (personId) => personId != id
           );
+          // syncing index from personIds with persons list
+          store.personIds.forEach((id, index) => {
+            if (store.persons[id].index != index) {
+              store.persons[id].hash = v4();
+              store.persons[id].index = index;
+            }
+          });
         })
       );
     },
     updateName: (id, name) => {
       set(
         produce((store) => {
+          store.persons[id].hash = v4();
           store.persons[id].name = name;
         })
       );
@@ -94,10 +104,19 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
     updatePersonIndex: (id, index) => {
       set(
         produce<ExpenseStore>((store) => {
-          store.persons[id].index = index;
-          store.personIds = Object.values(store.persons)
-            .sort((a, b) => a.index - b.index)
-            .map((person) => person._id);
+          // removing from old index
+          store.personIds = store.personIds.filter(
+            (personId) => personId != id
+          );
+          // place to new index
+          store.personIds.splice(index, 0, id);
+          // syncing index from personIds with persons list
+          store.personIds.forEach((id, index) => {
+            if (store.persons[id].index != index) {
+              store.persons[id].hash = v4();
+              store.persons[id].index = index;
+            }
+          });
         })
       );
     },
@@ -108,6 +127,7 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
     addExpense: (personId) => {
       set(
         produce<ExpenseStore>((store) => {
+          store.persons[personId].hash = v4();
           const length = Object.keys(store.persons[personId].txs).length;
           const id = v4();
           store.persons[personId].txs[id] = { _id: id, index: length };
@@ -118,16 +138,20 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
     deleteExpense: (id, personId) => {
       set(
         produce<ExpenseStore>((store) => {
-          delete store.persons[personId].txs[id];
-          store.persons[personId].txIds = store.persons[personId].txIds.filter(
-            (txId) => txId != id
-          );
+          store.persons[personId].hash = v4();
+          const person = store.persons[personId];
+          // removing tx
+          delete person.txs[id];
+          person.txIds = person.txIds.filter((txId) => txId != id);
+          // syncing index from txIds with txs list
+          person.txIds.forEach((id, index) => (person.txs[id].index = index));
         })
       );
     },
     updateExpense: (id: string, personId, updates) => {
       set(
         produce<ExpenseStore>((store) => {
+          store.persons[personId].hash = v4();
           store.persons[personId].txs[id] = {
             ...store.persons[personId].txs[id],
             ...updates,
@@ -138,12 +162,14 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
     updateExpenseIndex: (id, index, personId) => {
       set(
         produce<ExpenseStore>((store) => {
-          store.persons[personId].txs[id].index = index;
-          store.persons[personId].txIds = Object.values(
-            store.persons[personId].txs
-          )
-            .sort((a, b) => a.index - b.index)
-            .map((tx) => tx._id);
+          store.persons[personId].hash = v4();
+          const person = store.persons[personId];
+          // removing from old index
+          person.txIds = person.txIds.filter((txId) => txId != id);
+          // adding to new index
+          person.txIds.splice(index, 0, id);
+          // syncing index from txIds with txs list
+          person.txIds.forEach((id, index) => (person.txs[id].index = index));
         })
       );
     },

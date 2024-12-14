@@ -55,6 +55,7 @@ export default class Utility {
       _id: person._id,
       name: person.name,
       index: person.index,
+      hash: person.hash,
       txs: Object.values(person.txs),
       type: person.type,
       month: person.month,

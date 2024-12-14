@@ -13,7 +13,7 @@ export interface PersonTx {
   name: string;
   type: TableType;
   txs: Tx[];
-  hash?: string;
+  hash: string;
   index: number;
   month: string;
 }

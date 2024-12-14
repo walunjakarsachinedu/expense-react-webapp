@@ -1,4 +1,3 @@
-import hash from "object-hash";
 import { Person } from "../models/Person";
 
 export default class PersonCacheApi {
@@ -12,10 +11,7 @@ export default class PersonCacheApi {
   }
 
   storePerson = (person: Person) => {
-    localStorage.setItem(
-      this._getKey(person),
-      JSON.stringify({ ...person, hash: hash({ ...person, hash: undefined }) })
-    );
+    localStorage.setItem(this._getKey(person), JSON.stringify({ ...person }));
   };
 
   deletePersonData(person: Person[]) {

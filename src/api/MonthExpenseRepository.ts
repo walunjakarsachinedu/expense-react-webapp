@@ -1,4 +1,3 @@
-import hash from "object-hash";
 import { dummyPersonTx } from "../DummyData";
 import { PersonTx } from "../types/Transaction";
 import { utils } from "../utils/Utility";
@@ -38,10 +37,12 @@ export default class MonthExpenseRepository {
       PersonCacheApi.provider.storePerson(person)
     );
 
-    return [...storedPersons, ...fetchedPerson].map((person) => ({
-      ...person,
-      txIds: person.txIds.sort(),
-    }));
+    return [...storedPersons, ...fetchedPerson]
+      .map((person) => {
+        person.txIds.forEach((id, index) => (person.txs[id].index = index));
+        return person;
+      })
+      .sort((person) => person.index - person.index);
   }
 
   async getMonthExpenseByIds(personIds: string[]): Promise<PersonTx[]> {
@@ -56,7 +57,7 @@ export default class MonthExpenseRepository {
 
     return data.length == 0
       ? dummyPersonTx.map((person) => ({
-          hash: person.hash ?? hash(utils.personTxToPerson(person)),
+          hash: person.hash,
           _id: person._id,
         }))
       : data;

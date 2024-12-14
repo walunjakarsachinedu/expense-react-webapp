@@ -9,7 +9,7 @@ export interface Person {
   type: TableType;
   txs: Record<string, Tx>;
   txIds: string[];
-  hash?: string;
+  hash: string;
   index: number;
   month: string;
 }
