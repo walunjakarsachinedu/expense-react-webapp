@@ -73,7 +73,6 @@ const PersonTxs = memo(({ id }: Props) => {
       }}
     ></div>
   );
-  console.log("rendering PersonTxs");
 
   return (
     <div className="PersonTxsComp">
@@ -96,6 +95,9 @@ const PersonTxs = memo(({ id }: Props) => {
 const PersonName = ({ id }: Props) => {
   const name = useExpenseStore((store) => store.persons[id].name);
   const updateName = useExpenseStore((store) => store.updateName);
+  const delayDebounceTimer = useExpenseStore(
+    (store) => store.delayDebounceTimer
+  );
   return (
     <EditableElem
       initialText={name}
@@ -104,6 +106,7 @@ const PersonName = ({ id }: Props) => {
       maxCharacter={17}
       className="text-500"
       placeHolder="Person Name"
+      onFocus={() => delayDebounceTimer()}
       onChange={(value) => updateName(id, value)}
     />
   );

@@ -32,16 +32,17 @@ export type ExpenseStore = {
     tx: Prettify<Omit<Tx, "_id" | "index">>
   ) => void;
   updateExpenseIndex: (id: string, index: number, personId: string) => void;
+  delayDebounceTimer: () => void;
 };
 
-let startOrDelay: () => void;
+let timer: Timer;
 
 const personStore: StateCreator<ExpenseStore, [], []> = (
   set,
   get,
   storeApi
 ) => {
-  startOrDelay = setupDebounceTimer(get);
+  timer = setupDebounceTimer(get);
   return {
     monthYear: utils.formatToMonthYear(Date.now()),
     persons: {},
@@ -173,6 +174,8 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
         })
       );
     },
+    /** used by middleware to delay debounce timer */
+    delayDebounceTimer: () => {},
   };
 };
 
@@ -185,13 +188,16 @@ const useExpenseStore = create<ExpenseStore>(
         "copyPerson",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
+      if ((action as keyof ExpenseStore) === "delayDebounceTimer") {
+        if (!timer.isRunning()) return;
+      }
       // delay save
-      startOrDelay();
+      timer.startOrDelay();
     },
   })
 );
 
-function setupDebounceTimer(get: () => ExpenseStore): () => void {
+function setupDebounceTimer(get: () => ExpenseStore): Timer {
   const timer = new Timer({
     debounceTime: 1500,
     thresholdTime: 10000,
@@ -216,7 +222,7 @@ function setupDebounceTimer(get: () => ExpenseStore): () => void {
     MonthExpenseRepository.provider.storePersonData(persons);
   });
 
-  return timer.startOrDelay;
+  return timer;
 }
 
 export default useExpenseStore;

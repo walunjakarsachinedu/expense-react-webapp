@@ -10,6 +10,9 @@ const TxTag = memo(({ id, personId }: Props) => {
   const tx = useExpenseStore((store) => store.persons[personId].txs[id]);
   const updateExpense = useExpenseStore((store) => store.updateExpense);
   const deleteExpense = useExpenseStore((store) => store.deleteExpense);
+  const delayDebounceTimer = useExpenseStore(
+    (store) => store.delayDebounceTimer
+  );
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const moneyValue = useRef(tx.money ?? "");
@@ -25,8 +28,6 @@ const TxTag = memo(({ id, personId }: Props) => {
   const deleteTag = () => {
     deleteExpense(id, personId);
   };
-
-  console.log("rendering Tx");
 
   return (
     <div className="Tag relative">
@@ -50,7 +51,10 @@ const TxTag = memo(({ id, personId }: Props) => {
             preventNewline={true}
             trimInput={true}
             maxCharacter={24}
-            onFocus={() => setIsEditing(true)}
+            onFocus={() => {
+              setIsEditing(true);
+              delayDebounceTimer();
+            }}
             onBlur={(e) => setIsEditing(false)}
             onKeyUp={(e) => {
               const target = e.target as HTMLElement;
@@ -72,7 +76,10 @@ const TxTag = memo(({ id, personId }: Props) => {
             placeHolder="money"
             preventNewline={true}
             numberOnly={true}
-            onFocus={() => setIsEditing(true)}
+            onFocus={() => {
+              setIsEditing(true);
+              delayDebounceTimer();
+            }}
             onBlur={() => setIsEditing(false)}
             onKeyUp={(e) => {
               const target = e.target as HTMLElement;
