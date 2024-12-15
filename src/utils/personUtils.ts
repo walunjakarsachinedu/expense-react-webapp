@@ -1,6 +1,5 @@
-import { Person } from "../models/Person";
+import { Person, PersonTx } from "../models/Person";
 import Tx from "../models/Tx";
-import { PersonTx } from "../types/Transaction";
 import utils from "./utils";
 
 class PersonUtils {

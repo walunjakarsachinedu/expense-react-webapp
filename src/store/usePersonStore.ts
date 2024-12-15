@@ -7,10 +7,10 @@ import applyMiddleware from "../middleware/core/applyMiddleware";
 import { Person } from "../models/Person";
 import Tx from "../models/Tx";
 import { Prettify } from "../types/Prettify";
-import { TableType } from "../types/Transaction";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
+import { TableType } from "../models/TableType";
 
 export type ExpenseStore = {
   monthYear: string;

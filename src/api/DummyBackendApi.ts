@@ -1,5 +1,4 @@
-import { Person } from "../models/Person";
-import { PersonTx } from "../types/Transaction";
+import { Person, PersonTx } from "../models/Person";
 import personUtils from "../utils/personUtils";
 
 /** stores person as PersonTx structure in local */

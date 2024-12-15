@@ -1,9 +1,8 @@
-import { PersonTx } from "../types/Transaction";
+import { PersonTx } from "../models/Person";
 
 /** contains backend interaction for operation related to person & its transaction. */
 export default class PersonExpenseApi {
   static readonly provider = new PersonExpenseApi();
-
 
   async add(personTx: PersonTx): Promise<PersonTx> {
     // TODO: logic to add person from backend
