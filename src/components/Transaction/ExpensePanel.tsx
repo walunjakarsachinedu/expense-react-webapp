@@ -1,9 +1,9 @@
+import { Button } from "primereact/button";
 import { Panel } from "primereact/panel";
 import useExpenseStore from "../../store/usePersonStore";
-import PersonTxs from "./PersonTxs";
-import { utils } from "../../utils/Utility";
-import { Button } from "primereact/button";
 import { TableType } from "../../types/Transaction";
+import utils from "../../utils/utils";
+import PersonTxs from "./PersonTxs";
 
 const ExpensePanel = () => {
   const personIds = useExpenseStore((store) => store.personIds);

@@ -1,13 +1,13 @@
 import { Divider } from "primereact/divider";
 import { MenuItem } from "primereact/menuitem";
+import { memo } from "react";
 import useToast from "../../hooks/useToast";
 import useExpenseStore from "../../store/usePersonStore";
-import { utils } from "../../utils/Utility";
+import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
 import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxs.css";
 import TxTag from "./TxTag";
-import { memo } from "react";
 
 type Props = {
   id: string;

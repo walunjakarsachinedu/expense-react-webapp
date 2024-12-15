@@ -1,6 +1,6 @@
 import { Person } from "../models/Person";
 import { PersonTx } from "../types/Transaction";
-import { utils } from "../utils/Utility";
+import personUtils from "../utils/personUtils";
 
 /** stores person as PersonTx structure in local */
 interface IDummyBackendApi {
@@ -33,7 +33,7 @@ export class DummyBackendApi implements IDummyBackendApi {
 
   storePersonData(persons: Person[]): void {
     persons
-      .map((person) => utils.personToPersonTx(person))
+      .map((person) => personUtils.personToPersonTx(person))
       .forEach((person) =>
         localStorage.setItem(this._getKey(person._id), JSON.stringify(person))
       );

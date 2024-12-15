@@ -1,8 +1,8 @@
 import { dummyPersonTx } from "../DummyData";
-import { PersonTx } from "../types/Transaction";
-import { utils } from "../utils/Utility";
-import { DummyBackendApi } from "./DummyBackendApi";
 import { Person } from "../models/Person";
+import { PersonTx } from "../types/Transaction";
+import personUtils from "../utils/personUtils";
+import { DummyBackendApi } from "./DummyBackendApi";
 import PersonCacheApi from "./PersonCacheApi";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
@@ -30,7 +30,7 @@ export default class MonthExpenseRepository {
     /** person data fetched from backend. */
     const fetchedPerson = await this.getMonthExpenseByIds(
       notFoundIdHashes.map((person) => person._id)
-    ).then((persons) => persons.map<Person>(utils.personTxToPerson));
+    ).then((persons) => persons.map<Person>(personUtils.personTxToPerson));
 
     /** caching fetched data */
     fetchedPerson.forEach((person) =>

@@ -1,27 +1,9 @@
 import { Person } from "../models/Person";
 import Tx from "../models/Tx";
 import { PersonTx } from "../types/Transaction";
+import utils from "./utils";
 
-export default class Utility {
-  static readonly provider = new Utility();
-
-  parseNumber(numStr?: string): number | undefined {
-    try {
-      if (numStr) {
-        return parseInt(numStr);
-      }
-    } catch {
-      // error
-    }
-  }
-
-  formatToMonthYear(timestamp: number): string {
-    const date = new Date(timestamp);
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Ensure 2-digit month
-    const year = date.getFullYear().toString(); // Get the full year
-    return `${month}-${year}`;
-  }
-
+class PersonUtils {
   personToString(person: Person): string {
     const { name, txIds, txs } = person;
     const total = Object.values(txs).reduce(
@@ -63,4 +45,5 @@ export default class Utility {
   }
 }
 
-export const utils = new Utility();
+const personUtils = new PersonUtils();
+export default personUtils;

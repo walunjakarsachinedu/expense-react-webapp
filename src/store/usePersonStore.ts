@@ -1,16 +1,16 @@
-import * as jsonpatch from "fast-json-patch";
 import { produce } from "immer";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
 import { create, StateCreator } from "zustand";
+import MonthExpenseRepository from "../api/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
 import { Person } from "../models/Person";
 import Tx from "../models/Tx";
 import { Prettify } from "../types/Prettify";
 import { TableType } from "../types/Transaction";
+import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
-import { utils } from "../utils/Utility";
-import MonthExpenseRepository from "../api/MonthExpenseRepository";
+import utils from "../utils/utils";
 
 export type ExpenseStore = {
   monthYear: string;
@@ -122,7 +122,7 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
       );
     },
     copyPerson: (id) => {
-      const textToCopy = utils.personToString(get().persons[id]);
+      const textToCopy = personUtils.personToString(get().persons[id]);
       navigator.clipboard.writeText(textToCopy);
     },
     addExpense: (personId) => {
