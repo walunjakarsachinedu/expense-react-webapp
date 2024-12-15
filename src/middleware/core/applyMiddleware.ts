@@ -6,7 +6,9 @@ export default function applyMiddleware<State extends object>({
   beforeMiddlware,
   afterMiddlware,
 }: {
-  store: StateCreator<State, [], []>;
+  store:
+    | StateCreator<State, [], []>
+    | StateCreator<State, [], [["zustand/immer", never]]>;
   beforeMiddlware?: Middleware<State>;
   afterMiddlware?: Middleware<State>;
 }): StateCreator<State, [], []> {

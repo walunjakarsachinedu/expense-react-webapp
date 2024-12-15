@@ -2,15 +2,16 @@ import { produce } from "immer";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
 import { create, StateCreator } from "zustand";
+import { immer } from "zustand/middleware/immer";
 import MonthExpenseRepository from "../api/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
 import { Person } from "../models/Person";
+import { TableType } from "../models/TableType";
 import Tx from "../models/Tx";
 import { Prettify } from "../types/Prettify";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
-import { TableType } from "../models/TableType";
 
 export type ExpenseStore = {
   monthYear: string;
@@ -37,30 +38,24 @@ export type ExpenseStore = {
 
 let timer: Timer;
 
-const personStore: StateCreator<ExpenseStore, [], []> = (
-  set,
-  get,
-  storeApi
-) => {
-  timer = setupDebounceTimer(get);
-  return {
-    monthYear: utils.formatToMonthYear(Date.now()),
-    persons: {},
-    personIds: [],
-    setMonthData: (monthYear, persons) => {
-      set(
-        produce<ExpenseStore>((store) => {
+const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
+  immer<ExpenseStore, [], []>((set, get, storeApi) => {
+    timer = setupDebounceTimer(get);
+    return {
+      monthYear: utils.formatToMonthYear(Date.now()),
+      persons: {},
+      personIds: [],
+      setMonthData: (monthYear, persons) => {
+        set((store) => {
           store.monthYear = monthYear;
           persons.forEach((person) => (store.persons[person._id] = person));
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
             .map((person) => person._id);
-        })
-      );
-    },
-    addPerson: (type) =>
-      set(
-        produce<ExpenseStore>((store) => {
+        });
+      },
+      addPerson: (type) =>
+        set((store) => {
           const id = v4();
           const index = Object.keys(store.persons).length;
           store.persons[id] = {
@@ -74,11 +69,9 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
             type: type,
           };
           store.personIds.push(id);
-        })
-      ),
-    deletePerson: (id) => {
-      set(
-        produce<ExpenseStore>((store) => {
+        }),
+      deletePerson: (id) => {
+        set((store) => {
           // removing person
           delete store.persons[id];
           store.personIds = store.personIds.filter(
@@ -91,20 +84,18 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
               store.persons[id].index = index;
             }
           });
-        })
-      );
-    },
-    updateName: (id, name) => {
-      set(
-        produce((store) => {
-          store.persons[id].hash = v4();
-          store.persons[id].name = name;
-        })
-      );
-    },
-    updatePersonIndex: (id, index) => {
-      set(
-        produce<ExpenseStore>((store) => {
+        });
+      },
+      updateName: (id, name) => {
+        set(
+          produce((store) => {
+            store.persons[id].hash = v4();
+            store.persons[id].name = name;
+          })
+        );
+      },
+      updatePersonIndex: (id, index) => {
+        set((store) => {
           // removing from old index
           store.personIds = store.personIds.filter(
             (personId) => personId != id
@@ -118,27 +109,23 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
               store.persons[id].index = index;
             }
           });
-        })
-      );
-    },
-    copyPerson: (id) => {
-      const textToCopy = personUtils.personToString(get().persons[id]);
-      navigator.clipboard.writeText(textToCopy);
-    },
-    addExpense: (personId) => {
-      set(
-        produce<ExpenseStore>((store) => {
+        });
+      },
+      copyPerson: (id) => {
+        const textToCopy = personUtils.personToString(get().persons[id]);
+        navigator.clipboard.writeText(textToCopy);
+      },
+      addExpense: (personId) => {
+        set((store) => {
           store.persons[personId].hash = v4();
           const length = Object.keys(store.persons[personId].txs).length;
           const id = v4();
           store.persons[personId].txs[id] = { _id: id, index: length };
           store.persons[personId].txIds.push(id);
-        })
-      );
-    },
-    deleteExpense: (id, personId) => {
-      set(
-        produce<ExpenseStore>((store) => {
+        });
+      },
+      deleteExpense: (id, personId) => {
+        set((store) => {
           store.persons[personId].hash = v4();
           const person = store.persons[personId];
           // removing tx
@@ -146,23 +133,19 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
           person.txIds = person.txIds.filter((txId) => txId != id);
           // syncing index from txIds with txs list
           person.txIds.forEach((id, index) => (person.txs[id].index = index));
-        })
-      );
-    },
-    updateExpense: (id: string, personId, updates) => {
-      set(
-        produce<ExpenseStore>((store) => {
+        });
+      },
+      updateExpense: (id: string, personId, updates) => {
+        set((store) => {
           store.persons[personId].hash = v4();
           store.persons[personId].txs[id] = {
             ...store.persons[personId].txs[id],
             ...updates,
           };
-        })
-      );
-    },
-    updateExpenseIndex: (id, index, personId) => {
-      set(
-        produce<ExpenseStore>((store) => {
+        });
+      },
+      updateExpenseIndex: (id, index, personId) => {
+        set((store) => {
           store.persons[personId].hash = v4();
           const person = store.persons[personId];
           // removing from old index
@@ -171,14 +154,12 @@ const personStore: StateCreator<ExpenseStore, [], []> = (
           person.txIds.splice(index, 0, id);
           // syncing index from txIds with txs list
           person.txIds.forEach((id, index) => (person.txs[id].index = index));
-        })
-      );
-    },
-    /** used by middleware to delay debounce timer */
-    delayDebounceTimer: () => {},
-  };
-};
-
+        });
+      },
+      /** used by middleware to delay debounce timer */
+      delayDebounceTimer: () => {},
+    };
+  });
 const useExpenseStore = create<ExpenseStore>(
   applyMiddleware({
     store: personStore,
