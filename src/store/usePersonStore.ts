@@ -1,3 +1,4 @@
+import { compare } from "fast-json-patch";
 import { produce } from "immer";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
@@ -194,13 +195,12 @@ function setupDebounceTimer(get: () => ExpenseStore): Timer {
   timer.stopEvent.subscribe(() => {
     // todo: use jsonpatch to send batch of patch of changes
     console.info("saving data to local storage");
-    const persons = Object.values(get().persons);
-    const oldPersons = Object.values(expenseStore.persons);
-    const deletedPersons = oldPersons.filter(
-      (person) => !persons.some((oldPerson) => oldPerson._id == person._id)
-    );
-    MonthExpenseRepository.provider.deletePersonData(deletedPersons);
-    MonthExpenseRepository.provider.storePersonData(persons);
+
+    const persons = get().persons;
+    const oldPersons = expenseStore.persons;
+    const patches = compare(oldPersons, persons);
+
+    MonthExpenseRepository.provider.applyPatches(patches);
   });
 
   return timer;

@@ -1,4 +1,6 @@
+import { Operation } from "fast-json-patch";
 import { Person, PersonTx } from "../models/Person";
+import ApplyPatches from "../utils/ApplyPatches";
 import personUtils from "../utils/personUtils";
 
 /** stores person as PersonTx structure in local */
@@ -7,12 +9,13 @@ interface IDummyBackendApi {
   getPersonByIds(ids: string[]): PersonTx[];
   storePersonData(persons: Person[]): void;
   deletePersonData(person: Person[]): void;
+  applyChanges(patches: Operation[]): void;
 }
 
-export class DummyBackendApi implements IDummyBackendApi {
+export class DummyBackendApi extends ApplyPatches implements IDummyBackendApi {
   static readonly provider: IDummyBackendApi = new DummyBackendApi();
 
-  storageKey = "backend_person_data_";
+  readonly storageKey = "backend_person_data_";
 
   getPersonHashIds(month: string): { _id: string; hash: string }[] {
     const keys: string[] = Object.keys(localStorage);
@@ -46,5 +49,22 @@ export class DummyBackendApi implements IDummyBackendApi {
 
   _getKey(id: string): string {
     return `${this.storageKey}${id}`;
+  }
+
+  applyChanges(patches: Operation[]) {
+    let persons = Object.keys(localStorage)
+      .filter((key) => key.startsWith(this.storageKey))
+      .map((key) => JSON.parse(localStorage.getItem(key)!) as PersonTx)
+      .map((person) => personUtils.personTxToPerson(person))
+      .reduce<Record<string, Person>>((acc, cur) => {
+        acc[cur._id] = cur;
+        return acc;
+      }, {} as Record<string, Person>);
+    const oldPersonIds = Object.keys(persons);
+    persons = this.applyPatches(patches, persons);
+    oldPersonIds
+      .filter((id) => !persons[id])
+      .forEach((id) => localStorage.removeItem(this._getKey(id)));
+    this.storePersonData(Object.values(persons));
   }
 }

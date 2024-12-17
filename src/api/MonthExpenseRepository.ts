@@ -1,3 +1,4 @@
+import { Operation } from "fast-json-patch";
 import { dummyPersonTx } from "../DummyData";
 import { Person, PersonTx } from "../models/Person";
 import personUtils from "../utils/personUtils";
@@ -36,6 +37,11 @@ export default class MonthExpenseRepository {
       PersonCacheApi.provider.storePerson(person)
     );
 
+    /** deleting un-necessary data */
+    PersonCacheApi.provider.deleteUnecessaryCache(
+      fetchIdHashes.map((idHash) => idHash._id)
+    );
+
     return [...storedPersons, ...fetchedPerson]
       .map((person) => {
         person.txIds.forEach((id, index) => (person.txs[id].index = index));
@@ -53,6 +59,11 @@ export default class MonthExpenseRepository {
 
   async getMonthExpenseIdHash(): Promise<{ hash: string; _id: string }[]> {
     const data = DummyBackendApi.provider.getPersonHashIds("12-2024");
+    if (data.length == 0) {
+      DummyBackendApi.provider.storePersonData(
+        dummyPersonTx.map(personUtils.personTxToPerson)
+      );
+    }
 
     return data.length == 0
       ? dummyPersonTx.map((person) => ({
@@ -70,5 +81,10 @@ export default class MonthExpenseRepository {
   async deletePersonData(personData: Person[]) {
     PersonCacheApi.provider.deletePersonData(personData);
     DummyBackendApi.provider.deletePersonData(personData);
+  }
+
+  async applyPatches(patches: Operation[]) {
+    PersonCacheApi.provider.applyChanges(patches);
+    DummyBackendApi.provider.applyChanges(patches);
   }
 }
