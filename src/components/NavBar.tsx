@@ -11,8 +11,7 @@ export default function NavBar() {
         style={{
           width: "100%",
           padding: 10,
-          paddingRight: 20,
-          paddingLeft: 20,
+          paddingRight: 15,
           background: "rgba(200,200,200,.02)",
         }}
       >
