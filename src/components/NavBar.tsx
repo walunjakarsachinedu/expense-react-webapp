@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import moneyIcon from "../images/money-icon.svg";
+import MonthPicker from "./MonthPicker";
 import "./NavBar.css";
 
 export default function NavBar() {
@@ -24,12 +25,14 @@ export default function NavBar() {
         </Row>
 
         <div style={{ width: 70 }}></div>
-
         <Row>
           <div className="mr-3"></div>
-          <div className="pi pi-calendar icon-btn cursor-pointer"></div>
+          <MonthPicker initialDate={new Date()}></MonthPicker>
           <div className="mr-3"></div>
-          <div className="pi pi-sign-out icon-btn cursor-pointer"></div>
+          <div
+            className="border-1 border-round border-200 pi pi-sign-out icon-btn cursor-pointer"
+            style={{ fontSize: "0.7rem" }}
+          ></div>
         </Row>
       </div>
     </div>

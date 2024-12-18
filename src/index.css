@@ -62,7 +62,7 @@ body {
 
 .icon-btn:active,
 .icon-btn:hover {
-  border-color: var(--primary-color);
+  border-color: #22d3ee !important;
 }
 
 .editable {

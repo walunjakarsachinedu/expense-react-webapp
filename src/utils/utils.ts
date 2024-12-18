@@ -17,6 +17,30 @@ class Utility {
     const year = date.getFullYear().toString(); // Get the full year
     return `${month}-${year}`;
   }
+
+  dateToMMYY = (date: Date): string => {
+    const month = this.monthIndexToName(date.getMonth());
+    const year = date.getFullYear();
+    return `${month} ${year}`;
+  };
+
+  monthIndexToName(value: number): string | undefined {
+    const monthName = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    return monthName[value];
+  }
 }
 
 const utils = new Utility();

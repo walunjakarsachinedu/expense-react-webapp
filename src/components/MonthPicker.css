@@ -1,0 +1,14 @@
+.p-calendar .p-datepicker,
+.p-datepicker .p-datepicker-header {
+  background-color: rgb(25, 25, 25) !important;
+}
+
+.month-picker {
+  position: absolute;
+  top: 20px;
+  right: -12px;
+  z-index: 10;
+  max-width: unset;
+  width: 210px;
+  scale: 0.9;
+}

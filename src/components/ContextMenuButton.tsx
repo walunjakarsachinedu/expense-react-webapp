@@ -1,6 +1,7 @@
 import { ContextMenu } from "primereact/contextmenu";
 import { MenuItem } from "primereact/menuitem";
 import { useRef } from "react";
+import "./ContextMenuButton.css";
 
 type Props = {
   items: MenuItem[];
@@ -19,7 +20,7 @@ const ContextMenuButton = ({ items }: Props) => {
         model={items}
         ref={cm}
         breakpoint="767px"
-        style={{ background: "var(--dark-bg" }}
+        style={{ background: "var(--dark-bg", scale: "0.9", width: "150px" }}
       />
     </div>
   );
