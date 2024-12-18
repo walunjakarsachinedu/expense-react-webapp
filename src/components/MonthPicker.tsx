@@ -33,12 +33,12 @@ const MonthPicker = ({ initialDate }: Prop) => {
           console.log("showing month picker");
         }}
       >
-        <div className="mx-2 text-xs">
+        <div className="mx-2" style={{ fontSize: ".8rem" }}>
           {utils.dateToMMYY(date ?? new Date())}
         </div>
         <div
           className="pi pi-calendar icon-btn cursor-pointer mr-1"
-          style={{ fontSize: "0.8rem" }}
+          style={{ fontSize: ".9rem" }}
         ></div>
       </div>
       {isMonthPickerVisible && (

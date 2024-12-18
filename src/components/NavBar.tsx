@@ -31,7 +31,7 @@ export default function NavBar() {
           <div className="mr-3"></div>
           <div
             className="border-1 border-round border-200 pi pi-sign-out icon-btn cursor-pointer"
-            style={{ fontSize: "0.7rem" }}
+            style={{ fontSize: "0.9rem" }}
           ></div>
         </Row>
       </div>
