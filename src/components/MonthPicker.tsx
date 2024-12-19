@@ -27,7 +27,7 @@ const MonthPicker = ({ initialDate }: Prop) => {
     <div className="relative">
       <div
         ref={buttonRef}
-        className="flex align-items-center  select-none border-1 border-round border-200 icon-btn p-0 cursor-pointer"
+        className="flex align-items-center  select-none border-1 border-round border-200 icon-btn p-0 cursor-pointer white-space-nowrap"
         onClick={() => {
           setIsMonthPickerVisible((value) => !value);
           console.log("showing month picker");

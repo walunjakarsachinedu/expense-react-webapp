@@ -5,7 +5,7 @@ import "./NavBar.css";
 
 export default function NavBar() {
   return (
-    <div className="nav-bar white-space-nowrap">
+    <div className="nav-bar">
       <div
         className="blur-bg flex justify-content-center"
         style={{
@@ -15,7 +15,7 @@ export default function NavBar() {
           background: "rgba(200,200,200,.02)",
         }}
       >
-        <Row>
+        <Row className="white-space-nowrap">
           <img
             src={moneyIcon}
             alt="Icon"
@@ -40,9 +40,12 @@ export default function NavBar() {
 }
 
 type Props = {
+  className?: string;
   children: ReactNode;
 };
 
-function Row({ children }: Props) {
-  return <div className="flex align-items-center">{children}</div>;
+function Row({ className, children }: Props) {
+  return (
+    <div className={`flex align-items-center ${className}`}>{children}</div>
+  );
 }
