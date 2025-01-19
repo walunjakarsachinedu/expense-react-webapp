@@ -5,57 +5,46 @@ import ApplyPatches from "../utils/ApplyPatches";
 export default class PersonCacheApi extends ApplyPatches {
   static readonly provider = new PersonCacheApi();
 
-  readonly storageKey = "person_id_";
-  _getKey = (person: { _id: string }) => `${this.storageKey}${person._id}`;
+  readonly storageKey = "cached_person_id_";
+  _getKeyFromId = (id: string) => `${this.storageKey}${id}`;
 
-  storePersonData(person: Person[]) {
-    person.forEach((person) => this.storePerson(person));
-  }
+  getAllPersons = (): Person[] => {
+    return Object.keys(localStorage)
+      .filter((key) => key.startsWith(this.storageKey))
+      .map((id) => localStorage.getItem(id))
+      .map((data) => JSON.parse(data!));
+  };
+
+  deletePersonWithId = (id: string) => {
+    localStorage.removeItem(this._getKeyFromId(id));
+  };
 
   storePerson = (person: Person) => {
-    localStorage.setItem(this._getKey(person), JSON.stringify({ ...person }));
+    localStorage.setItem(
+      this._getKeyFromId(person._id),
+      JSON.stringify({ ...person })
+    );
   };
 
-  deleteUnecessaryCache = (fetchedPersonIds: string[]) => {
-    Object.keys(localStorage)
-      .filter((key) => key.startsWith(this.storageKey))
-      .filter(
-        (key) =>
-          !fetchedPersonIds.some(
-            (personId) => this._getKey({ _id: personId }) == key
-          )
-      )
-      .forEach((key) => localStorage.removeItem(key));
-  };
-
-  deletePersonData = (person: Person[]) => {
-    person.forEach((person) => localStorage.removeItem(this._getKey(person)));
-  };
-
-  getPerson = (personIdHash: {
-    _id: string;
-    hash: string;
-  }): Person | undefined => {
-    if (!localStorage.getItem(this._getKey(personIdHash))) return;
-    const localPerson = JSON.parse(
-      localStorage.getItem(this._getKey(personIdHash))!
-    ) as Person;
-    if (personIdHash.hash == localPerson?.hash) {
-      return localPerson;
-    } else {
-      localStorage.removeItem(this._getKey(personIdHash));
-    }
-  };
-
+  /**
+   * Apply patch and use new state to store - updation, deletion, addition.
+   */
   applyChanges(patches: Operation[]) {
-    let persons = Object.keys(localStorage)
-      .filter((key) => key.startsWith(this.storageKey))
-      .map((key) => JSON.parse(localStorage.getItem(key)!) as Person)
-      .reduce<Record<string, Person>>((acc, cur) => {
+    let personMap = this.getAllPersons().reduce<Record<string, Person>>(
+      (acc, cur) => {
         acc[cur._id] = cur;
         return acc;
-      }, {} as Record<string, Person>);
-    persons = this.applyPatches(patches, persons);
-    this.storePersonData(Object.values(persons));
+      },
+      {} as Record<string, Person>
+    );
+    const idList = Object.keys(personMap);
+    personMap = this.applyPatches(patches, personMap);
+    const updatedIdList = Object.keys(personMap);
+    // updation + addition
+    Object.values(personMap).forEach((person) => this.storePerson(person));
+    // deletion
+    idList
+      .filter((id) => !updatedIdList.includes(id))
+      .forEach(this.deletePersonWithId);
   }
 }

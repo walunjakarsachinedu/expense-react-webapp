@@ -9,40 +9,50 @@ import PersonCacheApi from "./PersonCacheApi";
 export default class MonthExpenseRepository {
   static readonly provider = new MonthExpenseRepository();
 
+  /**
+   * Algorithm :-
+   * 1. fetch person id+hash from backend & id+hash+data from cache.
+   * 2. fetch un-cache persons from backend, store in cache.
+   * 3. delete un-used persons from cache.
+   * @return array of fetched + cached persons
+   */
   async getMonthExpense(): Promise<Person[]> {
     // TODO: logic to populate month & year
     const fetchIdHashes = await this.getMonthExpenseIdHash();
-    /** person data found in local storage. */
-    const storedPersons: Person[] = fetchIdHashes
-      .map((personIdHash) => PersonCacheApi.provider.getPerson(personIdHash))
-      .filter((person) => person != undefined);
+    const cachedPersonList: Person[] = PersonCacheApi.provider.getAllPersons();
 
-    /** person hash not found in local storage. */
-    const notFoundIdHashes = fetchIdHashes.filter(
-      (fetchedPerson) =>
-        !storedPersons.some(
-          (storedPerson) =>
-            storedPerson._id == fetchedPerson._id &&
-            storedPerson.hash == fetchedPerson.hash
+    // Fetching persons which not found in cache
+    const fetchedPersons = await this.getMonthExpenseByIds(
+      fetchIdHashes
+        .filter(
+          (idHash) =>
+            !cachedPersonList.some((person) =>
+              this._compareIdHash(person, idHash)
+            )
         )
-    );
-
-    /** person data fetched from backend. */
-    const fetchedPerson = await this.getMonthExpenseByIds(
-      notFoundIdHashes.map((person) => person._id)
+        .map((person) => person._id)
     ).then((persons) => persons.map<Person>(personUtils.personTxToPerson));
 
-    /** caching fetched data */
-    fetchedPerson.forEach((person) =>
+    // Extracting Persons found in cache
+    const cachePersons = cachedPersonList.filter((person) =>
+      fetchIdHashes.find((idHash) => this._compareIdHash(person, idHash))
+    );
+
+    /** deleting un-necessary cache */
+    cachedPersonList
+      .filter(
+        (person) =>
+          !fetchIdHashes.some((idHash) => this._compareIdHash(person, idHash))
+      )
+      .map((idHash) => idHash._id)
+      .forEach(PersonCacheApi.provider.deletePersonWithId);
+
+    /** caching un-cached fetched persons */
+    fetchedPersons.forEach((person) =>
       PersonCacheApi.provider.storePerson(person)
     );
 
-    /** deleting un-necessary data */
-    PersonCacheApi.provider.deleteUnecessaryCache(
-      fetchIdHashes.map((idHash) => idHash._id)
-    );
-
-    return [...storedPersons, ...fetchedPerson]
+    return [...cachePersons, ...fetchedPersons]
       .map((person) => {
         person.txIds.forEach((id, index) => (person.txs[id].index = index));
         return person;
@@ -58,28 +68,32 @@ export default class MonthExpenseRepository {
   }
 
   async getMonthExpenseIdHash(): Promise<{ hash: string; _id: string }[]> {
-    const data = DummyBackendApi.provider.getPersonHashIds("12-2024");
+    const data = DummyBackendApi.provider.getPersonHashIds("01-2025");
     if (data.length == 0) {
       DummyBackendApi.provider.storePersonData(
         dummyPersonTx.map(personUtils.personTxToPerson)
       );
     }
+    // TODO: remove when data get from proper backend
+    if (data.length == 0) {
+      return dummyPersonTx.map((person) => ({
+        hash: person.hash,
+        _id: person._id,
+      }));
+    }
 
-    return data.length == 0
-      ? dummyPersonTx.map((person) => ({
-          hash: person.hash,
-          _id: person._id,
-        }))
-      : data;
+    return data;
   }
 
   async storePersonData(personData: Person[]) {
-    PersonCacheApi.provider.storePersonData(personData);
+    personData.forEach((person) => PersonCacheApi.provider.storePerson(person));
     DummyBackendApi.provider.storePersonData(personData);
   }
 
   async deletePersonData(personData: Person[]) {
-    PersonCacheApi.provider.deletePersonData(personData);
+    personData
+      .map((person) => person._id)
+      .forEach(PersonCacheApi.provider.deletePersonWithId);
     DummyBackendApi.provider.deletePersonData(personData);
   }
 
@@ -87,4 +101,9 @@ export default class MonthExpenseRepository {
     PersonCacheApi.provider.applyChanges(patches);
     DummyBackendApi.provider.applyChanges(patches);
   }
+
+  _compareIdHash = (
+    a: { _id: string; hash: string },
+    b: { _id: string; hash: string }
+  ): boolean => a._id == b._id && a.hash == b.hash;
 }

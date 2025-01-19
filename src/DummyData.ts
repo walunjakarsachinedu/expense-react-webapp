@@ -7,7 +7,7 @@ export const dummyPersonTx: PersonTx[] = [
     name: "John Doe",
     type: TableType.Expense,
     hash: "34532389",
-    month: "12-2024",
+    month: "01-2025",
     txs: [
       {
         _id: "tx1",
@@ -137,7 +137,7 @@ export const dummyPersonTx: PersonTx[] = [
     name: "Jane Smith",
     type: TableType.Income,
     hash: "42323423",
-    month: "12-2024",
+    month: "01-2025",
     txs: [
       {
         _id: "tx21",
