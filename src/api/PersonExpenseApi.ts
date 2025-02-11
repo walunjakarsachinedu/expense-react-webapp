@@ -1,4 +1,4 @@
-import { PersonTx } from "../models/Person";
+import { PersonTx } from "../models/type";
 
 /** contains backend interaction for operation related to person & its transaction. */
 export default class PersonExpenseApi {

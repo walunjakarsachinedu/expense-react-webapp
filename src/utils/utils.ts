@@ -41,6 +41,22 @@ class Utility {
     ];
     return monthName[value];
   }
+
+  /** removes all field with `value == undefined` */
+  removeUndefinedFields<T extends Partial<Record<string, unknown>>>(obj: T): T {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, value]) => value !== undefined)
+    ) as T;
+  }
+
+  /** removes all field with `value.length == 0` */
+  removeEmptyArrayFields<T extends Partial<Record<string, unknown[]>>>(
+    obj: T
+  ): T {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, value]) => value?.length ?? 0 > 0)
+    ) as T;
+  }
 }
 
 const utils = new Utility();

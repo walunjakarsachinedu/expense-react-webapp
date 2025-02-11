@@ -115,7 +115,7 @@ const PersonName = ({ id }: Props) => {
 const PersonTotal = ({ id }: Props) => {
   const person = useExpenseStore((store) => store.persons[id]);
   const total = Object.values(person.txs).reduce(
-    (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),
+    (total, tx) => total + (tx.money ?? 0),
     0
   );
   if (Object.keys(person.txs).length == 0 || total == 0) return null;

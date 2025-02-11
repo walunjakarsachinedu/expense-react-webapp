@@ -3,7 +3,7 @@ import { Panel } from "primereact/panel";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import PersonTxs from "./PersonTxs";
-import { TableType } from "../../models/TableType";
+import { TableType } from "../../models/type";
 
 const ExpensePanel = () => {
   const personIds = useExpenseStore((store) => store.personIds);
@@ -52,7 +52,7 @@ const ExpenseTotal = () => {
     (total, person) =>
       total +
       Object.values(person.txs).reduce(
-        (total, tx) => total + (utils.parseNumber(tx.money) ?? 0),
+        (total, tx) => total + (tx.money ?? 0),
         0
       ),
     0

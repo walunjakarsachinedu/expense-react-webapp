@@ -1,6 +1,10 @@
-import { Operation } from "fast-json-patch";
 import { dummyPersonTx } from "../DummyData";
-import { Person, PersonTx } from "../models/Person";
+import {
+  PersonData,
+  PersonDiff,
+  PersonMinimal,
+  PersonTx,
+} from "../models/type";
 import personUtils from "../utils/personUtils";
 import { DummyBackendApi } from "./DummyBackendApi";
 import PersonCacheApi from "./PersonCacheApi";
@@ -16,10 +20,11 @@ export default class MonthExpenseRepository {
    * 3. delete un-used persons from cache.
    * @return array of fetched + cached persons
    */
-  async getMonthExpense(): Promise<Person[]> {
+  async getMonthExpense(): Promise<PersonData[]> {
     // TODO: logic to populate month & year
     const fetchIdHashes = await this.getMonthExpenseIdHash();
-    const cachedPersonList: Person[] = PersonCacheApi.provider.getAllPersons();
+    const cachedPersonList: PersonData[] =
+      PersonCacheApi.provider.getAllPersons();
 
     // Fetching persons which not found in cache
     const fetchedPersons = await this.getMonthExpenseByIds(
@@ -31,7 +36,7 @@ export default class MonthExpenseRepository {
             )
         )
         .map((person) => person._id)
-    ).then((persons) => persons.map<Person>(personUtils.personTxToPerson));
+    ).then((persons) => persons.map<PersonData>(personUtils.personTxToPerson));
 
     // Extracting Persons found in cache
     const cachePersons = cachedPersonList.filter((person) =>
@@ -67,7 +72,7 @@ export default class MonthExpenseRepository {
       : data;
   }
 
-  async getMonthExpenseIdHash(): Promise<{ hash: string; _id: string }[]> {
+  async getMonthExpenseIdHash(): Promise<PersonMinimal[]> {
     const data = DummyBackendApi.provider.getPersonHashIds("01-2025");
     if (data.length == 0) {
       DummyBackendApi.provider.storePersonData(
@@ -77,7 +82,7 @@ export default class MonthExpenseRepository {
     // TODO: remove when data get from proper backend
     if (data.length == 0) {
       return dummyPersonTx.map((person) => ({
-        hash: person.hash,
+        version: person.version,
         _id: person._id,
       }));
     }
@@ -85,25 +90,24 @@ export default class MonthExpenseRepository {
     return data;
   }
 
-  async storePersonData(personData: Person[]) {
+  async storePersonData(personData: PersonData[]) {
     personData.forEach((person) => PersonCacheApi.provider.storePerson(person));
     DummyBackendApi.provider.storePersonData(personData);
   }
 
-  async deletePersonData(personData: Person[]) {
+  async deletePersonData(personData: PersonData[]) {
     personData
       .map((person) => person._id)
       .forEach(PersonCacheApi.provider.deletePersonWithId);
     DummyBackendApi.provider.deletePersonData(personData);
   }
 
-  async applyPatches(patches: Operation[]) {
+  async applyPatches(patches: PersonDiff) {
     PersonCacheApi.provider.applyChanges(patches);
     DummyBackendApi.provider.applyChanges(patches);
   }
 
-  _compareIdHash = (
-    a: { _id: string; hash: string },
-    b: { _id: string; hash: string }
-  ): boolean => a._id == b._id && a.hash == b.hash;
+  _compareIdHash = (a: PersonMinimal, b: PersonMinimal): boolean => {
+    return a._id == b._id && a.version == b.version;
+  };
 }

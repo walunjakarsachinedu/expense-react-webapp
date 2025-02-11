@@ -1,4 +1,4 @@
-import Tx from "../models/Tx";
+import { Tx } from "../models/type";
 
 /** contains backend interaction for operation related to single transaction tag. */
 export class TxTagApi {

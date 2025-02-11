@@ -3,6 +3,7 @@ import { memo, useRef, useState } from "react";
 import useExpenseStore from "../../store/usePersonStore";
 import EditableElem from "../common/EditableElement";
 import "./TxTag.css";
+import utils from "../../utils/utils";
 
 type Props = { id: string; personId: string };
 
@@ -15,7 +16,7 @@ const TxTag = memo(({ id, personId }: Props) => {
   );
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const moneyValue = useRef(tx.money ?? "");
+  const moneyValue = useRef(tx.money);
   const tagValue = useRef(tx.tag);
 
   const saveState = async () => {
@@ -72,7 +73,7 @@ const TxTag = memo(({ id, personId }: Props) => {
             }}
           ></div>
           <EditableElem
-            initialText={tx.money}
+            initialText={`${tx.money ?? ""}`}
             placeHolder="money"
             preventNewline={true}
             numberOnly={true}
@@ -83,7 +84,7 @@ const TxTag = memo(({ id, personId }: Props) => {
             onBlur={() => setIsEditing(false)}
             onKeyUp={(e) => {
               const target = e.target as HTMLElement;
-              moneyValue.current = target.textContent ?? "";
+              moneyValue.current = utils.parseNumber(target.textContent ?? "");
               saveState();
             }}
           ></EditableElem>

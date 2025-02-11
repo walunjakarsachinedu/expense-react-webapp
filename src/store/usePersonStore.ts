@@ -1,4 +1,3 @@
-import { compare } from "fast-json-patch";
 import { produce } from "immer";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
@@ -6,9 +5,7 @@ import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import MonthExpenseRepository from "../api/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
-import { Person } from "../models/Person";
-import { TableType } from "../models/TableType";
-import Tx from "../models/Tx";
+import { PersonData, TableType, Tx } from "../models/type";
 import { Prettify } from "../types/Prettify";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
@@ -16,10 +13,10 @@ import utils from "../utils/utils";
 
 export type ExpenseStore = {
   monthYear: string;
-  persons: Record<string, Person>;
+  persons: Record<string, PersonData>;
   personIds: string[]; // for maintaining order
 
-  setMonthData: (monthYear: string, persons: Person[]) => void;
+  setMonthData: (monthYear: string, persons: PersonData[]) => void;
   addPerson: (type: TableType) => void;
   deletePerson: (id: string) => void;
   updateName: (id: string, name: string) => void;
@@ -64,7 +61,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             index: index,
             name: "",
             txs: {},
-            hash: v4(),
+            version: v4(),
             txIds: [],
             month: utils.formatToMonthYear(Date.now()),
             type: type,
@@ -81,7 +78,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((id, index) => {
             if (store.persons[id].index != index) {
-              store.persons[id].hash = v4();
+              store.persons[id].version = v4();
               store.persons[id].index = index;
             }
           });
@@ -106,7 +103,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((id, index) => {
             if (store.persons[id].index != index) {
-              store.persons[id].hash = v4();
+              store.persons[id].version = v4();
               store.persons[id].index = index;
             }
           });
@@ -118,7 +115,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       addExpense: (personId) => {
         set((store) => {
-          store.persons[personId].hash = v4();
+          store.persons[personId].version = v4();
           const length = Object.keys(store.persons[personId].txs).length;
           const id = v4();
           store.persons[personId].txs[id] = { _id: id, index: length };
@@ -127,7 +124,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       deleteExpense: (id, personId) => {
         set((store) => {
-          store.persons[personId].hash = v4();
+          store.persons[personId].version = v4();
           const person = store.persons[personId];
           // removing tx
           delete person.txs[id];
@@ -138,7 +135,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpense: (id: string, personId, updates) => {
         set((store) => {
-          store.persons[personId].hash = v4();
+          store.persons[personId].version = v4();
           store.persons[personId].txs[id] = {
             ...store.persons[personId].txs[id],
             ...updates,
@@ -147,7 +144,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpenseIndex: (id, index, personId) => {
         set((store) => {
-          store.persons[personId].hash = v4();
+          store.persons[personId].version = v4();
           const person = store.persons[personId];
           // removing from old index
           person.txIds = person.txIds.filter((txId) => txId != id);
@@ -181,8 +178,8 @@ const useExpenseStore = create<ExpenseStore>(
 
 function setupDebounceTimer(get: () => ExpenseStore): Timer {
   const timer = new Timer({
-    debounceTime: 1500,
-    thresholdTime: 10000,
+    debounceTime: 5000,
+    thresholdTime: 20000,
     stopTimerOnWindowBlur: true,
   });
 
@@ -198,7 +195,12 @@ function setupDebounceTimer(get: () => ExpenseStore): Timer {
 
     const persons = get().persons;
     const oldPersons = expenseStore.persons;
-    const patches = compare(oldPersons, persons);
+    // const patches = compare(oldPersons, persons);
+    const patches = personUtils.personDiff({
+      updatedData: persons,
+      oldData: oldPersons,
+    });
+    console.log(patches);
 
     MonthExpenseRepository.provider.applyPatches(patches);
   });
