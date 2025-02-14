@@ -23,6 +23,7 @@ class PersonUtils {
     return result;
   }
 
+  // object is frozen
   personTxToPerson(person: PersonTx): PersonData {
     return {
       ...person,

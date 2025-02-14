@@ -1,4 +1,3 @@
-import { produce } from "immer";
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { v4 } from "uuid";
 import { create, StateCreator } from "zustand";
@@ -85,12 +84,10 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
         });
       },
       updateName: (id, name) => {
-        set(
-          produce((store) => {
-            store.persons[id].hash = v4();
-            store.persons[id].name = name;
-          })
-        );
+        set((state) => {
+          state.persons[id].version = v4();
+          state.persons[id].name = name;
+        });
       },
       updatePersonIndex: (id, index) => {
         set((store) => {
