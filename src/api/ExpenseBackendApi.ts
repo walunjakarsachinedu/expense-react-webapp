@@ -46,8 +46,8 @@ export class ExpenseBackendApi {
     diff: PersonDiff
   ): Promise<PersonDiffResponse | undefined> {
     const result = await this.graphqlClient
-      .query({
-        query: ApiContants.applyPatchQuery,
+      .mutate({
+        mutation: ApiContants.applyPatchQuery,
         variables: { diff },
       })
       .catch((err) => undefined)

@@ -22,7 +22,7 @@ export default class MonthExpenseRepository {
   async getMonthExpense(): Promise<PersonData[]> {
     // TODO: logic to populate month & year
     const fetchIdVersions =
-      await ExpenseBackendApi.provider.getPersonVersionIds("02-2024");
+      await ExpenseBackendApi.provider.getPersonVersionIds("02-2025");
     const cachedPersonList: PersonData[] =
       PersonCacheApi.provider.getAllPersons();
 

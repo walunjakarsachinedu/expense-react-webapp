@@ -1,8 +1,10 @@
 import {
   PersonData,
   PersonDiff,
+  PersonDiffResponse,
   PersonPatch,
   PersonTx,
+  StoredId,
   Tx,
   TxPatch,
 } from "../models/type";
@@ -68,6 +70,50 @@ class PersonUtils {
       .filter((personPatch) => personPatch !== undefined);
 
     return utils.removeEmptyArrayFields({ added, deleted, updated });
+  }
+
+  applyNewIds(
+    newIds: PersonDiffResponse,
+    persons: Record<string, PersonData>
+  ): Record<string, PersonData> {
+    const applyPersonNewId = (newId: { _id: StoredId }): PersonData => {
+      const person = persons[newId._id.tmpId];
+      persons[newId._id.storedId] = person;
+      delete persons[newId._id.tmpId];
+      person._id = newId._id.storedId;
+      return person;
+    };
+    const applyTxNewId = (person: PersonData, newId: StoredId) => {
+      if (person.txs[newId.tmpId]) {
+        const tx = person.txs[newId.tmpId];
+        person.txs[newId.storedId] = tx;
+        delete person.txs[newId.tmpId];
+        tx._id = newId.storedId;
+      }
+      const index = person.txIds.indexOf(newId.tmpId);
+      if (index != -1) {
+        person.txIds[index] = newId.storedId;
+      }
+    };
+
+    newIds.added?.forEach((addedPerson) => {
+      if (persons[addedPerson._id.tmpId]) {
+        const person = applyPersonNewId(addedPerson);
+        addedPerson.txs.forEach((newId) => {
+          applyTxNewId(person, newId);
+        });
+      }
+    });
+    newIds.updated?.forEach((updatedPerson) => {
+      if (persons[updatedPerson._id]) {
+        const person = persons[updatedPerson._id];
+        updatedPerson.txs?.forEach((newId) => {
+          applyTxNewId(person, newId);
+        });
+      }
+    });
+
+    return persons;
   }
 
   _personPatch(

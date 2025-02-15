@@ -1,6 +1,8 @@
 - one changing focus, instantly save changes
   - on changing/closing tab, moving focus to other window/tab
-- ensure pending save action are queued
+- queue save actions
   - current save should be process after all pending save have send to backend & their response is processed  
     - just check if merge save action and send at once
+  - merge patches to single pending action 
 - make configuration available based on current environment
+- store selected month, make month selector working

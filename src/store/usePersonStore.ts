@@ -37,7 +37,7 @@ let timer: Timer;
 
 const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
   immer<ExpenseStore, [], []>((set, get, storeApi) => {
-    timer = setupDebounceTimer(get);
+    timer = setupDebounceTimer(set, get);
     return {
       monthYear: utils.formatToMonthYear(Date.now()),
       persons: {},
@@ -173,9 +173,12 @@ const useExpenseStore = create<ExpenseStore>(
   })
 );
 
-function setupDebounceTimer(get: () => ExpenseStore): Timer {
+function setupDebounceTimer(
+  set: (nextState: (store: ExpenseStore) => void) => void,
+  get: () => ExpenseStore
+): Timer {
   const timer = new Timer({
-    debounceTime: 5000,
+    debounceTime: 1000,
     thresholdTime: 20000,
     stopTimerOnWindowBlur: true,
   });
@@ -187,7 +190,6 @@ function setupDebounceTimer(get: () => ExpenseStore): Timer {
   });
 
   timer.stopEvent.subscribe(() => {
-    // todo: use jsonpatch to send batch of patch of changes
     console.info("saving data to local storage");
 
     const persons = get().persons;
@@ -199,7 +201,12 @@ function setupDebounceTimer(get: () => ExpenseStore): Timer {
     });
     console.log(patches);
 
-    MonthExpenseRepository.provider.applyPatches(patches);
+    MonthExpenseRepository.provider.applyPatches(patches)?.then((newIds) => {
+      if (!newIds) return;
+      set((store) => {
+        store.persons = personUtils.applyNewIds(newIds, store.persons);
+      });
+    });
   });
 
   return timer;
