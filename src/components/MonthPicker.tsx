@@ -6,10 +6,12 @@ import "./MonthPicker.css";
 
 type Prop = {
   initialDate: Date;
+  // provide date in format: MM-yyyy
+  onDateChange: (date: string) => void;
 };
 
-const MonthPicker = ({ initialDate }: Prop) => {
-  const [date, setDate] = useState<Date | null>(initialDate);
+const MonthPicker = ({ initialDate, onDateChange }: Prop) => {
+  const [date, setDate] = useState<Date>(initialDate);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const overlayRef = useRef(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -34,7 +36,7 @@ const MonthPicker = ({ initialDate }: Prop) => {
         }}
       >
         <div className="mx-2" style={{ fontSize: ".8rem" }}>
-          {utils.dateToMMYY(date ?? new Date())}
+          {utils.formatToMonthYear(date)}
         </div>
         <div
           className="pi pi-calendar icon-btn cursor-pointer mr-1"
@@ -48,6 +50,7 @@ const MonthPicker = ({ initialDate }: Prop) => {
             value={date}
             onChange={(e) => {
               setDate(e.value as Date);
+              onDateChange(utils.formatToMonthYear(e.value as Date));
               setIsMonthPickerVisible(false);
               console.log(e.value);
             }}

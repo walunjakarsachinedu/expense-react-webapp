@@ -19,10 +19,10 @@ export default class MonthExpenseRepository {
    * 3. delete un-used persons from cache.
    * @return array of fetched + cached persons
    */
-  async getMonthExpense(): Promise<PersonData[]> {
+  async getMonthExpense(monthYear: string): Promise<PersonData[]> {
     // TODO: logic to populate month & year
     const fetchIdVersions =
-      await ExpenseBackendApi.provider.getPersonVersionIds("02-2025");
+      await ExpenseBackendApi.provider.getPersonVersionIds(monthYear);
     const cachedPersonList: PersonData[] =
       PersonCacheApi.provider.getAllPersons();
 

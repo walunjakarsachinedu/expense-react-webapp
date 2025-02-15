@@ -1,9 +1,18 @@
 import { ReactNode } from "react";
 import moneyIcon from "../images/money-icon.svg";
+import useExpenseStore from "../store/usePersonStore";
+import utils from "../utils/utils";
 import MonthPicker from "./MonthPicker";
 import "./NavBar.css";
 
 export default function NavBar() {
+  const month = useExpenseStore((store) => store.monthYear);
+  const setMonthYear = useExpenseStore((store) => store.setMonthYear);
+
+  const onMonthChange = (monthYear: string) => {
+    setMonthYear(monthYear);
+  };
+
   return (
     <div className="nav-bar">
       <div
@@ -27,7 +36,10 @@ export default function NavBar() {
         <div style={{ width: 70 }}></div>
         <Row>
           <div className="mr-3"></div>
-          <MonthPicker initialDate={new Date()}></MonthPicker>
+          <MonthPicker
+            initialDate={utils.parseDate(month)}
+            onDateChange={onMonthChange}
+          ></MonthPicker>
           <div className="mr-3"></div>
           <div
             className="border-1 border-round border-200 pi pi-sign-out icon-btn cursor-pointer"

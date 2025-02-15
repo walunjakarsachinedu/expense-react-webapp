@@ -9,12 +9,14 @@ import { Prettify } from "../types/Prettify";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
+import Constants from "../utils/constants";
 
 export type ExpenseStore = {
   monthYear: string;
   persons: Record<string, PersonData>;
   personIds: string[]; // for maintaining order
 
+  setMonthYear: (monthYear: string) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
   addPerson: (type: TableType) => void;
   deletePerson: (id: string) => void;
@@ -38,10 +40,20 @@ let timer: Timer;
 const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
   immer<ExpenseStore, [], []>((set, get, storeApi) => {
     timer = setupDebounceTimer(set, get);
+    const selectedMonth =
+      localStorage.getItem(Constants.monthStorageKey) ??
+      utils.formatToMonthYear(Date.now());
+
     return {
-      monthYear: utils.formatToMonthYear(Date.now()),
+      monthYear: selectedMonth,
       persons: {},
       personIds: [],
+      setMonthYear: (monthYear: string) => {
+        set((store) => {
+          store.monthYear = monthYear;
+        });
+        localStorage.setItem(Constants.monthStorageKey, monthYear);
+      },
       setMonthData: (monthYear, persons) => {
         set((store) => {
           store.monthYear = monthYear;
@@ -62,7 +74,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             txs: {},
             version: v4(),
             txIds: [],
-            month: utils.formatToMonthYear(Date.now()),
+            month: store.monthYear,
             type: type,
           };
           store.personIds.push(id);
@@ -160,6 +172,7 @@ const useExpenseStore = create<ExpenseStore>(
     store: personStore,
     beforeMiddlware: (action) => {
       const ignoreActions: (keyof ExpenseStore)[] = [
+        "setMonthYear",
         "setMonthData",
         "copyPerson",
       ];

@@ -11,35 +11,18 @@ class Utility {
     }
   }
 
-  formatToMonthYear(timestamp: number): string {
+  /** format date in format: MM-yyyy e.g., 02-2025 */
+  formatToMonthYear(timestamp: number | Date): string {
     const date = new Date(timestamp);
     const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Ensure 2-digit month
     const year = date.getFullYear().toString(); // Get the full year
     return `${month}-${year}`;
   }
 
-  dateToMMYY = (date: Date): string => {
-    const month = this.monthIndexToName(date.getMonth());
-    const year = date.getFullYear();
-    return `${month} ${year}`;
-  };
-
-  monthIndexToName(value: number): string | undefined {
-    const monthName = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return monthName[value];
+  /** parse date string of format: MM-yyyy */
+  parseDate(monthYear: string): Date {
+    const [month, year] = monthYear.split("-").map(Number);
+    return new Date(year, month - 1, 1); // Month is 0-based in JS Date
   }
 
   /** removes all field with `value == undefined` */
