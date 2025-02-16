@@ -25,6 +25,7 @@ export class ExpenseBackendApi {
       .query({
         query: ApiContants.personOfMonthQuery,
         variables: { month },
+        fetchPolicy: "network-only",
       })
       .catch((err) => undefined)
       .then(<T>(result: T) => JSON.parse(JSON.stringify(result)) as T);

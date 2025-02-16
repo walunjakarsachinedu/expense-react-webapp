@@ -29,22 +29,14 @@ const usePromise = <T>({
   onResolve,
 }: Props<T>): UsePromiseResult<T> => {
   const [state, setState] = useState<UsePromiseResult<T>>({ isLoading: true });
-
-  const promiseRef = useRef<Promise<T> | null>(null);
   const prevDepsRef = useRef<unknown[] | null>(null);
 
   useEffect(() => {
-    const cleanupFn = () => {
-      if (prevDepsRef.current != dependencies) {
-        promiseRef.current = null;
-      }
-    };
-    if (promiseRef.current) return cleanupFn;
-
+    if (JSON.stringify(prevDepsRef.current) == JSON.stringify(dependencies)) {
+      return;
+    }
     setState({ isLoading: true });
-    const promise = asyncFn();
-    promiseRef.current = promise;
-    promise
+    asyncFn()
       .then((result) => {
         setState({ result, isLoading: false });
         onResolve(result);
@@ -52,8 +44,6 @@ const usePromise = <T>({
       .catch((error) => setState({ error, isLoading: false }));
 
     prevDepsRef.current = dependencies;
-
-    return cleanupFn;
   }, [asyncFn, dependencies, onResolve]);
 
   return state;
