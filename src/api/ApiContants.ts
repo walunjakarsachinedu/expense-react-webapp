@@ -1,7 +1,9 @@
 import { gql } from "@apollo/client";
 
+console.log(window.config);
+
 export default class ApiContants {
-  static readonly graphqlEndpoint: string = "http://localhost:8888/v1/graphql";
+  static readonly graphqlEndpoint: string = window.config.apiPath;
 
   // queries
 
