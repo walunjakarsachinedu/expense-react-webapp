@@ -5,6 +5,4 @@
     - just check if merge save action and send at once
   - merge patches to single pending action 
 - make configuration available based on current environment
-- store selected month, make month selector working
 - fix the versions in package.json
-- clearing data between month change

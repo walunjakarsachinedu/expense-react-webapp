@@ -6,6 +6,7 @@ import {
 } from "../models/type";
 import personUtils from "../utils/personUtils";
 import { ExpenseBackendApi } from "./ExpenseBackendApi";
+import InMemoryCache, { InMemoryCacheCategory } from "./InMemoryCacheApi";
 import PersonCacheApi from "./PersonCacheApi";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
@@ -20,6 +21,12 @@ export default class MonthExpenseRepository {
    * @return array of fetched + cached persons
    */
   async getMonthExpense(monthYear: string): Promise<PersonData[]> {
+    const personData = InMemoryCache.provider.getCache<PersonData[]>(
+      InMemoryCacheCategory.PersonMonthlyData,
+      monthYear
+    );
+    if (personData) return personData;
+
     // TODO: logic to populate month & year
     const fetchIdVersions =
       await ExpenseBackendApi.provider.getPersonVersionIds(monthYear);

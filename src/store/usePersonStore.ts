@@ -10,6 +10,7 @@ import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
 import Constants from "../utils/constants";
+import InMemoryCache, { InMemoryCacheCategory } from "../api/InMemoryCacheApi";
 
 export type ExpenseStore = {
   monthYear: string;
@@ -49,6 +50,13 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       persons: {},
       personIds: [],
       setMonthYear: (monthYear: string) => {
+        // caching before switching to different month
+        InMemoryCache.provider.setCache(
+          InMemoryCacheCategory.PersonMonthlyData,
+          storeApi.getState().monthYear,
+          Object.values(storeApi.getState().persons)
+        );
+
         set((store) => {
           store.monthYear = monthYear;
         });
@@ -57,6 +65,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       setMonthData: (monthYear, persons) => {
         set((store) => {
           store.monthYear = monthYear;
+          store.persons = {};
           persons.forEach((person) => (store.persons[person._id] = person));
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
