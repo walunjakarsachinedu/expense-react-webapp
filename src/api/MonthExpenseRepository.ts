@@ -1,9 +1,10 @@
 import {
+  Conflicts,
   PersonData,
   PersonDiff,
-  PersonDiffResponse,
   PersonMinimal,
 } from "../models/type";
+import { PatchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import { ExpenseBackendApi } from "./ExpenseBackendApi";
 import InMemoryCache, { InMemoryCacheCategory } from "./InMemoryCacheApi";
@@ -21,6 +22,10 @@ export default class MonthExpenseRepository {
    * @return array of fetched + cached persons
    */
   async getMonthExpense(monthYear: string): Promise<PersonData[]> {
+    await PatchProcessing.provider.processPatchFromStorage(async (patches) => {
+      await MonthExpenseRepository.provider.applyPatches(patches);
+    });
+
     const personData = InMemoryCache.provider.getCache<PersonData[]>(
       InMemoryCacheCategory.PersonMonthlyData,
       monthYear
@@ -88,9 +93,7 @@ export default class MonthExpenseRepository {
       .forEach(PersonCacheApi.provider.deletePersonWithId);
   }
 
-  async applyPatches(
-    patches: PersonDiff
-  ): Promise<PersonDiffResponse | undefined> {
+  async applyPatches(patches: PersonDiff): Promise<Conflicts | undefined> {
     PersonCacheApi.provider.applyChanges(patches);
     return ExpenseBackendApi.provider.applyChanges(patches);
   }

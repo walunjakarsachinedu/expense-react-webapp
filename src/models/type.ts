@@ -71,22 +71,12 @@ export type TxPatch = {
   tag?: string;
 };
 
-export type PersonDiffResponse = {
-  added?: Array<{
-    _id: StoredId;
-    txs: StoredId[];
-  }>;
-  updated?: Array<{
-    _id: string;
-    txs?: StoredId[];
-    deletedTxs?: string[];
-  }>;
-  deleted?: string[];
+export type Conflicts = {
+  conflictPersons?: ConflictPerson[];
 };
 
-export type StoredId = {
-  // tmporary id send by user to create an entity
-  tmpId: string;
-  // id use by server to store an entity
-  storedId: string;
+export type ConflictPerson = {
+  _id: string;
+  isDeleted: boolean;
+  txs?: { _id: string; isDeleted: boolean }[];
 };

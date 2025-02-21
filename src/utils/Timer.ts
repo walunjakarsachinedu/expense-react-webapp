@@ -15,16 +15,17 @@ class Timer {
   constructor({
     debounceTime,
     thresholdTime,
-    stopTimerOnWindowBlur = false,
+    timeoutOnWindowBlur = false,
   }: {
     debounceTime: number;
     thresholdTime: number;
-    stopTimerOnWindowBlur?: boolean;
+    timeoutOnWindowBlur?: boolean;
   }) {
     this._debounceTime = debounceTime;
     this._thresholdTime = thresholdTime;
-    if (stopTimerOnWindowBlur) {
-      window.addEventListener("beforeunload", this._handleWindowBlur);
+    if (timeoutOnWindowBlur) {
+      window.addEventListener("beforeunload", this._handleWindowCloseEvent);
+      window.addEventListener("blur", this.timeout);
     }
   }
 
@@ -53,6 +54,8 @@ class Timer {
   };
 
   timeout = () => {
+    if (!this.isRunning()) return;
+
     this._stopDebounce();
     this._stopThreshold();
 
@@ -79,11 +82,15 @@ class Timer {
     this._thresholdTimer = undefined;
   };
 
-  private _handleWindowBlur = () => {
-    if (this.isRunning()) {
-      this.timeout();
-      alert("You have unsaved changes. Are you sure you want to leave?");
-    }
+  private _handleWindowCloseEvent = (event: BeforeUnloadEvent) => {
+    if (!this.isRunning()) return;
+    this.timeout();
+
+    // stop browser from closing page
+    event.preventDefault();
+    const message = "You have unsaved changes. Are you sure you want to leave?";
+    event.returnValue = message;
+    return message;
   };
 }
 

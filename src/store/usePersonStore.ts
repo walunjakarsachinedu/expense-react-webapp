@@ -1,16 +1,17 @@
 import { mountStoreDevtool } from "simple-zustand-devtools";
-import { v4 } from "uuid";
 import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import InMemoryCache, { InMemoryCacheCategory } from "../api/InMemoryCacheApi";
 import MonthExpenseRepository from "../api/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
 import { PersonData, TableType, Tx } from "../models/type";
 import { Prettify } from "../types/Prettify";
+import Constants from "../utils/constants";
+import { ObjectId } from "../utils/objectid";
+import { PatchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
-import Constants from "../utils/constants";
-import InMemoryCache, { InMemoryCacheCategory } from "../api/InMemoryCacheApi";
 
 export type ExpenseStore = {
   monthYear: string;
@@ -70,18 +71,19 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
             .map((person) => person._id);
+          PatchProcessing.provider.setPrevState(store.persons);
         });
       },
       addPerson: (type) =>
         set((store) => {
-          const id = v4();
+          const id = ObjectId.getId();
           const index = Object.keys(store.persons).length;
           store.persons[id] = {
-            _id: v4(),
+            _id: id,
             index: index,
             name: "",
             txs: {},
-            version: v4(),
+            version: ObjectId.getId(),
             txIds: [],
             month: store.monthYear,
             type: type,
@@ -98,7 +100,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((id, index) => {
             if (store.persons[id].index != index) {
-              store.persons[id].version = v4();
+              store.persons[id].version = ObjectId.getId();
               store.persons[id].index = index;
             }
           });
@@ -106,7 +108,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateName: (id, name) => {
         set((state) => {
-          state.persons[id].version = v4();
+          state.persons[id].version = ObjectId.getId();
           state.persons[id].name = name;
         });
       },
@@ -121,7 +123,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((id, index) => {
             if (store.persons[id].index != index) {
-              store.persons[id].version = v4();
+              store.persons[id].version = ObjectId.getId();
               store.persons[id].index = index;
             }
           });
@@ -133,16 +135,16 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       addExpense: (personId) => {
         set((store) => {
-          store.persons[personId].version = v4();
+          store.persons[personId].version = ObjectId.getId();
           const length = Object.keys(store.persons[personId].txs).length;
-          const id = v4();
+          const id = ObjectId.getId();
           store.persons[personId].txs[id] = { _id: id, index: length };
           store.persons[personId].txIds.push(id);
         });
       },
       deleteExpense: (id, personId) => {
         set((store) => {
-          store.persons[personId].version = v4();
+          store.persons[personId].version = ObjectId.getId();
           const person = store.persons[personId];
           // removing tx
           delete person.txs[id];
@@ -153,7 +155,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpense: (id: string, personId, updates) => {
         set((store) => {
-          store.persons[personId].version = v4();
+          store.persons[personId].version = ObjectId.getId();
           store.persons[personId].txs[id] = {
             ...store.persons[personId].txs[id],
             ...updates,
@@ -162,7 +164,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpenseIndex: (id, index, personId) => {
         set((store) => {
-          store.persons[personId].version = v4();
+          store.persons[personId].version = ObjectId.getId();
           const person = store.persons[personId];
           // removing from old index
           person.txIds = person.txIds.filter((txId) => txId != id);
@@ -186,6 +188,7 @@ const useExpenseStore = create<ExpenseStore>(
         "copyPerson",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
+      // delayDebounceTimer action - delay the timer only if user is working
       if ((action as keyof ExpenseStore) === "delayDebounceTimer") {
         if (!timer.isRunning()) return;
       }
@@ -202,32 +205,21 @@ function setupDebounceTimer(
   const timer = new Timer({
     debounceTime: 1000,
     thresholdTime: 20000,
-    stopTimerOnWindowBlur: true,
-  });
-
-  let expenseStore: ExpenseStore;
-
-  timer.startEvent.subscribe(() => {
-    expenseStore = get();
+    timeoutOnWindowBlur: true,
   });
 
   timer.stopEvent.subscribe(() => {
-    console.info("saving data to local storage");
+    console.info("scheduling patch processing");
 
-    const persons = get().persons;
-    const oldPersons = expenseStore.persons;
-    // const patches = compare(oldPersons, persons);
-    const patches = personUtils.personDiff({
-      updatedData: persons,
-      oldData: oldPersons,
-    });
-    console.log(patches);
-
-    MonthExpenseRepository.provider.applyPatches(patches)?.then((newIds) => {
-      if (!newIds) return;
-      set((store) => {
-        store.persons = personUtils.applyNewIds(newIds, store.persons);
-      });
+    const nextState = get().persons;
+    PatchProcessing.provider.processPatch(nextState, async (patches) => {
+      console.log("patch: ", patches);
+      await MonthExpenseRepository.provider
+        .applyPatches(patches)
+        ?.then((conflicts) => {
+          if (!conflicts) return;
+          // TODO - add logic to show conflict to user
+        });
     });
   });
 

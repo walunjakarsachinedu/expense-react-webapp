@@ -65,25 +65,14 @@ export default class ApiContants {
   static readonly applyPatchQuery = gql`
     mutation ApplyUpdates($diff: PersonDiff) {
       applyUpdates(diff: $diff) {
-        added {
-          _id {
-            tmpId
-            storedId
-          }
-          txs {
-            tmpId
-            storedId
-          }
-        }
-        updated {
+        conflictPersons {
           _id
+          isDeleted
           txs {
-            tmpId
-            storedId
+            _id
+            isDeleted
           }
-          deletedTxs
         }
-        deleted
       }
     }
   `;

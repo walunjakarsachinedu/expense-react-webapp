@@ -1,7 +1,7 @@
 class Utility {
   static readonly provider = new Utility();
 
-  parseNumber(numStr?: string): number | undefined {
+  parseNumber(numStr?: string | null): number | undefined {
     try {
       if (numStr) {
         return parseInt(numStr);

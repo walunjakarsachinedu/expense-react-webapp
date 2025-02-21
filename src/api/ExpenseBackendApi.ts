@@ -1,10 +1,5 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import {
-  PersonDiff,
-  PersonDiffResponse,
-  PersonMinimal,
-  PersonTx,
-} from "../models/type";
+import { Conflicts, PersonDiff, PersonMinimal, PersonTx } from "../models/type";
 import ApiContants from "./ApiContants";
 
 // returning frozen objects
@@ -16,7 +11,7 @@ export class ExpenseBackendApi {
     cache: new InMemoryCache(),
     headers: {
       Authorization:
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoic2FjaGluIHdhbHVuamFrYXIiLCJlbWFpbCI6InNhY2hpbkBnbWFpbC5jb20iLCJpYXQiOjE3Mzk0MDcxMTQsImV4cCI6MTc0MDAxMTkxNCwic3ViIjoiNjc5ZWZjYTY2NTkwY2IwOGE2OWQyMzA0In0.fMLkjsTTJKLECqTVMDOpTF2vzKFOQ_vuzvM5-unWbck",
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoic2FjaGluIHdhbHVuamFrYXIiLCJlbWFpbCI6InNhY2hpbkBnbWFpbC5jb20iLCJpYXQiOjE3NDAwMTI3MjMsImV4cCI6MTc0MDQ0NDcyMywic3ViIjoiNjc5ZWZjYTY2NTkwY2IwOGE2OWQyMzA0In0.G0CJv1LmmlE4A9a7wMGHOqydw4Qi5LomFTU4EmlOZOI",
     },
   });
 
@@ -33,6 +28,8 @@ export class ExpenseBackendApi {
   }
 
   async getPersonByIds(ids: string[]): Promise<PersonTx[]> {
+    // for empty list no need to send api call
+    if (ids.length == 0) return [];
     const result = await this.graphqlClient
       .query({
         query: ApiContants.personsByIdsQuery,
@@ -43,9 +40,7 @@ export class ExpenseBackendApi {
     return (result?.data["persons"] as PersonTx[]) ?? [];
   }
 
-  async applyChanges(
-    diff: PersonDiff
-  ): Promise<PersonDiffResponse | undefined> {
+  async applyChanges(diff: PersonDiff): Promise<Conflicts | undefined> {
     const result = await this.graphqlClient
       .mutate({
         mutation: ApiContants.applyPatchQuery,
@@ -53,6 +48,6 @@ export class ExpenseBackendApi {
       })
       .catch((err) => undefined)
       .then(<T>(result: T) => JSON.parse(JSON.stringify(result)) as T);
-    return result?.data["applyUpdates"] as PersonDiffResponse;
+    return result?.data["applyUpdates"] as Conflicts;
   }
 }
