@@ -1,9 +1,10 @@
 import { gql } from "@apollo/client";
+import config from "../config";
 
-console.log(window.config);
+console.log("__APP_CONFIG_", config);
 
 export default class ApiContants {
-  static readonly graphqlEndpoint: string = window.config.apiPath;
+  static readonly graphqlEndpoint: string = config.apiPath;
 
   // queries
 
