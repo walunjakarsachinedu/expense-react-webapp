@@ -1,5 +1,5 @@
 const config = {
-  // apiPath: "http://expense.netlify.dev/v1/graphql",
+  apiPath: "https://expense-tracker-backend-api.netlify.app/v1/graphql",
   environment: "production",
 };
 
