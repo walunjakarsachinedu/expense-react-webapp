@@ -7,18 +7,20 @@ import "./theme/colors.css";
 import "./theme/theme.css";
 
 import { PrimeReactProvider } from "primereact/api";
-import { RouterProvider } from "react-router-dom";
 import "./App.css";
-import router from "./router";
+import AppRouter from "./AppRouter";
 import { TimerProvider } from "./services/TimerContext";
 import { ToastProvider } from "./services/ToasterContext";
+import { BrowserRouter } from "react-router-dom";
 
 function App() {
   return (
     <TimerProvider>
       <PrimeReactProvider>
         <ToastProvider>
-          <RouterProvider router={router} />
+          <BrowserRouter>
+            <AppRouter></AppRouter>
+          </BrowserRouter>
         </ToastProvider>
       </PrimeReactProvider>
     </TimerProvider>
