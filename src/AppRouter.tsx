@@ -3,13 +3,16 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import PageNotFound from "./pages/PageNotFound";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import Layout from "./pages/Layout";
 
 export default function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<ProtectedRoute />}>
-        <Route index element={<HomePage />} />
+        <Route element={<Layout />}>
+          <Route index element={<HomePage />} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

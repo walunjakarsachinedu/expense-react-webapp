@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import moneyIcon from "../images/money-icon.svg";
 import useExpenseStore from "../store/usePersonStore";
 import utils from "../utils/utils";
@@ -8,9 +9,15 @@ import "./NavBar.css";
 export default function NavBar() {
   const month = useExpenseStore((store) => store.monthYear);
   const setMonthYear = useExpenseStore((store) => store.setMonthYear);
+  const navigate = useNavigate();
 
   const onMonthChange = (monthYear: string) => {
     setMonthYear(monthYear);
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
@@ -43,6 +50,7 @@ export default function NavBar() {
           <div className="mr-3"></div>
           <div
             className="border-1 border-round border-200 pi pi-sign-out icon-btn cursor-pointer"
+            onClick={logout}
             style={{ fontSize: "0.9rem" }}
           ></div>
         </Row>

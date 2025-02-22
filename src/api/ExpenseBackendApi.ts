@@ -1,5 +1,11 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { Conflicts, PersonDiff, PersonMinimal, PersonTx } from "../models/type";
+import {
+  Conflicts,
+  GraphqlResponse,
+  PersonDiff,
+  PersonMinimal,
+  PersonTx,
+} from "../models/type";
 import ApiContants from "./ApiContants";
 
 // returning frozen objects
@@ -14,6 +20,20 @@ export class ExpenseBackendApi {
         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoic2FjaGluIHdhbHVuamFrYXIiLCJlbWFpbCI6InNhY2hpbkBnbWFpbC5jb20iLCJpYXQiOjE3NDAwMTI3MjMsImV4cCI6MTc0MDQ0NDcyMywic3ViIjoiNjc5ZWZjYTY2NTkwY2IwOGE2OWQyMzA0In0.G0CJv1LmmlE4A9a7wMGHOqydw4Qi5LomFTU4EmlOZOI",
     },
   });
+
+  async performLogin(
+    email: string,
+    password: string
+  ): Promise<GraphqlResponse<string>> {
+    const result = await this.graphqlClient
+      .mutate({
+        mutation: ApiContants.loginQuery,
+        variables: { email, password },
+      })
+      .then((result) => ({ data: result.data.login }))
+      .catch((err) => ({ error: { message: err.message } }));
+    return result as GraphqlResponse<string>;
+  }
 
   async getPersonVersionIds(month: string): Promise<PersonMinimal[]> {
     const result = await this.graphqlClient

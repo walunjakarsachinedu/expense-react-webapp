@@ -80,3 +80,5 @@ export type ConflictPerson = {
   isDeleted: boolean;
   txs?: { _id: string; isDeleted: boolean }[];
 };
+
+export type GraphqlResponse<T> = { data?: T; error?: { message: string } };

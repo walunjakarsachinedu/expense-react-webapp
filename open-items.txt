@@ -6,6 +6,7 @@
   - merge patches to single pending action 
 - perform save before changing month
   - not use middleware by removing action setMonthYear from ignoreActions list
+- set keep alive of each fetch request to true in apollo client
 
 
 unsolvable issue
