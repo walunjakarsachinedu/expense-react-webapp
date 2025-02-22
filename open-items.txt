@@ -6,7 +6,6 @@
   - merge patches to single pending action 
 - perform save before changing month
   - not use middleware by removing action setMonthYear from ignoreActions list
-- set keep alive of each fetch request to true in apollo client
 - build issue
   - (!) Some chunks are larger than 500 kB after minification. Consider:
   - Using dynamic import() to code-split the application

@@ -4,6 +4,12 @@ import ApiContants from "./ApiContants";
 
 const httpLink = createHttpLink({
   uri: ApiContants.graphqlEndpoint,
+  fetch: (uri, options) => {
+    return fetch(uri, {
+      ...options,
+      keepalive: true,
+    });
+  },
 });
 
 const authLink = setContext((_, { headers }) => {
