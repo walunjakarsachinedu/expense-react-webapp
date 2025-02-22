@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 
 const PageNotFound: React.FC = () => {
   return (
-    <main className="flex flex-column align-items-center justify-content-center min-h-screen text-center">
-      <div className="text-3xl font-bold text-white mb-2">
+    <div className="flex flex-column align-items-center justify-content-center mt-8">
+      <div className="text-3xl font-bold text-white mb-2 mt-4">
         404 - Page Not Found
       </div>
       <p className="text-lg text-gray-300 mb-3">
@@ -15,7 +15,7 @@ const PageNotFound: React.FC = () => {
       >
         Go to Home
       </Link>
-    </main>
+    </div>
   );
 };
 
