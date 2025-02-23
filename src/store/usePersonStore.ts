@@ -51,6 +51,9 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       persons: {},
       personIds: [],
       setMonthYear: (monthYear: string) => {
+        // save change considering: user is changing month
+        timer.timeout();
+
         // caching before switching to different month
         InMemoryCache.provider.setCache(
           InMemoryCacheCategory.PersonMonthlyData,
@@ -203,7 +206,7 @@ function setupDebounceTimer(
   get: () => ExpenseStore
 ): Timer {
   const timer = new Timer({
-    debounceTime: 1000,
+    debounceTime: 20000,
     thresholdTime: 20000,
     timeoutOnWindowBlur: true,
   });
