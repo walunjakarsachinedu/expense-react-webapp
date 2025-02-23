@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import CustomLink from "../components/common/CustomLink";
 
 const PageNotFound: React.FC = () => {
   return (
@@ -9,12 +9,7 @@ const PageNotFound: React.FC = () => {
       <p className="text-lg text-gray-300 mb-3">
         The page you are looking for does not exist.
       </p>
-      <Link
-        to="/"
-        className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
-      >
-        Go to Home
-      </Link>
+      <CustomLink to="/">Go to Home</CustomLink>
     </div>
   );
 };

@@ -1,17 +1,18 @@
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import useLogin from "../hooks/useLogin";
-import InputField from "../components/common/InputField";
 import CustomLink from "../components/common/CustomLink";
+import InputField from "../components/common/InputField";
+import useLogin from "../hooks/useLogin";
 
-function LoginPage() {
+function SignupPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // TODO: replace with signup method
   const {
-    run: performLogin,
+    // run: performLogin,
     isLoading,
     result: token,
   } = useLogin(email, password);
@@ -21,8 +22,15 @@ function LoginPage() {
   return (
     <div className="flex flex-column align-items-center justify-content-center mt-8">
       <div className="w-20rem">
-        <div className="text-xl text-center">Login</div>
+        <div className="text-xl text-center">Sign Up</div>
         <br />
+        <InputField
+          label="Name"
+          id="name"
+          type="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        ></InputField>
         <InputField
           label="Email address"
           id="email"
@@ -42,13 +50,14 @@ function LoginPage() {
         <Button
           label="Submit"
           className="w-full login-btn flex justify-content-center"
-          onClick={performLogin}
+          // TODO: add signup method
+          // onClick={performLogin}
           loading={isLoading}
         />
         <br />
         <br />
         <div className="flex justify-content-center">
-          <CustomLink to="/sign-up">Don't have an account? Sign up</CustomLink>
+          <CustomLink to="/login">Have an account? Log in</CustomLink>
         </div>
         <div className="h-5rem"></div>
         {token?.error && (
@@ -61,4 +70,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default SignupPage;
