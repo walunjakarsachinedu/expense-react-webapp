@@ -11,6 +11,12 @@ open-items
         - alert dialog is also not shown any case of beforeunload event
 
 
+feature to implement
+  - password reset
+  - conflict resolution 
+  - setting recurrent tx
+  
+
 notes:
 - to access webapp on mobile
   - in frontend, replace backend url to url with ip of laptop
