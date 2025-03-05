@@ -19,6 +19,8 @@ export class PatchProcessing {
   private action?: (patch: PersonDiff) => Promise<void>;
   private currentActionStatus?: TrackedPromise<void>;
 
+  private scheduledAction?: () => void;
+
   processPatch(
     nextState: Record<string, PersonData>,
     action: (patch: PersonDiff) => Promise<void>
@@ -31,22 +33,28 @@ export class PatchProcessing {
       return;
     }
 
+    const patch = personUtils.personDiff({
+      updatedData: this.nextState,
+      oldData: this.prevState,
+    });
+
+    if (!navigator.onLine) {
+      this._storePatch(patch);
+      this._runOnceOnline(action);
+      return;
+    }
+
+    const isPatchInProcess =
+      this.currentActionStatus && !this.currentActionStatus.getIsResolved();
+
     // store current patch when there is patch already in process
-    if (this.currentActionStatus && !this.currentActionStatus.getIsResolved()) {
-      const patch = personUtils.personDiff({
-        updatedData: this.nextState,
-        oldData: this.prevState,
-      });
+    if (isPatchInProcess) {
       this._storePatch(patch);
     }
 
     // process patch when there is no patch in process
-    if (!this.currentActionStatus || this.currentActionStatus.getIsResolved()) {
+    if (!isPatchInProcess) {
       this._deletePatch();
-      const patch = personUtils.personDiff({
-        updatedData: this.nextState,
-        oldData: this.prevState,
-      });
       this.prevState = nextState;
       this.nextState = null;
       this.currentActionStatus = new TrackedPromise(
@@ -89,5 +97,22 @@ export class PatchProcessing {
   private _deletePatch() {
     localStorage.removeItem("pendingPatch");
     localStorage.removeItem("pendingPatchTimeStamp");
+  }
+
+  /** schedule action to run once when online. */
+  private _runOnceOnline(action: (patch: PersonDiff) => Promise<void>) {
+    if (this.scheduledAction) {
+      window.removeEventListener("online", this.scheduledAction);
+    }
+    const processPatch = () => {
+      if (this.nextState) this.processPatch(this.nextState, action);
+      else this.processPatchFromStorage(action);
+    };
+    window.addEventListener("online", () => {
+      processPatch();
+      window.removeEventListener("online", processPatch);
+      this.scheduledAction = undefined;
+    });
+    this.scheduledAction = processPatch;
   }
 }

@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "../components/NavBar";
+import OfflineAlert from "../components/OfflineAlert";
 
 const Layout = () => {
   return (
@@ -7,6 +8,7 @@ const Layout = () => {
       <NavBar></NavBar>
       <div style={{ height: 70 }}></div>
       <Outlet></Outlet>
+      <OfflineAlert></OfflineAlert>
     </>
   );
 };
