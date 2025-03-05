@@ -5,6 +5,7 @@ import useExpenseStore from "../store/usePersonStore";
 import utils from "../utils/utils";
 import MonthPicker from "./MonthPicker";
 import "./NavBar.css";
+import authService from "../core/authService";
 
 export default function NavBar() {
   const month = useExpenseStore((store) => store.monthYear);
@@ -16,8 +17,7 @@ export default function NavBar() {
   };
 
   const logout = () => {
-    localStorage.clear();
-    navigate("/login");
+    authService.logout(navigate);
   };
 
   return (
