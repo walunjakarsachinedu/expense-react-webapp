@@ -6,6 +6,7 @@ import utils from "../utils/utils";
 import MonthPicker from "./MonthPicker";
 import "./NavBar.css";
 import authService from "../core/authService";
+import OfflineAlert from "./OfflineAlert";
 
 export default function NavBar() {
   const month = useExpenseStore((store) => store.monthYear);
@@ -22,6 +23,7 @@ export default function NavBar() {
 
   return (
     <div className="nav-bar">
+      <OfflineAlert></OfflineAlert>
       <div
         className="blur-bg flex justify-content-center"
         style={{

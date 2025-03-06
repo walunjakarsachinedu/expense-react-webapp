@@ -19,7 +19,7 @@ const OfflineAlert = () => {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full p-1 flex align-items-center justify-content-center bg-yellow-500 text-gray-900">
+    <div className="left-0 w-full p-1 flex align-items-center justify-content-center bg-yellow-500 text-gray-900">
       <i className="pi pi-info-circle mr-2"></i>
       <span>Offline: Changes will sync later.</span>
     </div>

@@ -8,7 +8,6 @@ const Layout = () => {
       <NavBar></NavBar>
       <div style={{ height: 70 }}></div>
       <Outlet></Outlet>
-      <OfflineAlert></OfflineAlert>
     </>
   );
 };
