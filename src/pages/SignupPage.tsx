@@ -4,18 +4,18 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import CustomLink from "../components/common/CustomLink";
 import InputField from "../components/common/InputField";
-import useLogin from "../hooks/useLogin";
+import useSignup from "../hooks/useSignup";
 
 function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // TODO: replace with signup method
+
   const {
-    // run: performLogin,
+    run: performSignup,
     isLoading,
     result: token,
-  } = useLogin(email, password);
+  } = useSignup(name, email, password);
 
   if (token?.data) return <Navigate to="/"></Navigate>;
 
@@ -50,8 +50,8 @@ function SignupPage() {
         <Button
           label="Submit"
           className="w-full login-btn flex justify-content-center"
-          // TODO: add signup method
-          // onClick={performLogin}
+          // TODO: form validation for email, password before signup
+          onClick={performSignup}
           loading={isLoading}
         />
         <br />

@@ -16,11 +16,7 @@ export default class ApiContants {
 
   static readonly signupQuery = gql`
     mutation Signup($name: String!, $email: String!, $password: String!) {
-      signup(name: $name, email: $email, password: $password) {
-        _id
-        email
-        name
-      }
+      signup(name: $name, email: $email, password: $password)
     }
   `;
 

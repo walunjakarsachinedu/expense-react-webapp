@@ -12,6 +12,21 @@ import graphqlClient from "./graphqlClient";
 export class ExpenseBackendApi {
   static readonly provider = new ExpenseBackendApi();
 
+  async performSignup(
+    name: string,
+    email: string,
+    password: string
+  ): Promise<GraphqlResponse<string>> {
+    const result = await graphqlClient
+      .mutate({
+        mutation: ApiContants.signupQuery,
+        variables: { name, email, password },
+      })
+      .then((result) => ({ data: result.data.signup }))
+      .catch((err) => ({ error: { message: err.message } }));
+    return result as GraphqlResponse<string>;
+  }
+
   async performLogin(
     email: string,
     password: string
