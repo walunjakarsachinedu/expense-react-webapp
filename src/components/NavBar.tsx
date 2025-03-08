@@ -7,6 +7,7 @@ import MonthPicker from "./MonthPicker";
 import "./NavBar.css";
 import authService from "../core/authService";
 import OfflineAlert from "./OfflineAlert";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 export default function NavBar() {
   const month = useExpenseStore((store) => store.monthYear);
@@ -18,11 +19,20 @@ export default function NavBar() {
   };
 
   const logout = () => {
-    authService.logout(navigate);
+    confirmDialog({
+      message: "Are you sure you want to log out?",
+      header: "Logout Confirmation",
+      icon: "pi pi-info-circle",
+      position: "top",
+      accept: () => {
+        authService.logout(navigate);
+      },
+    });
   };
 
   return (
     <div className="nav-bar">
+      <ConfirmDialog />
       <OfflineAlert></OfflineAlert>
       <div
         className="blur-bg flex justify-content-center"
