@@ -206,7 +206,7 @@ function setupDebounceTimer(
   get: () => ExpenseStore
 ): Timer {
   const timer = new Timer({
-    debounceTime: 20000,
+    debounceTime: 2000,
     thresholdTime: 20000,
     timeoutOnWindowBlur: true,
   });
@@ -228,6 +228,8 @@ function setupDebounceTimer(
 
   return timer;
 }
+
+export { timer };
 
 export default useExpenseStore;
 

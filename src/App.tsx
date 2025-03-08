@@ -12,6 +12,7 @@ import AppRouter from "./AppRouter";
 import { TimerProvider } from "./services/TimerContext";
 import { ToastProvider } from "./services/ToasterContext";
 import { BrowserRouter } from "react-router-dom";
+import { InfoDialog } from "./components/info-dialog";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <ToastProvider>
           <BrowserRouter>
             <AppRouter></AppRouter>
+            <InfoDialog />
           </BrowserRouter>
         </ToastProvider>
       </PrimeReactProvider>

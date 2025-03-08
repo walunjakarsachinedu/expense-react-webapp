@@ -7,6 +7,8 @@ import {
 import { setContext } from "@apollo/client/link/context";
 import ApiContants from "./ApiContants";
 import authService from "../core/authService";
+import { timer } from "../store/usePersonStore";
+import { showInfoDialog } from "../components/info-dialog";
 
 const httpLink = createHttpLink({
   uri: ApiContants.graphqlEndpoint,
@@ -22,7 +24,10 @@ const authLink = setContext((request, { headers }) => {
   const publicOperations = ["Login", "Signup"];
   if (!publicOperations.includes(request.operationName ?? "")) {
     if (authService.isTokenExpired()) {
-      authService.logout();
+      timer.timeout();
+      showInfoDialog("Your session has expired. Click Ok to log in.", () => {
+        authService.logout();
+      });
     }
   }
 

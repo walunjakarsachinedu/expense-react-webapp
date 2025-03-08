@@ -1,0 +1,6 @@
+.custom-info-dialog.p-dialog .p-dialog-content {
+  padding-bottom: 1rem;
+}
+.custom-info-dialog.p-dialog .p-dialog-content:last-of-type {
+  border-radius: 6px;
+}
