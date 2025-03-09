@@ -119,7 +119,11 @@ const PersonTotal = ({ id }: Props) => {
     0
   );
   if (Object.keys(person.txs).length == 0 || total == 0) return null;
-  return <> {utils.formatNumber(total)}/-</>;
+  return (
+    <>
+      {utils.formatNumber(total)} <span className="pl-1 text-500"> /-</span>
+    </>
+  );
 };
 
 export default PersonTxs;

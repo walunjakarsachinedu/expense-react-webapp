@@ -60,7 +60,13 @@ const ExpensePanel = ({ type }: Props) => {
 const ExpenseTotal = ({ type }: Props) => {
   const total = useTxTotal(type);
 
-  return <div className="mr-1">Total: {utils.formatNumber(total)}/-</div>;
+  return (
+    <div className="mr-1 font-normal">
+      <span className="text-500">Total : &nbsp;</span>
+      {utils.formatNumber(total)}
+      <span className="text-500"> /-</span>
+    </div>
+  );
 };
 
 export default ExpensePanel;
