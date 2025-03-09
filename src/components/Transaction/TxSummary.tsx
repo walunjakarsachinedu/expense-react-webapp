@@ -46,7 +46,10 @@ const LabeledNumber = ({ label, number }: Props) => {
   return (
     <div className="flex flex-column gap-1">
       <div className="text-sm text-500">{label}</div>
-      <div className="text-2xl text-900">{utils.formatNumber(number)}/-</div>
+      <div className="flex align-items-center">
+        <div className="text-2xl text-900">{utils.formatNumber(number)}</div>
+        <div className="pl-1 text-500">/-</div>
+      </div>
     </div>
   );
 };
