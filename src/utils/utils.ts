@@ -40,6 +40,14 @@ class Utility {
       Object.entries(obj).filter(([_, value]) => value?.length ?? 0 > 0)
     ) as T;
   }
+
+  formatNumber(num: number): string {
+    const str = num.toString();
+    const lastThree = str.slice(-3);
+    const otherDigits = str.slice(0, -3);
+    const formatted = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+    return otherDigits ? `${formatted},${lastThree}` : lastThree;
+  }
 }
 
 const utils = new Utility();

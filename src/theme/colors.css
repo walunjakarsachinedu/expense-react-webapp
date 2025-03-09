@@ -1,6 +1,10 @@
-.p-panel .p-panel-header, .p-panel .p-panel-content {
+.p-panel .p-panel-header,
+.p-panel .p-panel-content,
+.p-accordion,
+.p-accordion-header-link,
+.p-accordion .p-accordion-content {
   background-color: var(--surface-ground);
-  border-color: var(--surface-border)
+  border-color: var(--surface-border);
 }
 
 .p-tag {

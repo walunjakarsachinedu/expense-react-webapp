@@ -7,7 +7,7 @@ const Layout = () => {
   return (
     <>
       <NavBar></NavBar>
-      <div style={{ height: isOffline ? 100 : 70 }}></div>
+      <div style={{ height: isOffline ? 90 : 70 }}></div>
       <Outlet></Outlet>
     </>
   );

@@ -7,6 +7,7 @@ import EditableElem from "../common/EditableElement";
 import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxs.css";
 import TxTag from "./TxTag";
+import utils from "../../utils/utils";
 
 type Props = {
   id: string;
@@ -118,7 +119,7 @@ const PersonTotal = ({ id }: Props) => {
     0
   );
   if (Object.keys(person.txs).length == 0 || total == 0) return null;
-  return <> {total}/-</>;
+  return <> {utils.formatNumber(total)}/-</>;
 };
 
 export default PersonTxs;

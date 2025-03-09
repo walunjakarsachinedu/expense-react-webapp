@@ -1,6 +1,7 @@
 import ExpensePanel from "../components/Transaction/ExpensePanel";
 import useMonthExpense from "../hooks/useMonthExpense";
 import { TxType } from "../models/type";
+import TxSummary from "../components/Transaction/TxSummary";
 
 const HomePage = () => {
   const { isLoading, error } = useMonthExpense();
@@ -10,6 +11,8 @@ const HomePage = () => {
 
   return (
     <>
+      <TxSummary></TxSummary>
+      <br />
       <ExpensePanel type={TxType.Expense}></ExpensePanel>
       <br /> <br /> <br />
       <ExpensePanel type={TxType.Income}></ExpensePanel>
