@@ -12,9 +12,9 @@ const HomePage = () => {
   return (
     <>
       <TxSummary></TxSummary>
-      <br />
+      <br /> <br />
       <ExpensePanel type={TxType.Expense}></ExpensePanel>
-      <br /> <br /> <br />
+      <br /> <br />
       <ExpensePanel type={TxType.Income}></ExpensePanel>
       <br /> <br />
     </>

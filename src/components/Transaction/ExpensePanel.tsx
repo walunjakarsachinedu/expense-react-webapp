@@ -1,11 +1,11 @@
 import { Button } from "primereact/button";
-import { Panel } from "primereact/panel";
 import useExpenseStore from "../../store/usePersonStore";
 import PersonTxs from "./PersonTxs";
 import { TxType } from "../../models/type";
 import useTxTotal from "../../hooks/useTxTotal";
 import utils from "../../utils/utils";
 import CenteredContent from "../common/CenteredContent";
+import { Accordion, AccordionTab } from "primereact/accordion";
 
 type Props = {
   type: TxType;
@@ -23,30 +23,36 @@ const ExpensePanel = ({ type }: Props) => {
 
   return (
     <CenteredContent>
-      <Panel
-        headerTemplate={
-          <div className="p-panel-header flex justify-content-between align-items-center">
-            <div className="font-bold	">
-              {type == TxType.Expense ? "Expense" : "Income"} History{" "}
-            </div>
-            <div className="flex align-items-center">
-              <div className="pi pi-cog"></div>
-              <div className="mx-3"></div>
-              <ExpenseTotal type={type}></ExpenseTotal>
-            </div>
-          </div>
-        }
+      <Accordion
+        activeIndex={0}
+        style={{ backgroundColor: "var(--surface-ground) !important" }}
       >
-        <div className="m-0 p-4 pb-2">{personList}</div>
-        <Button
-          className="m-4 mt-0"
-          outlined
-          size="small"
-          onClick={() => addPerson(type)}
+        <AccordionTab
+          header={
+            <div className="flex justify-content-between align-items-center">
+              <div className="font-bold	">
+                {type == TxType.Expense ? "Expense" : "Income"} History{" "}
+              </div>
+              <div className="flex align-items-center">
+                {/* <div className="pi pi-cog"></div> */}
+                <div className="mx-3"></div>
+                <ExpenseTotal type={type}></ExpenseTotal>
+              </div>
+            </div>
+          }
+          style={{ backgroundColor: "var(--surface-ground) !important" }}
         >
-          Add Person
-        </Button>
-      </Panel>
+          <div className="m-0 pt-2 pb-2">{personList}</div>
+          <Button
+            className="m-4 ml-0 mb-2 mt-0"
+            outlined
+            size="small"
+            onClick={() => addPerson(type)}
+          >
+            Add Person
+          </Button>
+        </AccordionTab>
+      </Accordion>
     </CenteredContent>
   );
 };
