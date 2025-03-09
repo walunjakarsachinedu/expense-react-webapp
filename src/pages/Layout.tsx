@@ -1,12 +1,13 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "../components/NavBar";
-import OfflineAlert from "../components/OfflineAlert";
+import useIsOffline from "../hooks/useIsOffline";
 
 const Layout = () => {
+  const isOffline = useIsOffline();
   return (
     <>
       <NavBar></NavBar>
-      <div style={{ height: 70 }}></div>
+      <div style={{ height: isOffline ? 100 : 70 }}></div>
       <Outlet></Outlet>
     </>
   );
