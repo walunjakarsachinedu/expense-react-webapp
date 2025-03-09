@@ -16,7 +16,7 @@ import utils from "../utils/utils";
 export type ExpenseStore = {
   monthYear: string;
   persons: Record<string, PersonData>;
-  personIds: string[]; // for maintaining order
+  personIds: { id: string; type: TxType }[]; // for maintaining order
 
   setMonthYear: (monthYear: string) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
@@ -73,7 +73,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           persons.forEach((person) => (store.persons[person._id] = person));
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
-            .map((person) => person._id);
+            .map((person) => ({ id: person._id, type: person.type }));
           PatchProcessing.provider.setPrevState(store.persons);
         });
       },
@@ -91,20 +91,18 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             month: store.monthYear,
             type: type,
           };
-          store.personIds.push(id);
+          store.personIds.push({ id, type });
         }),
       deletePerson: (id) => {
         set((store) => {
           // removing person
           delete store.persons[id];
-          store.personIds = store.personIds.filter(
-            (personId) => personId != id
-          );
+          store.personIds = store.personIds.filter((person) => person.id != id);
           // syncing index from personIds with persons list
-          store.personIds.forEach((id, index) => {
-            if (store.persons[id].index != index) {
-              store.persons[id].version = ObjectId.getId();
-              store.persons[id].index = index;
+          store.personIds.forEach((person, index) => {
+            if (store.persons[person.id].index != index) {
+              store.persons[person.id].version = ObjectId.getId();
+              store.persons[person.id].index = index;
             }
           });
         });
@@ -118,16 +116,17 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       updatePersonIndex: (id, index) => {
         set((store) => {
           // removing from old index
-          store.personIds = store.personIds.filter(
-            (personId) => personId != id
-          );
+          store.personIds = store.personIds.filter((person) => person.id != id);
           // place to new index
-          store.personIds.splice(index, 0, id);
+          store.personIds.splice(index, 0, {
+            id: id,
+            type: store.persons[id].type,
+          });
           // syncing index from personIds with persons list
-          store.personIds.forEach((id, index) => {
-            if (store.persons[id].index != index) {
-              store.persons[id].version = ObjectId.getId();
-              store.persons[id].index = index;
+          store.personIds.forEach((person, index) => {
+            if (store.persons[person.id].index != index) {
+              store.persons[person.id].version = ObjectId.getId();
+              store.persons[person.id].index = index;
             }
           });
         });

@@ -1,16 +1,21 @@
 import { Button } from "primereact/button";
 import { Panel } from "primereact/panel";
 import useExpenseStore from "../../store/usePersonStore";
-import utils from "../../utils/utils";
 import PersonTxs from "./PersonTxs";
 import { TxType } from "../../models/type";
 
-const ExpensePanel = () => {
-  const personIds = useExpenseStore((store) => store.personIds);
+type Props = {
+  type: TxType;
+};
+
+const ExpensePanel = ({ type }: Props) => {
+  const personIds = useExpenseStore((store) => store.personIds).filter(
+    (person) => person.type == type
+  );
   const addPerson = useExpenseStore((store) => store.addPerson);
 
-  const personList = personIds.map((personId) => (
-    <PersonTxs key={personId} id={personId}></PersonTxs>
+  const personList = personIds.map((person) => (
+    <PersonTxs key={person.id} id={person.id}></PersonTxs>
   ));
 
   return (
@@ -20,11 +25,13 @@ const ExpensePanel = () => {
           <Panel
             headerTemplate={
               <div className="p-panel-header flex justify-content-between align-items-center">
-                <div> Expense History </div>
+                <div className="font-bold	">
+                  {type == TxType.Expense ? "Expense" : "Income"} History{" "}
+                </div>
                 <div className="flex align-items-center">
                   <div className="pi pi-cog"></div>
                   <div className="mx-3"></div>
-                  <ExpenseTotal></ExpenseTotal>
+                  <ExpenseTotal type={type}></ExpenseTotal>
                 </div>
               </div>
             }
@@ -34,7 +41,7 @@ const ExpensePanel = () => {
               className="m-4 mt-0"
               outlined
               size="small"
-              onClick={() => addPerson(TxType.Expense)}
+              onClick={() => addPerson(type)}
             >
               Add Person
             </Button>
@@ -45,18 +52,20 @@ const ExpensePanel = () => {
   );
 };
 
-const ExpenseTotal = () => {
+const ExpenseTotal = ({ type }: Props) => {
   const persons = useExpenseStore((store) => store.persons);
 
-  const total = Object.values(persons).reduce(
-    (total, person) =>
-      total +
-      Object.values(person.txs).reduce(
-        (total, tx) => total + (tx.money ?? 0),
-        0
-      ),
-    0
-  );
+  const total = Object.values(persons)
+    .filter((person) => person.type == type)
+    .reduce(
+      (total, person) =>
+        total +
+        Object.values(person.txs).reduce(
+          (total, tx) => total + (tx.money ?? 0),
+          0
+        ),
+      0
+    );
 
   return <div className="mr-1">Total: {total}/-</div>;
 };
