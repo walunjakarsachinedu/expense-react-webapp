@@ -3,6 +3,7 @@ import { useClickOutside } from "primereact/hooks";
 import { useRef, useState } from "react";
 import utils from "../utils/utils";
 import "./MonthPicker.css";
+import useIsOffline from "../hooks/useIsOffline";
 
 type Prop = {
   initialDate: Date;
@@ -11,6 +12,7 @@ type Prop = {
 };
 
 const MonthPicker = ({ initialDate, onDateChange }: Prop) => {
+  const isOffline = useIsOffline();
   const [date, setDate] = useState<Date>(initialDate);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
   const overlayRef = useRef(null);
@@ -29,17 +31,25 @@ const MonthPicker = ({ initialDate, onDateChange }: Prop) => {
     <div className="relative">
       <div
         ref={buttonRef}
-        className="flex align-items-center  select-none border-1 border-round border-200 icon-btn p-0 cursor-pointer white-space-nowrap"
-        onClick={() => {
-          setIsMonthPickerVisible((value) => !value);
-          console.log("showing month picker");
-        }}
+        className={`flex align-items-center  select-none border-1 border-round border-200 icon-btn p-0 white-space-nowrap ${
+          isOffline ? "disabled cursor-not-allowed" : ""
+        }`}
+        onClick={
+          !isOffline
+            ? () => {
+                setIsMonthPickerVisible((value) => !value);
+                console.log("showing month picker");
+              }
+            : undefined
+        }
       >
         <div className="mx-2" style={{ fontSize: ".8rem" }}>
           {utils.formatToMonthYear(date)}
         </div>
         <div
-          className="pi pi-calendar icon-btn cursor-pointer mr-1"
+          className={`pi pi-calendar icon-btn  mr-1 ${
+            isOffline ? "cursor-not-allowed" : ""
+          }`}
           style={{ fontSize: ".9rem" }}
         ></div>
       </div>

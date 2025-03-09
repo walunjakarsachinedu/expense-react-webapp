@@ -65,6 +65,14 @@ body {
   border-color: #22d3ee !important;
 }
 
+.disabled.icon-btn {
+  border-color: var(--surface-200) !important;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+}
+
 .editable {
   display: inline-block;
 }

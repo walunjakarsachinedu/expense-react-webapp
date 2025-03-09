@@ -1,20 +1,7 @@
-import { useEffect, useState } from "react";
+import useIsOffline from "../hooks/useIsOffline";
 
 const OfflineAlert = () => {
-  const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
+  const isOffline = useIsOffline();
 
   if (!isOffline) return null;
 
