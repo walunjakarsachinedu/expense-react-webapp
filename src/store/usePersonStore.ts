@@ -4,7 +4,7 @@ import { immer } from "zustand/middleware/immer";
 import InMemoryCache, { InMemoryCacheCategory } from "../api/InMemoryCacheApi";
 import MonthExpenseRepository from "../api/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
-import { PersonData, TableType, Tx } from "../models/type";
+import { PersonData, TxType, Tx } from "../models/type";
 import { Prettify } from "../types/Prettify";
 import Constants from "../utils/constants";
 import { ObjectId } from "../utils/objectid";
@@ -20,7 +20,7 @@ export type ExpenseStore = {
 
   setMonthYear: (monthYear: string) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
-  addPerson: (type: TableType) => void;
+  addPerson: (type: TxType) => void;
   deletePerson: (id: string) => void;
   updateName: (id: string, name: string) => void;
   updatePersonIndex: (id: string, index: number) => void;

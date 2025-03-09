@@ -1,5 +1,5 @@
-/** define type of transaction */
-export enum TableType {
+/** define transaction type */
+export enum TxType {
   Expense = "Expense",
   Income = "Income",
 }
@@ -9,7 +9,7 @@ export interface PersonData {
   _id: string;
   /** format: MM-yyyy */
   month: string;
-  type: TableType;
+  type: TxType;
   index: number;
   name: string;
   // map of tx._id -> tx
@@ -23,7 +23,7 @@ export interface PersonTx {
   _id: string;
   /** format: MM-yyyy */
   month: string;
-  type: TableType;
+  type: TxType;
   index: number;
   name: string;
   txs: Tx[];

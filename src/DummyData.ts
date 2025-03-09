@@ -1,10 +1,10 @@
-import { PersonTx, TableType } from "./models/type";
+import { PersonTx, TxType } from "./models/type";
 
 export const dummyPersonTx: PersonTx[] = [
   {
     _id: "1",
     name: "John Doe",
-    type: TableType.Expense,
+    type: TxType.Expense,
     version: "34532389",
     month: "01-2025",
     txs: [
@@ -134,7 +134,7 @@ export const dummyPersonTx: PersonTx[] = [
   {
     _id: "2",
     name: "Jane Smith",
-    type: TableType.Income,
+    type: TxType.Income,
     version: "42323423",
     month: "01-2025",
     txs: [

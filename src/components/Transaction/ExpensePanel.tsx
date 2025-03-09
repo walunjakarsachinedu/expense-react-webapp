@@ -3,7 +3,7 @@ import { Panel } from "primereact/panel";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import PersonTxs from "./PersonTxs";
-import { TableType } from "../../models/type";
+import { TxType } from "../../models/type";
 
 const ExpensePanel = () => {
   const personIds = useExpenseStore((store) => store.personIds);
@@ -34,7 +34,7 @@ const ExpensePanel = () => {
               className="m-4 mt-0"
               outlined
               size="small"
-              onClick={() => addPerson(TableType.Expense)}
+              onClick={() => addPerson(TxType.Expense)}
             >
               Add Person
             </Button>
