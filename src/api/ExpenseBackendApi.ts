@@ -2,8 +2,9 @@ import {
   Conflicts,
   GraphqlResponse,
   PersonDiff,
-  PersonMinimal,
+  PersonVersionId,
   PersonTx,
+  ChangedPersons,
 } from "../models/type";
 import ApiContants from "./ApiContants";
 import graphqlClient from "./graphqlClient";
@@ -41,29 +42,19 @@ export class ExpenseBackendApi {
     return result as GraphqlResponse<string>;
   }
 
-  async getPersonVersionIds(month: string): Promise<PersonMinimal[]> {
+  async getChangedPersons(
+    month: string,
+    personVersionIds: PersonVersionId[]
+  ): Promise<ChangedPersons> {
     const result = await graphqlClient
       .query({
-        query: ApiContants.personOfMonthQuery,
-        variables: { month },
+        query: ApiContants.changedPersonsQuery,
+        variables: { month, personVersionIds },
         fetchPolicy: "network-only",
       })
       .catch((err) => undefined)
       .then(<T>(result: T) => JSON.parse(JSON.stringify(result)) as T);
-    return (result?.data["personsOfMonth"] as PersonMinimal[]) ?? [];
-  }
-
-  async getPersonByIds(ids: string[]): Promise<PersonTx[]> {
-    // for empty list no need to send api call
-    if (ids.length == 0) return [];
-    const result = await graphqlClient
-      .query({
-        query: ApiContants.personsByIdsQuery,
-        variables: { ids },
-      })
-      .catch((err) => undefined)
-      .then(<T>(result: T) => JSON.parse(JSON.stringify(result)) as T);
-    return (result?.data["persons"] as PersonTx[]) ?? [];
+    return (result?.data["changedPersons"] as ChangedPersons) ?? [];
   }
 
   async applyChanges(diff: PersonDiff): Promise<Conflicts | undefined> {

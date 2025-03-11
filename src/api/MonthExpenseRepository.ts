@@ -2,7 +2,7 @@ import {
   Conflicts,
   PersonData,
   PersonDiff,
-  PersonMinimal,
+  PersonVersionId,
 } from "../models/type";
 import { PatchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
@@ -16,66 +16,64 @@ export default class MonthExpenseRepository {
 
   /**
    * Algorithm :-
-   * 1. fetch person id+version from backend & id+version+data from cache.
-   * 2. fetch un-cache persons from backend, store in cache.
-   * 3. delete un-used persons from cache.
-   * @return array of fetched + cached persons
+   * 1. send pending patch
+   * 2. if cache for data found, then return data from cache
+   * 3. fetch cache & changed persons
+   * 4. remove un-used persons from cache
+   * 5. store updated & added persons from cache
+   * 6. merge changed persons with cache
    */
   async getMonthExpense(monthYear: string): Promise<PersonData[]> {
+    // 1. send pending patch
     await PatchProcessing.provider.processPatchFromStorage(async (patches) => {
       await MonthExpenseRepository.provider.applyPatches(patches);
     });
 
-    const personData = InMemoryCache.provider.getCache<PersonData[]>(
+    // 2. if cache for data found, then return data from cache
+    const cachedPersonData = InMemoryCache.provider.getCache<PersonData[]>(
       InMemoryCacheCategory.PersonMonthlyData,
       monthYear
     );
-    if (personData) return personData;
+    if (cachedPersonData) return cachedPersonData;
 
-    // TODO: logic to populate month & year
-    const fetchIdVersions =
-      await ExpenseBackendApi.provider.getPersonVersionIds(monthYear);
-    const cachedPersonList: PersonData[] =
-      PersonCacheApi.provider.getAllPersons();
+    // 3. fetch cache & changed persons
+    const persons: PersonData[] = PersonCacheApi.provider.getAllPersons();
 
-    // Fetching persons which not found in cache
-    const fetchedPersons = await ExpenseBackendApi.provider
-      .getPersonByIds(
-        fetchIdVersions
-          .filter(
-            (idVersion) =>
-              !cachedPersonList.find((person) =>
-                this._isIdVersionEqual(person, idVersion)
-              )
-          )
-          .map((person) => person._id)
-      )
-      .then((persons) => persons.map<PersonData>(personUtils.personTxToPerson));
+    const personVersionIds: PersonVersionId[] = persons.map((person) => ({
+      _id: person._id,
+      version: person.version,
+    }));
 
-    // Extracting Persons found in cache
-    const cachePersons = cachedPersonList.filter((person) =>
-      fetchIdVersions.find((idVersion) =>
-        this._isIdVersionEqual(person, idVersion)
-      )
+    const changedPersons = await ExpenseBackendApi.provider.getChangedPersons(
+      monthYear,
+      personVersionIds
     );
 
-    /** deleting un-necessary cache */
-    cachedPersonList
-      .filter(
-        (person) =>
-          !fetchIdVersions.find((idVersion) =>
-            this._isIdVersionEqual(person, idVersion)
-          )
-      )
-      .map((idVersion) => idVersion._id)
-      .forEach(PersonCacheApi.provider.deletePersonWithId);
-
-    /** caching un-cached fetched persons */
-    fetchedPersons.forEach((person) =>
-      PersonCacheApi.provider.storePerson(person)
+    const cachedPersons = persons.filter(
+      (person) =>
+        !changedPersons.updatedPersons.find(({ _id }) => _id == person._id) &&
+        !changedPersons.deletedPersons.find((id) => id == person._id)
     );
 
-    return [...cachePersons, ...fetchedPersons]
+    const addedPersons = changedPersons.addedPersons.map(
+      personUtils.personTxToPerson
+    );
+    const updatedPersons = changedPersons.updatedPersons.map(
+      personUtils.personTxToPerson
+    );
+
+    // 4. remove un-used persons from cache
+    changedPersons.deletedPersons.forEach(
+      PersonCacheApi.provider.deletePersonWithId
+    );
+
+    // 5. store updated & added persons from cache
+    [...changedPersons.updatedPersons, ...changedPersons.addedPersons]
+      .map(personUtils.personTxToPerson)
+      .forEach(PersonCacheApi.provider.storePerson);
+
+    // 6. merge changed persons with cache
+    return [...cachedPersons, ...addedPersons, ...updatedPersons]
       .map((person) => {
         person.txIds.forEach((id, index) => (person.txs[id].index = index));
         return person;
@@ -98,7 +96,7 @@ export default class MonthExpenseRepository {
     return ExpenseBackendApi.provider.applyChanges(patches);
   }
 
-  _isIdVersionEqual = (a: PersonMinimal, b: PersonMinimal): boolean => {
+  _isIdVersionEqual = (a: PersonVersionId, b: PersonVersionId): boolean => {
     return a._id == b._id && a.version == b.version;
   };
 }

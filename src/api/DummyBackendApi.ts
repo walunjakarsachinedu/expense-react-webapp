@@ -1,14 +1,14 @@
 import {
   PersonData,
   PersonDiff,
-  PersonMinimal,
+  PersonVersionId,
   PersonTx,
 } from "../models/type";
 import personUtils from "../utils/personUtils";
 
 /** stores person as PersonTx structure in local */
 interface IDummyBackendApi {
-  getPersonHashIds(month: string): PersonMinimal[];
+  getPersonHashIds(month: string): PersonVersionId[];
   getPersonByIds(ids: string[]): PersonTx[];
   storePersonData(persons: PersonData[]): void;
   deletePersonData(person: PersonData[]): void;
@@ -20,13 +20,13 @@ export class DummyBackendApi implements IDummyBackendApi {
 
   readonly storageKey = "backend_person_data_";
 
-  getPersonHashIds(month: string): PersonMinimal[] {
+  getPersonHashIds(month: string): PersonVersionId[] {
     const keys: string[] = Object.keys(localStorage);
     return keys
       .filter((key) => key.startsWith(this.storageKey))
       .map((key) => JSON.parse(localStorage.getItem(key)!) as PersonTx)
       .filter((person) => person.month == month)
-      .map((person) => person as PersonMinimal);
+      .map((person) => person as PersonVersionId);
   }
 
   getPersonByIds(ids: string[]): PersonTx[] {

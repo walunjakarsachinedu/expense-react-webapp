@@ -38,9 +38,15 @@ export interface Tx {
   tag?: string;
 }
 
-export type PersonMinimal = {
+export type PersonVersionId = {
   _id: string;
   version: string;
+};
+
+export type ChangedPersons = {
+  addedPersons: PersonTx[];
+  updatedPersons: PersonTx[];
+  deletedPersons: string[];
 };
 
 export type PersonDiff = {

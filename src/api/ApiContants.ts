@@ -30,30 +30,41 @@ export default class ApiContants {
     }
   `;
 
-  static readonly personOfMonthQuery = gql`
-    query PersonsOfMonth($month: String!) {
-      personsOfMonth(month: $month) {
-        _id
-        version
-      }
-    }
-  `;
-
-  static readonly personsByIdsQuery = gql`
-    query PersonsByIds($ids: [String]) {
-      persons(ids: $ids) {
-        _id
-        index
-        month
-        name
-        txs {
+  static readonly changedPersonsQuery = gql`
+    query ChangedPersons(
+      $month: String!
+      $personVersionIds: [PersonVersionId!]!
+    ) {
+      changedPersons(month: $month, personVersionIds: $personVersionIds) {
+        addedPersons {
           _id
+          month
+          type
           index
-          money
-          tag
+          name
+          txs {
+            _id
+            index
+            money
+            tag
+          }
+          version
         }
-        type
-        version
+        deletedPersons
+        updatedPersons {
+          _id
+          month
+          type
+          index
+          name
+          txs {
+            _id
+            index
+            money
+            tag
+          }
+          version
+        }
       }
     }
   `;
