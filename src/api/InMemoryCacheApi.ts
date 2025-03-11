@@ -2,11 +2,7 @@ export enum InMemoryCacheCategory {
   PersonMonthlyData = "PersonMonthlyData",
 }
 
-export default class InMemoryCache {
-  public static readonly provider = new InMemoryCache({
-    [InMemoryCacheCategory.PersonMonthlyData]: 5,
-  });
-
+class InMemoryCache {
   private readonly inMemoryStorage: {
     [category in string]: {
       [key in string]: { data: unknown; timestamp: number };
@@ -56,3 +52,7 @@ export default class InMemoryCache {
     }
   }
 }
+
+export const inMemoryCache = new InMemoryCache({
+  [InMemoryCacheCategory.PersonMonthlyData]: 5,
+});

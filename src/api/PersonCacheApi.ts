@@ -1,8 +1,6 @@
 import { PersonData, PersonDiff } from "../models/type";
 
-export default class PersonCacheApi {
-  static readonly provider = new PersonCacheApi();
-
+class PersonCacheApi {
   readonly storageKey = "cached_person_id_";
   _getKeyFromId = (id: string) => `${this.storageKey}${id}`;
 
@@ -47,3 +45,5 @@ export default class PersonCacheApi {
     //   .forEach(this.deletePersonWithId);
   }
 }
+
+export const personCacheApi = new PersonCacheApi();

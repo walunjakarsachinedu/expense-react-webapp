@@ -1,17 +1,17 @@
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import InMemoryCache, { InMemoryCacheCategory } from "../api/InMemoryCacheApi";
-import MonthExpenseRepository from "../api/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
 import { PersonData, TxType, Tx } from "../models/type";
 import { Prettify } from "../types/Prettify";
 import Constants from "../utils/constants";
 import { ObjectId } from "../utils/objectid";
-import { PatchProcessing } from "../utils/PatchProcessing";
+import { patchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
+import { inMemoryCache, InMemoryCacheCategory } from "../api/InMemoryCacheApi";
+import { monthExpenseRepository } from "../api/MonthExpenseRepository";
 
 export type ExpenseStore = {
   monthYear: string;
@@ -55,7 +55,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
         timer.timeout();
 
         // caching before switching to different month
-        InMemoryCache.provider.setCache(
+        inMemoryCache.setCache(
           InMemoryCacheCategory.PersonMonthlyData,
           storeApi.getState().monthYear,
           Object.values(storeApi.getState().persons)
@@ -74,7 +74,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
             .map((person) => ({ id: person._id, type: person.type }));
-          PatchProcessing.provider.setPrevState(store.persons);
+          patchProcessing.setPrevState(store.persons);
         });
       },
       addPerson: (type) =>
@@ -214,14 +214,12 @@ function setupDebounceTimer(
     console.info("scheduling patch processing");
 
     const nextState = get().persons;
-    PatchProcessing.provider.processPatch(nextState, async (patches) => {
+    patchProcessing.processPatch(nextState, async (patches) => {
       console.log("patch: ", patches);
-      await MonthExpenseRepository.provider
-        .applyPatches(patches)
-        ?.then((conflicts) => {
-          if (!conflicts) return;
-          // TODO - add logic to show conflict to user
-        });
+      await monthExpenseRepository.applyPatches(patches)?.then((conflicts) => {
+        if (!conflicts) return;
+        // TODO - add logic to show conflict to user
+      });
     });
   });
 

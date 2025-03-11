@@ -11,9 +11,7 @@ import utils from "./utils";
  *    - set prevState=nextState & nextState=null
  *    - process newly calculated patch
  */
-export class PatchProcessing {
-  static readonly provider = new PatchProcessing();
-
+class PatchProcessing {
   private prevState?: Record<string, PersonData>;
   private nextState?: Record<string, PersonData> | null;
   private action?: (patch: PersonDiff) => Promise<void>;
@@ -116,3 +114,5 @@ export class PatchProcessing {
     this.scheduledAction = processPatch;
   }
 }
+
+export const patchProcessing = new PatchProcessing();

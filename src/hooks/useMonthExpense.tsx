@@ -1,4 +1,4 @@
-import MonthExpenseRepository from "../api/MonthExpenseRepository";
+import { monthExpenseRepository } from "../api/MonthExpenseRepository";
 import { PersonData } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
 import usePromise from "./usePromise";
@@ -9,7 +9,7 @@ const useMonthExpense = () => {
 
   return usePromise<PersonData[]>({
     dependencies: ["monthExpense", monthYear],
-    asyncFn: () => MonthExpenseRepository.provider.getMonthExpense(monthYear),
+    asyncFn: () => monthExpenseRepository.getMonthExpense(monthYear),
     onResolve: (persons) => setMonthData(monthYear, persons),
   });
 };
