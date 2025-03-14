@@ -7,6 +7,7 @@ interface SignupFormValues {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
 function useSignupValidation() {
@@ -21,6 +22,7 @@ function useSignupValidation() {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 

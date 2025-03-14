@@ -12,6 +12,7 @@ import useSignupValidation from "../hooks/useSignupValidation";
 function SignupPage() {
   const emailRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<Password | null>(null);
+  const confirmPasswordRef = useRef<Password | null>(null);
   const {
     getValues,
     trigger,
@@ -21,7 +22,7 @@ function SignupPage() {
     onChange,
     markAllTouched,
   } = useSignupValidation();
-  const { name, email, password } = getValues();
+  const { name, email, password, confirmPassword } = getValues();
   const {
     run: performSignup,
     isLoading,
@@ -74,8 +75,19 @@ function SignupPage() {
           value={password}
           onChange={(e) => onChange("password", e.target.value)}
           onBlur={() => handleBlur("password")}
+          onPressEnter={() => confirmPasswordRef.current?.focus()}
           errorMsg={errors.password?.message}
           touched={touched.password}
+        />
+        <PasswordField
+          ref={confirmPasswordRef}
+          label="Confirm Password"
+          id="confirm-password"
+          value={confirmPassword}
+          onChange={(e) => onChange("confirmPassword", e.target.value)}
+          onBlur={() => handleBlur("confirmPassword")}
+          errorMsg={errors.confirmPassword?.message}
+          touched={touched.confirmPassword}
         />
         <br />
         <br />

@@ -5,9 +5,12 @@ export const loginSchema = yup.object({
   password: yup.string().required("Password is required"),
 });
 
-export const signupSchema = loginSchema.shape({
+export const signupSchema = yup.object({
   name: yup.string().required("Name is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
+  email: yup
+    .string()
+    .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, "Invalid email")
+    .required("Email is required"),
   password: yup
     .string()
     .required("Password is required")
@@ -16,8 +19,10 @@ export const signupSchema = loginSchema.shape({
     .matches(/[A-Z]/, "Must include an uppercase letter")
     .matches(/\d/, "Must include a number")
     .matches(/[@$!%*?&]/, "Must include a special character"),
-  // confirmPassword: yup
-  //   .string()
-  //   .oneOf([yup.ref("password")], "Passwords must match")
-  //   .required("Confirm Password is required"),
+  confirmPassword: yup
+    .string()
+    .required("Confirm Password is required")
+    .test("required-if-password", "Passwords must match", function (value) {
+      return this.parent.password == value;
+    }),
 });
