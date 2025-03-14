@@ -48,7 +48,7 @@ function LoginPage() {
           label="Email address"
           id="email"
           type="email"
-          value={email}
+          defaulValue={email}
           onChange={(e) => onChange("email", e.target.value)}
           onBlur={() => handleBlur("email")}
           onPressEnter={() => passwordRef.current?.focus()}
@@ -59,7 +59,7 @@ function LoginPage() {
           ref={passwordRef}
           label="Password"
           id="password"
-          value={password}
+          defaultValue={password}
           onChange={(e) => onChange("password", e.target.value)}
           onBlur={() => handleBlur("password")}
           onPressEnter={onSubmit}

@@ -3,7 +3,8 @@ import { ChangeEventHandler, forwardRef } from "react";
 
 type FieldProps = {
   label: string;
-  value: string;
+  // TODO: rename to defaultValue
+  defaultValue: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
   onPressEnter?: () => void;
   onBlur?: () => void;
@@ -15,7 +16,7 @@ const PasswordField = forwardRef<Password | null, FieldProps>(
   (
     {
       label,
-      value,
+      defaultValue,
       onChange,
       onPressEnter,
       onBlur,
@@ -37,7 +38,7 @@ const PasswordField = forwardRef<Password | null, FieldProps>(
               if (e.key == "Enter") onPressEnter?.();
             }}
             inputClassName="w-full"
-            defaultValue={value}
+            defaultValue={defaultValue}
             onChange={onChange}
             onBlur={onBlur}
             feedback={false}

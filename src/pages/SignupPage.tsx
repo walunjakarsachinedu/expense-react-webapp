@@ -49,7 +49,7 @@ function SignupPage() {
           label="Name"
           id="name"
           type="name"
-          value={name}
+          defaulValue={name}
           onChange={(e) => onChange("name", e.target.value)}
           onBlur={() => handleBlur("name")}
           onPressEnter={() => emailRef.current?.focus()}
@@ -61,7 +61,7 @@ function SignupPage() {
           label="Email address"
           id="email"
           type="email"
-          value={email}
+          defaulValue={email}
           onChange={(e) => onChange("email", e.target.value)}
           onBlur={() => handleBlur("email")}
           onPressEnter={() => passwordRef.current?.focus()}
@@ -72,7 +72,7 @@ function SignupPage() {
           ref={passwordRef}
           label="Password"
           id="password"
-          value={password}
+          defaultValue={password}
           onChange={(e) => onChange("password", e.target.value)}
           onBlur={() => handleBlur("password")}
           onPressEnter={() => confirmPasswordRef.current?.focus()}
@@ -83,7 +83,7 @@ function SignupPage() {
           ref={confirmPasswordRef}
           label="Confirm Password"
           id="confirm-password"
-          value={confirmPassword}
+          defaultValue={confirmPassword}
           onChange={(e) => onChange("confirmPassword", e.target.value)}
           onBlur={() => handleBlur("confirmPassword")}
           errorMsg={errors.confirmPassword?.message}

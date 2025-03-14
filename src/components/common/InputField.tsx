@@ -3,7 +3,7 @@ import { ChangeEventHandler, forwardRef } from "react";
 
 type FieldProps = {
   label: string;
-  value: string;
+  defaulValue: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
   onPressEnter?: () => void;
   onBlur?: () => void;
@@ -16,7 +16,7 @@ const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
   (
     {
       label,
-      value,
+      defaulValue,
       onChange,
       onPressEnter,
       onBlur,
@@ -40,7 +40,7 @@ const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
               if (e.key == "Enter") onPressEnter?.();
             }}
             className="w-full"
-            defaultValue={value}
+            defaultValue={defaulValue}
             onChange={onChange}
             onBlur={onBlur}
           />
