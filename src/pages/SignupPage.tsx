@@ -1,6 +1,6 @@
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import CustomLink from "../components/common/CustomLink";
 import InputField from "../components/common/InputField";
@@ -10,6 +10,8 @@ function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
 
   const {
     run: performSignup,
@@ -30,15 +32,19 @@ function SignupPage() {
           type="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onPressEnter={() => emailRef.current?.focus()}
         ></InputField>
         <InputField
+          ref={emailRef}
           label="Email address"
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onPressEnter={() => passwordRef.current?.focus()}
         ></InputField>
         <InputField
+          ref={passwordRef}
           label="Password"
           id="password"
           type="password"
