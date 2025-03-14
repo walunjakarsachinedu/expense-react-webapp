@@ -43,6 +43,7 @@ function useSignupValidation() {
     markTouched("name");
     markTouched("email");
     markTouched("password");
+    markTouched("confirmPassword");
   };
 
   const onChange = async (field: keyof SignupFormValues, value: string) => {
