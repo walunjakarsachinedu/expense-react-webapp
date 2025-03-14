@@ -98,3 +98,14 @@ body {
 .w-full .p-icon-field {
   width: 100% !important;
 }
+
+/* prime react costumization */
+
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-footer {
+  background-color: rgb(30, 30, 30) !important;
+}
+.p-dialog {
+  border-color: rgb(53, 53, 53);
+}
