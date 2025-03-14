@@ -1,22 +1,43 @@
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
-import { useRef, useState } from "react";
+import { Password } from "primereact/password";
+import { useRef } from "react";
 import { Navigate } from "react-router-dom";
 import CustomLink from "../components/common/CustomLink";
 import InputField from "../components/common/InputField";
+import PasswordField from "../components/common/PasswordField";
 import useLogin from "../hooks/useLogin";
+import useLoginValidation from "../hooks/useLoginValidation";
 
 function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const passwordRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<Password | null>(null);
+
+  const {
+    getValues,
+    trigger,
+    markAllTouched,
+    errors,
+    touched,
+    handleBlur,
+    onChange,
+  } = useLoginValidation();
+
+  const { email, password } = getValues();
   const {
     run: performLogin,
     isLoading,
     result: token,
   } = useLogin(email, password);
 
-  if (token?.data) return <Navigate to="/"></Navigate>;
+  if (token?.data) return <Navigate to="/" />;
+
+  const onSubmit = async () => {
+    markAllTouched();
+    const isValid = await trigger();
+    if (isValid) {
+      performLogin();
+    }
+  };
 
   return (
     <div className="flex flex-column align-items-center justify-content-center mt-8">
@@ -28,24 +49,29 @@ function LoginPage() {
           id="email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => onChange("email", e.target.value)}
+          onBlur={() => handleBlur("email")}
           onPressEnter={() => passwordRef.current?.focus()}
-        ></InputField>
-        <InputField
+          errorMsg={errors.email?.message}
+          touched={touched.email}
+        />
+        <PasswordField
           ref={passwordRef}
           label="Password"
           id="password"
-          type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onPressEnter={performLogin}
-        ></InputField>
+          onChange={(e) => onChange("password", e.target.value)}
+          onBlur={() => handleBlur("password")}
+          onPressEnter={onSubmit}
+          errorMsg={errors.password?.message}
+          touched={touched.password}
+        />
         <br />
         <br />
         <Button
           label="Submit"
           className="w-full login-btn flex justify-content-center"
-          onClick={performLogin}
+          onClick={onSubmit}
           loading={isLoading}
         />
         <br />

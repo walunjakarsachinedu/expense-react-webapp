@@ -1,18 +1,27 @@
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
-import { useRef, useState } from "react";
+import { Password } from "primereact/password";
+import { useRef } from "react";
 import { Navigate } from "react-router-dom";
 import CustomLink from "../components/common/CustomLink";
 import InputField from "../components/common/InputField";
+import PasswordField from "../components/common/PasswordField";
 import useSignup from "../hooks/useSignup";
+import useSignupValidation from "../hooks/useSignupValidation";
 
 function SignupPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const emailRef = useRef<HTMLInputElement | null>(null);
-  const passwordRef = useRef<HTMLInputElement | null>(null);
-
+  const passwordRef = useRef<Password | null>(null);
+  const {
+    getValues,
+    trigger,
+    errors,
+    touched,
+    handleBlur,
+    onChange,
+    markAllTouched,
+  } = useSignupValidation();
+  const { name, email, password } = getValues();
   const {
     run: performSignup,
     isLoading,
@@ -20,6 +29,15 @@ function SignupPage() {
   } = useSignup(name, email, password);
 
   if (token?.data) return <Navigate to="/"></Navigate>;
+
+  const onSubmit = async () => {
+    markAllTouched();
+    const isValid = await trigger();
+
+    if (isValid) {
+      performSignup();
+    }
+  };
 
   return (
     <div className="flex flex-column align-items-center justify-content-center mt-8">
@@ -31,8 +49,11 @@ function SignupPage() {
           id="name"
           type="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => onChange("name", e.target.value)}
+          onBlur={() => handleBlur("name")}
           onPressEnter={() => emailRef.current?.focus()}
+          errorMsg={errors.name?.message}
+          touched={touched.name}
         ></InputField>
         <InputField
           ref={emailRef}
@@ -40,24 +61,28 @@ function SignupPage() {
           id="email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => onChange("email", e.target.value)}
+          onBlur={() => handleBlur("email")}
           onPressEnter={() => passwordRef.current?.focus()}
+          errorMsg={errors.email?.message}
+          touched={touched.email}
         ></InputField>
-        <InputField
+        <PasswordField
           ref={passwordRef}
           label="Password"
           id="password"
-          type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        ></InputField>
+          onChange={(e) => onChange("password", e.target.value)}
+          onBlur={() => handleBlur("password")}
+          errorMsg={errors.password?.message}
+          touched={touched.password}
+        />
         <br />
         <br />
         <Button
           label="Submit"
           className="w-full login-btn flex justify-content-center"
-          // TODO: form validation for email, password before signup
-          onClick={performSignup}
+          onClick={onSubmit}
           loading={isLoading}
         />
         <br />

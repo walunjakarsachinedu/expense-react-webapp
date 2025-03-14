@@ -94,3 +94,7 @@ body {
   margin-right: 1rem;
   flex: unset;
 }
+
+.w-full .p-icon-field {
+  width: 100% !important;
+}

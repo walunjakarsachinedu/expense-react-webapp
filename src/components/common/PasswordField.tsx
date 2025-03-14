@@ -1,4 +1,4 @@
-import { InputText } from "primereact/inputtext";
+import { Password } from "primereact/password";
 import { ChangeEventHandler, forwardRef } from "react";
 
 type FieldProps = {
@@ -7,12 +7,11 @@ type FieldProps = {
   onChange: ChangeEventHandler<HTMLInputElement>;
   onPressEnter?: () => void;
   onBlur?: () => void;
-  type?: string | undefined;
   errorMsg?: string;
   touched?: boolean;
   id: string;
 };
-const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
+const PasswordField = forwardRef<Password | null, FieldProps>(
   (
     {
       label,
@@ -21,7 +20,6 @@ const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
       onPressEnter,
       onBlur,
       touched,
-      type,
       errorMsg,
       id,
     }: FieldProps,
@@ -32,17 +30,18 @@ const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
         <br />
         <div className="flex flex-column gap-2 w-full">
           <label htmlFor={id}>{label}</label>
-          <InputText
+          <Password
             ref={ref}
             id={id}
-            type={type}
             onKeyDown={(e) => {
               if (e.key == "Enter") onPressEnter?.();
             }}
-            className="w-full"
+            inputClassName="w-full"
             defaultValue={value}
             onChange={onChange}
             onBlur={onBlur}
+            feedback={false}
+            toggleMask
           />
         </div>
         {touched && errorMsg && (
@@ -55,4 +54,4 @@ const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
   }
 );
 
-export default InputField;
+export default PasswordField;
