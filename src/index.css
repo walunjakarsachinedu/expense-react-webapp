@@ -62,7 +62,7 @@ body {
 
 .icon-btn:active,
 .icon-btn:hover {
-  border-color: #22d3ee !important;
+  border-color: var(--primary-500) !important;
 }
 
 .disabled.icon-btn {
