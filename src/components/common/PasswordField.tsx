@@ -3,7 +3,6 @@ import { ChangeEventHandler, forwardRef } from "react";
 
 type FieldProps = {
   label: string;
-  // TODO: rename to defaultValue
   defaultValue: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
   onPressEnter?: () => void;
@@ -13,19 +12,11 @@ type FieldProps = {
   id: string;
 };
 const PasswordField = forwardRef<Password | null, FieldProps>(
-  (
-    {
-      label,
-      defaultValue,
-      onChange,
-      onPressEnter,
-      onBlur,
-      touched,
-      errorMsg,
-      id,
-    }: FieldProps,
-    ref
-  ) => {
+  (fieldProps: FieldProps, ref) => {
+    const { label, defaultValue } = fieldProps;
+    const { onChange, onPressEnter, onBlur } = fieldProps;
+    const { touched, errorMsg, id } = fieldProps;
+
     return (
       <>
         <br />

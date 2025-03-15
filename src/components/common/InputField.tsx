@@ -13,20 +13,10 @@ type FieldProps = {
   id: string;
 };
 const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
-  (
-    {
-      label,
-      defaulValue,
-      onChange,
-      onPressEnter,
-      onBlur,
-      touched,
-      type,
-      errorMsg,
-      id,
-    }: FieldProps,
-    ref
-  ) => {
+  (fieldProps: FieldProps, ref) => {
+    const { label, defaulValue } = fieldProps;
+    const { onChange, onPressEnter, onBlur } = fieldProps;
+    const { touched, type, errorMsg, id } = fieldProps;
     return (
       <>
         <br />
