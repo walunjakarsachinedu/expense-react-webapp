@@ -1,7 +1,10 @@
 import * as yup from "yup";
 
 export const loginSchema = yup.object({
-  email: yup.string().required("Email is required"),
+  email: yup
+    .string()
+    .required("Email is required")
+    .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, "Invalid email"),
   password: yup.string().required("Password is required"),
 });
 
@@ -9,8 +12,8 @@ export const signupSchema = yup.object({
   name: yup.string().required("Name is required"),
   email: yup
     .string()
-    .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, "Invalid email")
-    .required("Email is required"),
+    .required("Email is required")
+    .matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, "Invalid email"),
   password: yup
     .string()
     .required("Password is required")
