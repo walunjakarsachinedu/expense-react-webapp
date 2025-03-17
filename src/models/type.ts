@@ -88,3 +88,16 @@ export type ConflictPerson = {
 };
 
 export type GraphqlResponse<T> = { data?: T; error?: { message: string } };
+
+export type ChangePasswordInput = {
+  resetCode: string;
+  email: string;
+  nonce: string;
+  newPassword: string;
+};
+
+export type VerifyResetCodeInput = {
+  resetCode: string;
+  email: string;
+  nonce: string;
+};

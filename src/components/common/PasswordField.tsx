@@ -1,5 +1,6 @@
 import { Password } from "primereact/password";
 import { ChangeEventHandler, forwardRef } from "react";
+import CustomLink from "./CustomLink";
 
 type FieldProps = {
   label: string;
@@ -10,18 +11,27 @@ type FieldProps = {
   errorMsg?: string;
   touched?: boolean;
   id: string;
+  showForgotPasswordLink?: boolean;
 };
 const PasswordField = forwardRef<Password | null, FieldProps>(
   (fieldProps: FieldProps, ref) => {
     const { label, defaultValue } = fieldProps;
     const { onChange, onPressEnter, onBlur } = fieldProps;
     const { touched, errorMsg, id } = fieldProps;
+    const { showForgotPasswordLink } = fieldProps;
 
     return (
       <>
         <br />
         <div className="flex flex-column gap-2 w-full">
-          <label htmlFor={id}>{label}</label>
+          <div className="flex justify-content-between">
+            <label htmlFor={id}>{label}</label>
+            {showForgotPasswordLink && (
+              <div className="text-sm">
+                <CustomLink to="/forgot-password">Forget password?</CustomLink>
+              </div>
+            )}
+          </div>
           <Password
             ref={ref}
             id={id}

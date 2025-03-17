@@ -3,7 +3,7 @@ import { ChangeEventHandler, forwardRef } from "react";
 
 type FieldProps = {
   label: string;
-  defaulValue: string;
+  defaultValue: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
   onPressEnter?: () => void;
   onBlur?: () => void;
@@ -14,7 +14,7 @@ type FieldProps = {
 };
 const InputField = forwardRef<HTMLInputElement | null, FieldProps>(
   (fieldProps: FieldProps, ref) => {
-    const { label, defaulValue } = fieldProps;
+    const { label, defaultValue: defaulValue } = fieldProps;
     const { onChange, onPressEnter, onBlur } = fieldProps;
     const { touched, type, errorMsg, id } = fieldProps;
     return (

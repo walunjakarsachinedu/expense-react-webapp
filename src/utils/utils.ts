@@ -1,3 +1,5 @@
+import { ErrorCodes } from "../api/ErrorContants";
+
 class Utility {
   static readonly provider = new Utility();
 
@@ -47,6 +49,11 @@ class Utility {
     const otherDigits = str.slice(0, -3);
     const formatted = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
     return otherDigits ? `${formatted},${lastThree}` : lastThree;
+  }
+
+  extractGraphqlError(error: unknown): ErrorCodes | undefined {
+    return (error as { cause?: { extensions?: { code?: ErrorCodes } } })?.cause
+      ?.extensions?.code;
   }
 }
 

@@ -21,7 +21,13 @@ const httpLink = createHttpLink({
 });
 
 const authLink = setContext((request, { headers }) => {
-  const publicOperations = ["Login", "Signup"];
+  const publicOperations = [
+    "Login",
+    "Signup",
+    "SendPasswordResetCode",
+    "VerifyResetCode",
+    "ChangePassword",
+  ];
   if (!publicOperations.includes(request.operationName ?? "")) {
     if (authService.isTokenExpired()) {
       timer.timeout();

@@ -83,4 +83,26 @@ export default class ApiContants {
       }
     }
   `;
+
+  static readonly sendResetCode = gql`
+    mutation SendPasswordResetCode($nonce: String!, $email: String!) {
+      sendPasswordResetCode(nonce: $nonce, email: $email)
+    }
+  `;
+
+  static readonly verifyResetCode = gql`
+    mutation VerifyResetCode(
+      $resetCode: String!
+      $email: String!
+      $nonce: String!
+    ) {
+      verifyResetCode(resetCode: $resetCode, email: $email, nonce: $nonce)
+    }
+  `;
+
+  static readonly changePassword = gql`
+    mutation ChangePassword($passwordResetInput: PasswordResetInput) {
+      changePassword(passwordResetInput: $passwordResetInput)
+    }
+  `;
 }
