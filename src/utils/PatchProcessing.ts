@@ -1,4 +1,5 @@
 import { PersonData, PersonDiff } from "../models/type";
+import { isPageUnloaded } from "./is-page-unloaded";
 import personUtils from "./personUtils";
 import TrackedPromise from "./TrackPromise";
 import utils from "./utils";
@@ -107,6 +108,7 @@ class PatchProcessing {
       else this.processPatchFromStorage(action);
     };
     window.addEventListener("online", () => {
+      if (isPageUnloaded()) return;
       processPatch();
       window.removeEventListener("online", processPatch);
       this.scheduledAction = undefined;
