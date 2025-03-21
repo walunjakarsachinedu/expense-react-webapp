@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
 import { Navigate } from "react-router-dom";
-import { ErrorCodes } from "../../api/ErrorContants";
+import { ErrorCodes } from "../../api/constants/ErrorContants";
 import CenteredForm from "../../components/common/CenteredForm";
 import InputField from "../../components/common/InputField";
 import { useNonce } from "../../hooks/reset-password/useNonce";

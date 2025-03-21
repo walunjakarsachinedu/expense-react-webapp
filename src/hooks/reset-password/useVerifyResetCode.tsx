@@ -1,4 +1,4 @@
-import { ExpenseBackendApi } from "../../api/ExpenseBackendApi";
+import { ExpenseBackendApi } from "../../api/services/ExpenseBackendApi";
 import { VerifyResetCodeInput } from "../../models/type";
 import usePromise from "../usePromise";
 

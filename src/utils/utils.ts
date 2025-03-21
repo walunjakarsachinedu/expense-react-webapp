@@ -1,4 +1,4 @@
-import { ErrorCodes } from "../api/ErrorContants";
+import { ErrorCodes } from "../api/constants/ErrorContants";
 
 class Utility {
   static readonly provider = new Utility();

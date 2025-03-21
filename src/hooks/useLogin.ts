@@ -1,4 +1,4 @@
-import { ExpenseBackendApi } from "../api/ExpenseBackendApi";
+import { ExpenseBackendApi } from "../api/services/ExpenseBackendApi";
 import authService from "../core/authService";
 import usePromise from "./usePromise";
 

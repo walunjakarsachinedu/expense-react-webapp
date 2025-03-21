@@ -5,10 +5,10 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
-import ApiContants from "./ApiContants";
-import authService from "../core/authService";
-import { timer } from "../store/usePersonStore";
-import { showInfoDialog } from "../components/info-dialog";
+import ApiContants from "../constants/ApiContants";
+import authService from "../../core/authService";
+import { timer } from "../../store/usePersonStore";
+import { showInfoDialog } from "../../components/info-dialog";
 
 const httpLink = createHttpLink({
   uri: ApiContants.graphqlEndpoint,

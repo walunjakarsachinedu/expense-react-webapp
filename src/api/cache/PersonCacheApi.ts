@@ -1,5 +1,5 @@
-import { PersonData, PersonDiff, PersonPatch } from "../models/type";
-import personUtils from "../utils/personUtils";
+import { PersonData, PersonDiff, PersonPatch } from "../../models/type";
+import personUtils from "../../utils/personUtils";
 
 class PersonCacheApi {
   readonly storageKey = "cached_person_id_";

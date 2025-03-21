@@ -6,10 +6,10 @@ import {
   PersonDiff,
   PersonVersionId,
   VerifyResetCodeInput,
-} from "../models/type";
-import utils from "../utils/utils";
-import ApiContants from "./ApiContants";
-import graphqlClient from "./graphqlClient";
+} from "../../models/type";
+import utils from "../../utils/utils";
+import graphqlClient from "../client/graphqlClient";
+import ApiContants from "../constants/ApiContants";
 
 // returning frozen objects
 export class ExpenseBackendApi {

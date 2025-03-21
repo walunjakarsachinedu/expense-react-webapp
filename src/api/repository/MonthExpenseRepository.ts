@@ -3,12 +3,15 @@ import {
   PersonData,
   PersonDiff,
   PersonVersionId,
-} from "../models/type";
-import { patchProcessing } from "../utils/PatchProcessing";
-import personUtils from "../utils/personUtils";
-import { ExpenseBackendApi } from "./ExpenseBackendApi";
-import { inMemoryCache, InMemoryCacheCategory } from "./InMemoryCacheApi";
-import { personCacheApi } from "./PersonCacheApi";
+} from "../../models/type";
+import { patchProcessing } from "../../utils/PatchProcessing";
+import personUtils from "../../utils/personUtils";
+import { ExpenseBackendApi } from "../services/ExpenseBackendApi";
+import {
+  inMemoryCache,
+  InMemoryCacheCategory,
+} from "../cache/InMemoryCacheApi";
+import { personCacheApi } from "../cache/PersonCacheApi";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
 class MonthExpenseRepository {

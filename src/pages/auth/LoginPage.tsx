@@ -3,12 +3,12 @@ import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { useRef } from "react";
 import { Navigate } from "react-router-dom";
-import CustomLink from "../components/common/CustomLink";
-import InputField from "../components/common/InputField";
-import PasswordField from "../components/common/PasswordField";
-import useLogin from "../hooks/useLogin";
-import useLoginValidation from "../hooks/useLoginValidation";
-import CenteredForm from "../components/common/CenteredForm";
+import useLoginValidation from "../../hooks/useLoginValidation";
+import useLogin from "../../hooks/useLogin";
+import CenteredForm from "../../components/common/CenteredForm";
+import InputField from "../../components/common/InputField";
+import PasswordField from "../../components/common/PasswordField";
+import CustomLink from "../../components/common/CustomLink";
 
 function LoginPage() {
   const passwordRef = useRef<Password | null>(null);

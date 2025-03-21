@@ -1,4 +1,4 @@
-import { monthExpenseRepository } from "../api/MonthExpenseRepository";
+import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 import { PersonData } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
 import usePromise from "./usePromise";

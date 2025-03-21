@@ -1,4 +1,4 @@
-import { ExpenseBackendApi } from "../../api/ExpenseBackendApi";
+import { ExpenseBackendApi } from "../../api/services/ExpenseBackendApi";
 import usePromise from "../usePromise";
 
 const useSendResetCode = (email: string, nonce: string) =>

@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import config from "../config";
+import config from "../../config";
 
 console.log("__APP_CONFIG_", config);
 

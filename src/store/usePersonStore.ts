@@ -10,8 +10,11 @@ import { patchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
-import { inMemoryCache, InMemoryCacheCategory } from "../api/InMemoryCacheApi";
-import { monthExpenseRepository } from "../api/MonthExpenseRepository";
+import {
+  inMemoryCache,
+  InMemoryCacheCategory,
+} from "../api/cache/InMemoryCacheApi";
+import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 
 export type ExpenseStore = {
   monthYear: string;

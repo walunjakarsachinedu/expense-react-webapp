@@ -5,7 +5,7 @@ import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ErrorCodes } from "../../api/ErrorContants";
+import { ErrorCodes } from "../../api/constants/ErrorContants";
 import CenteredForm from "../../components/common/CenteredForm";
 import PasswordField from "../../components/common/PasswordField";
 import useChangePassword from "../../hooks/reset-password/useChangePassword";

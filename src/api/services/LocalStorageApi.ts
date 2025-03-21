@@ -1,4 +1,4 @@
-import { LocalStorageValues } from "../types/LocalStorageValues";
+import { LocalStorageValues } from "../../types/LocalStorageValues";
 
 export default class LocalStorageApi {
   static readonly provider = new LocalStorageApi();

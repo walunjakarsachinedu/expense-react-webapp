@@ -1,13 +1,13 @@
 import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
 import PageNotFound from "./pages/PageNotFound";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import Layout from "./pages/Layout";
-import SignupPage from "./pages/SignupPage";
 import SendResetCode from "./pages/password-reset/SendResetCode";
 import VerifyResetCode from "./pages/password-reset/VerifyResetCode";
 import ChangePassword from "./pages/password-reset/ChangePassword";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
 
 export default function AppRouter() {
   return (
