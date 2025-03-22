@@ -50,11 +50,6 @@ class Utility {
     const formatted = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
     return otherDigits ? `${formatted},${lastThree}` : lastThree;
   }
-
-  extractGraphqlError(error: unknown): ErrorCodes | undefined {
-    return (error as { cause?: { extensions?: { code?: ErrorCodes } } })?.cause
-      ?.extensions?.code;
-  }
 }
 
 const utils = new Utility();

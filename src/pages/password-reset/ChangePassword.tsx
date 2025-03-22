@@ -49,7 +49,7 @@ function ChangePassword() {
   if (result?.data) return <Navigate to="/" />;
 
   const isSessionExpired =
-    sessionExpired || result?.error?.message == ErrorCodes.INVALID_RESET_CODE;
+    sessionExpired || result?.error?.code == ErrorCodes.INVALID_RESET_CODE;
 
   return (
     <CenteredForm>
@@ -95,16 +95,16 @@ function ChangePassword() {
       <br />
       <br />
       <br />
-      {result?.error?.message == ErrorCodes.INVALID_RESET_CODE && (
+      {result?.error?.code == ErrorCodes.INVALID_RESET_CODE && (
         <div className="flex justify-content-center">
-          <Message severity="error" text="Invalid or expired reset code." />
+          <Message severity="error" text="Invalid or expired reset code" />
         </div>
       )}
-      {result?.error?.message == ErrorCodes.INVALID_RESET_DATA && (
+      {result?.error?.code == ErrorCodes.INVALID_RESET_DATA && (
         <div className="flex justify-content-center">
           <Message
             severity="error"
-            text="Invalid data found, please try again."
+            text="Invalid data found, please try again"
           />
         </div>
       )}

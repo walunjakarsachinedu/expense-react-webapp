@@ -78,16 +78,16 @@ function VerifyResetCode() {
         </div>
       )}
       <div className="h-5rem"></div>
-      {result?.error?.message == ErrorCodes.INVALID_RESET_CODE && (
+      {result?.error?.code == ErrorCodes.INVALID_RESET_CODE && (
         <div className="flex justify-content-center">
-          <Message severity="error" text="Invalid or expired reset code." />
+          <Message severity="error" text="Invalid or expired reset code" />
         </div>
       )}
-      {result?.error?.message == ErrorCodes.INVALID_RESET_DATA && (
+      {result?.error?.code == ErrorCodes.INVALID_RESET_DATA && (
         <div className="flex justify-content-center">
           <Message
             severity="error"
-            text="Invalid data found, please try again."
+            text="Invalid data found, please try again"
           />
         </div>
       )}

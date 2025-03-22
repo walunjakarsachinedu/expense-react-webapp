@@ -60,16 +60,16 @@ function SendResetCode() {
         <CustomLink to="/login">← Back to log in</CustomLink>
       </div>
       <div className="h-5rem"></div>
-      {result?.error?.message == ErrorCodes.USER_NOT_FOUND && (
+      {result?.error?.code == ErrorCodes.USER_NOT_FOUND && (
         <div className="flex justify-content-center">
-          <Message severity="error" text="User with given email not found." />
+          <Message severity="error" text="User with given email not found" />
         </div>
       )}
-      {result?.error?.message == ErrorCodes.ERROR_IN_SENDING_EMAIL && (
+      {result?.error?.code == ErrorCodes.ERROR_IN_SENDING_EMAIL && (
         <div className="flex justify-content-center">
           <Message
             severity="error"
-            text="Some error occured in sending reset code. Try after sometime."
+            text="Some error occured in sending reset code. Try after sometime"
           />
         </div>
       )}

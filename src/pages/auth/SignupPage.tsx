@@ -9,6 +9,7 @@ import CenteredForm from "../../components/common/CenteredForm";
 import InputField from "../../components/common/InputField";
 import PasswordField from "../../components/common/PasswordField";
 import CustomLink from "../../components/common/CustomLink";
+import { ErrorCodes } from "../../api/constants/ErrorContants";
 
 function SignupPage() {
   const emailRef = useRef<HTMLInputElement | null>(null);
@@ -27,10 +28,10 @@ function SignupPage() {
   const {
     run: performSignup,
     isLoading,
-    result: token,
+    result,
   } = useSignup(name, email, password);
 
-  if (token?.data) return <Navigate to="/"></Navigate>;
+  if (result?.data) return <Navigate to="/"></Navigate>;
 
   const onSubmit = async () => {
     markAllTouched();
@@ -103,9 +104,9 @@ function SignupPage() {
         <CustomLink to="/login">Have an account? Log in</CustomLink>
       </div>
       <div className="h-5rem"></div>
-      {token?.error && (
+      {result?.error?.code == ErrorCodes.USER_ALREADY_EXISTS && (
         <div className="flex justify-content-center">
-          <Message severity="error" text="Invalid email or password" />
+          <Message severity="error" text="User with email already exists" />
         </div>
       )}
     </CenteredForm>

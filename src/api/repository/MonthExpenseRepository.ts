@@ -3,6 +3,7 @@ import {
   PersonData,
   PersonDiff,
   PersonVersionId,
+  ResponseData,
 } from "../../models/type";
 import { patchProcessing } from "../../utils/PatchProcessing";
 import personUtils from "../../utils/personUtils";
@@ -45,10 +46,9 @@ class MonthExpenseRepository {
       version: person.version,
     }));
 
-    const changedPersons = await ExpenseBackendApi.provider.getChangedPersons(
-      monthYear,
-      personVersionIds
-    );
+    const changedPersons = await ExpenseBackendApi.provider
+      .getChangedPersons(monthYear, personVersionIds)
+      .then((result) => result.data!);
 
     const cachedPersons = persons.filter(
       (person) =>
@@ -90,7 +90,7 @@ class MonthExpenseRepository {
       .forEach(personCacheApi.deletePersonWithId);
   }
 
-  async applyPatches(patches: PersonDiff): Promise<Conflicts | undefined> {
+  async applyPatches(patches: PersonDiff): ResponseData<Conflicts> {
     personCacheApi.applyChanges(patches);
     return ExpenseBackendApi.provider.applyChanges(patches);
   }

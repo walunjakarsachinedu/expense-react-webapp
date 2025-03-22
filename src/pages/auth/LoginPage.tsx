@@ -9,6 +9,7 @@ import CenteredForm from "../../components/common/CenteredForm";
 import InputField from "../../components/common/InputField";
 import PasswordField from "../../components/common/PasswordField";
 import CustomLink from "../../components/common/CustomLink";
+import { ErrorCodes } from "../../api/constants/ErrorContants";
 
 function LoginPage() {
   const passwordRef = useRef<Password | null>(null);
@@ -24,13 +25,9 @@ function LoginPage() {
   } = useLoginValidation();
 
   const { email, password } = getValues();
-  const {
-    run: performLogin,
-    isLoading,
-    result: token,
-  } = useLogin(email, password);
+  const { run: performLogin, isLoading, result } = useLogin(email, password);
 
-  if (token?.data) return <Navigate to="/" />;
+  if (result?.data) return <Navigate to="/" />;
 
   const onSubmit = async () => {
     markAllTouched();
@@ -81,7 +78,7 @@ function LoginPage() {
         <CustomLink to="/sign-up">Don't have an account? Sign up</CustomLink>
       </div>
       <div className="h-5rem"></div>
-      {token?.error && (
+      {result?.error?.code == ErrorCodes.INVALID_CREDENTIALS && (
         <div className="flex justify-content-center">
           <Message severity="error" text="Invalid email or password" />
         </div>

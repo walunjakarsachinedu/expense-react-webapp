@@ -1,3 +1,5 @@
+import { ErrorCodes } from "../api/constants/ErrorContants";
+
 /** define transaction type */
 export enum TxType {
   Expense = "Expense",
@@ -87,7 +89,11 @@ export type ConflictPerson = {
   txs?: { _id: string; isDeleted: boolean }[];
 };
 
-export type GraphqlResponse<T> = { data?: T; error?: { message: string } };
+export type GraphqlResponse<T> = {
+  data?: T;
+  error?: { code?: ErrorCodes; message?: string };
+};
+export type ResponseData<ResponseType> = Promise<GraphqlResponse<ResponseType>>;
 
 export type ChangePasswordInput = {
   resetCode: string;

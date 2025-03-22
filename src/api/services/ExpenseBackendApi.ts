@@ -1,15 +1,17 @@
+import { FetchResult } from "@apollo/client";
+import cloneDeep from "lodash/cloneDeep";
 import {
   ChangedPersons,
   ChangePasswordInput,
   Conflicts,
-  GraphqlResponse,
   PersonDiff,
   PersonVersionId,
+  ResponseData,
   VerifyResetCodeInput,
 } from "../../models/type";
-import utils from "../../utils/utils";
 import graphqlClient from "../client/graphqlClient";
 import ApiContants from "../constants/ApiContants";
+import { ErrorCodes } from "../constants/ErrorContants";
 
 // returning frozen objects
 export class ExpenseBackendApi {
@@ -19,88 +21,72 @@ export class ExpenseBackendApi {
     name: string,
     email: string,
     password: string
-  ): Promise<GraphqlResponse<string>> {
-    const result = await graphqlClient
-      .mutate({
+  ): ResponseData<string> {
+    return handleResponse(
+      graphqlClient.mutate({
         mutation: ApiContants.signupQuery,
         variables: { name, email, password },
-      })
-      .then((result) => ({ data: result.data.signup }))
-      .catch((err) => ({ error: { message: err.message } }));
-    return result as GraphqlResponse<string>;
+      }),
+      "signup"
+    );
   }
 
-  async performLogin(
-    email: string,
-    password: string
-  ): Promise<GraphqlResponse<string>> {
-    const result = await graphqlClient
-      .mutate({
+  async performLogin(email: string, password: string): ResponseData<string> {
+    return handleResponse<string>(
+      graphqlClient.mutate({
         mutation: ApiContants.loginQuery,
         variables: { email, password },
-      })
-      .then((result) => ({ data: result.data.login }))
-      .catch((err) => ({ error: { message: err.message } }));
-    return result as GraphqlResponse<string>;
+      }),
+      "login"
+    );
   }
 
   async getChangedPersons(
     month: string,
     personVersionIds: PersonVersionId[]
-  ): Promise<ChangedPersons> {
-    const result = await graphqlClient
-      .query({
+  ): ResponseData<ChangedPersons> {
+    return handleResponse<ChangedPersons>(
+      graphqlClient.query({
         query: ApiContants.changedPersonsQuery,
         variables: { month, personVersionIds },
         fetchPolicy: "network-only",
-      })
-      .catch((err) => undefined)
-      .then(<T>(result: T) => JSON.parse(JSON.stringify(result)) as T);
-    return (result?.data["changedPersons"] as ChangedPersons) ?? [];
+      }),
+      "changedPersons"
+    );
   }
 
-  async applyChanges(diff: PersonDiff): Promise<Conflicts | undefined> {
-    const result = await graphqlClient
-      .mutate({
+  async applyChanges(diff: PersonDiff): ResponseData<Conflicts> {
+    return handleResponse<Conflicts>(
+      graphqlClient.mutate({
         mutation: ApiContants.applyPatchQuery,
         variables: { diff },
-      })
-      .catch((err) => undefined)
-      .then(<T>(result: T) => JSON.parse(JSON.stringify(result)) as T);
-    return result?.data["applyUpdates"] as Conflicts;
+      }),
+      "applyUpdates"
+    );
   }
 
-  async sendResetCode(
-    email: string,
-    nonce: string
-  ): Promise<GraphqlResponse<string>> {
-    const result = await graphqlClient
-      .mutate({
+  async sendResetCode(email: string, nonce: string): ResponseData<string> {
+    return handleResponse<string>(
+      graphqlClient.mutate({
         mutation: ApiContants.sendResetCode,
         variables: { email, nonce },
-      })
-      .then((result) => ({ data: result.data.sendPasswordResetCode as string }))
-      .catch((err: unknown) => ({
-        error: { message: utils.extractGraphqlError(err)! },
-      }));
-    return result;
+      }),
+      "sendPasswordResetCode"
+    );
   }
 
   async verifyResetCode({
     resetCode,
     email,
     nonce,
-  }: VerifyResetCodeInput): Promise<GraphqlResponse<string>> {
-    const result = await graphqlClient
-      .mutate({
+  }: VerifyResetCodeInput): ResponseData<string> {
+    return handleResponse<string>(
+      graphqlClient.mutate({
         mutation: ApiContants.verifyResetCode,
         variables: { resetCode, email, nonce },
-      })
-      .then((result) => ({ data: result.data.verifyResetCode as string }))
-      .catch((err: unknown) => ({
-        error: { message: utils.extractGraphqlError(err)! },
-      }));
-    return result;
+      }),
+      "verifyResetCode"
+    );
   }
 
   async changePassword({
@@ -108,18 +94,44 @@ export class ExpenseBackendApi {
     email,
     nonce,
     newPassword,
-  }: ChangePasswordInput): Promise<GraphqlResponse<string>> {
-    const result = await graphqlClient
-      .mutate({
+  }: ChangePasswordInput): ResponseData<string> {
+    return handleResponse<string>(
+      graphqlClient.mutate({
         mutation: ApiContants.changePassword,
         variables: {
           passwordResetInput: { resetCode, email, nonce, newPassword },
         },
-      })
-      .then((result) => ({ data: result.data.changePassword as string }))
-      .catch((err: unknown) => ({
-        error: { message: utils.extractGraphqlError(err)! },
-      }));
-    return result;
+      }),
+      "changePassword"
+    );
   }
+}
+
+function handleResponse<ResponseType>(
+  promise: Promise<FetchResult<Record<string, unknown>>>,
+  fieldToExtract: string
+): ResponseData<ResponseType> {
+  return promise
+    .then((result) => cloneDeep(result))
+    .then((result) => ({ data: result.data?.[fieldToExtract] as ResponseType }))
+    .catch((err: unknown) => ({
+      error: extractGraphqlError(err),
+    }));
+}
+
+function extractGraphqlError(error: unknown):
+  | {
+      code?: ErrorCodes;
+      message?: string;
+    }
+  | undefined {
+  const err = error as {
+    cause?: { extensions?: { code?: ErrorCodes; message: string } };
+  };
+  return err.cause?.extensions?.code || err.cause?.extensions?.message
+    ? {
+        code: err?.cause?.extensions?.code,
+        message: err?.cause?.extensions?.message,
+      }
+    : undefined;
 }
