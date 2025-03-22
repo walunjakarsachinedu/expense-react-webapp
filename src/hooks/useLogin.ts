@@ -1,4 +1,4 @@
-import { ExpenseBackendApi } from "../api/services/ExpenseBackendApi";
+import { expenseBackendApi } from "../api/services/ExpenseBackendApi";
 import authService from "../core/authService";
 import usePromise from "./usePromise";
 
@@ -9,7 +9,7 @@ const useLogin = (email: string, password: string) =>
   });
 
 const performLogin = async (email: string, password: string) => {
-  const token = await ExpenseBackendApi.provider.performLogin(email, password);
+  const token = await expenseBackendApi.performLogin(email, password);
 
   if (token.data) {
     authService.storeToken(token.data);

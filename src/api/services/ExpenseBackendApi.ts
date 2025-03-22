@@ -15,8 +15,6 @@ import { ErrorCodes } from "../constants/ErrorContants";
 
 // returning frozen objects
 export class ExpenseBackendApi {
-  static readonly provider = new ExpenseBackendApi();
-
   async performSignup(
     name: string,
     email: string,
@@ -135,3 +133,5 @@ function extractGraphqlError(error: unknown):
       }
     : undefined;
 }
+
+export const expenseBackendApi = new ExpenseBackendApi();

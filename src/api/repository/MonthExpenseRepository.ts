@@ -7,7 +7,7 @@ import {
 } from "../../models/type";
 import { patchProcessing } from "../../utils/PatchProcessing";
 import personUtils from "../../utils/personUtils";
-import { ExpenseBackendApi } from "../services/ExpenseBackendApi";
+import { expenseBackendApi } from "../services/ExpenseBackendApi";
 import {
   inMemoryCache,
   InMemoryCacheCategory,
@@ -46,7 +46,7 @@ class MonthExpenseRepository {
       version: person.version,
     }));
 
-    const changedPersons = await ExpenseBackendApi.provider
+    const changedPersons = await expenseBackendApi
       .getChangedPersons(monthYear, personVersionIds)
       .then((result) => result.data!);
 
@@ -92,7 +92,7 @@ class MonthExpenseRepository {
 
   async applyPatches(patches: PersonDiff): ResponseData<Conflicts> {
     personCacheApi.applyChanges(patches);
-    return ExpenseBackendApi.provider.applyChanges(patches);
+    return expenseBackendApi.applyChanges(patches);
   }
 
   _isIdVersionEqual = (a: PersonVersionId, b: PersonVersionId): boolean => {

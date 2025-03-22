@@ -1,4 +1,4 @@
-import { ExpenseBackendApi } from "../../api/services/ExpenseBackendApi";
+import { expenseBackendApi } from "../../api/services/ExpenseBackendApi";
 import authService from "../../core/authService";
 import { ChangePasswordInput } from "../../models/type";
 import usePromise from "../usePromise";
@@ -15,7 +15,7 @@ const changePassword = async ({
   nonce,
   newPassword,
 }: ChangePasswordInput) => {
-  const token = await ExpenseBackendApi.provider.changePassword({
+  const token = await expenseBackendApi.changePassword({
     resetCode,
     email,
     nonce,

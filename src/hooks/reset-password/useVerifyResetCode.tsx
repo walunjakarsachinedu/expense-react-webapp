@@ -1,4 +1,4 @@
-import { ExpenseBackendApi } from "../../api/services/ExpenseBackendApi";
+import { expenseBackendApi } from "../../api/services/ExpenseBackendApi";
 import { VerifyResetCodeInput } from "../../models/type";
 import usePromise from "../usePromise";
 
@@ -9,7 +9,7 @@ const useVerifyResetCode = ({
 }: VerifyResetCodeInput) =>
   usePromise({
     asyncFn: () =>
-      ExpenseBackendApi.provider.verifyResetCode({ resetCode, email, nonce }),
+      expenseBackendApi.verifyResetCode({ resetCode, email, nonce }),
     manual: true,
   });
 
