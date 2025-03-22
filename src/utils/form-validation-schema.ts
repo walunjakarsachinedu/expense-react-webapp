@@ -16,8 +16,7 @@ const passwordValidation = yup
   .min(8, "Must be at least 8 characters")
   .matches(/[a-z]/, "Must include a lowercase letter")
   .matches(/[A-Z]/, "Must include an uppercase letter")
-  .matches(/\d/, "Must include a number")
-  .matches(/[@$!%*?&]/, "Must include a special character");
+  .matches(/\d/, "Must include a number");
 
 const confirmPasswordValidation = yup
   .string()
