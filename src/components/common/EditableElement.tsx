@@ -12,6 +12,7 @@ interface Props {
   trimInput?: boolean;
   numberOnly?: boolean;
   maxCharacter?: number;
+  isReadonly?: boolean;
   onFocus?: FocusEventHandler<HTMLSpanElement> | undefined;
   onBlur?: FocusEventHandler<HTMLSpanElement> | undefined;
   onKeyUp?: KeyboardEventHandler<HTMLSpanElement> | undefined;
@@ -29,6 +30,7 @@ export default function EditableElem({
   initialText = "",
   placeHolder = "",
   className = "",
+  isReadonly = false,
   onChange,
   onFocus,
   onBlur,
@@ -96,7 +98,7 @@ export default function EditableElem({
     <span
       ref={contentRef}
       suppressContentEditableWarning={true}
-      contentEditable={true}
+      contentEditable={!isReadonly}
       data-placeholder={placeHolder}
       onInput={handleInput}
       onKeyUp={onKeyUp}

@@ -9,3 +9,24 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+.deleted.Tag::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px; /* Adjust thickness */
+  background-color: var(--gray-400); /* Matches text color */
+}
+
+.Tag .delete-checkbox {
+  position: absolute;
+  top: -0.6rem;
+  right: -0.6rem;
+}
+
+.Tag .delete-checkbox:hover {
+  transform: scale(0.7) !important;
+  transition: transform 0.2s ease-in-out;
+}
