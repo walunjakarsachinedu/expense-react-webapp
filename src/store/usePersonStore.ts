@@ -49,7 +49,7 @@ let timer: Timer;
 
 const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
   immer<ExpenseStore, [], []>((set, get, storeApi) => {
-    timer = setupDebounceTimer(set, get);
+    timer = setupDebounceTimer();
     const selectedMonth =
       localStorage.getItem(Constants.monthStorageKey) ??
       utils.formatToMonthYear(Date.now());
@@ -216,10 +216,7 @@ const useExpenseStore = create<ExpenseStore>(
   })
 );
 
-function setupDebounceTimer(
-  set: (nextState: (store: ExpenseStore) => void) => void,
-  get: () => ExpenseStore
-): Timer {
+function setupDebounceTimer(): Timer {
   const timer = new Timer({
     debounceTime: 2000,
     thresholdTime: 20000,
@@ -229,7 +226,7 @@ function setupDebounceTimer(
   timer.stopEvent.subscribe(() => {
     console.info("scheduling patch processing");
 
-    const nextState = get().persons;
+    const nextState = useExpenseStore.getState().persons;
     patchProcessing.processPatch(nextState, async (patches) => {
       if (utils.isPatchEmpty(patches)) return;
       console.log("patch: ", patches);

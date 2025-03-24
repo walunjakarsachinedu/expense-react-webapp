@@ -1,4 +1,5 @@
-import { PersonData, PersonDiff, PersonPatch } from "../../models/type";
+import { PersonData, PersonDiff } from "../../models/type";
+import useExpenseStore from "../../store/usePersonStore";
 import personUtils from "../../utils/personUtils";
 
 class PersonCacheApi {
@@ -27,45 +28,10 @@ class PersonCacheApi {
    * Apply patch - updation, deletion, addition.
    */
   applyChanges(patches: PersonDiff) {
-    const personMap = [
-      // filter out deleted persons
-      ...this.getAllPersons().filter(
-        (person) =>
-          !patches.deleted || !patches.deleted.find((_id) => _id == person._id)
-      ),
-      // include added persons
-      ...(patches.added?.map(personUtils.personTxToPerson) ?? []),
-    ].reduce<Record<string, PersonData>>((acc, cur) => {
-      acc[cur._id] = cur;
-      return acc;
-    }, {} as Record<string, PersonData>);
-
-    patches.updated?.forEach((update: PersonPatch) => {
-      // applying person update
-      personMap[update._id] = {
-        ...personMap[update._id],
-        ...{ ...update, txDiff: undefined },
-      };
-
-      const person = personMap[update._id];
-
-      // applying tx updates
-      update.txDiff?.added?.forEach((tx) => (person.txs[tx._id] = tx));
-      update.txDiff?.deleted?.forEach((txId) => delete person.txs[txId]);
-      update.txDiff?.updated?.forEach((txPatch) => {
-        person.txs[txPatch._id] = {
-          ...person.txs[txPatch._id],
-          ...txPatch,
-        };
-      });
-      // setting order with updated tx
-      person.txIds = Object.values(person.txs)
-        .sort((a, b) => a.index - b.index)
-        .map(({ _id }) => _id);
-    });
-
-    // store cache
-    Object.values(personMap).forEach(personCacheApi.storePerson);
+    const persons = useExpenseStore.getState().persons;
+    patches.added?.forEach((person) => this.storePerson(persons[person._id]));
+    patches.updated?.forEach((person) => this.storePerson(persons[person._id]));
+    patches.deleted?.map(this.deletePersonWithId);
   }
 }
 
