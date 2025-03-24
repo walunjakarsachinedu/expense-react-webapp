@@ -10,7 +10,6 @@ import {
   Tx,
 } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
-import { ObjectId } from "../../utils/objectid";
 import { patchProcessing } from "../../utils/PatchProcessing";
 import personUtils from "../../utils/personUtils";
 import utils from "../../utils/utils";
@@ -26,10 +25,10 @@ class MonthExpenseRepository {
   /**
    * Algorithm :-
    * 1. send pending patch
-   * 2. if cache for data found, then return data from cache
+   * 2. if data found in in-memory cache, then return data from cache
    * 3. fetch cache & changed persons
    * 4. remove un-used persons from cache
-   * 5. store updated & added persons from cache
+   * 5. store updated & added persons to cache
    * 6. merge changed persons with cache
    */
   async getMonthExpense(monthYear: string): Promise<PersonData[]> {
@@ -38,7 +37,7 @@ class MonthExpenseRepository {
       await monthExpenseRepository.applyPatches(patches);
     });
 
-    // 2. if cache for data found, then return data from cache
+    // 2. if data found in in-memory cache, then return data from cache
     const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
       InMemoryCacheCategory.PersonMonthlyData,
       monthYear
@@ -73,7 +72,7 @@ class MonthExpenseRepository {
     // 4. remove un-used persons from cache
     changedPersons.deletedPersons.forEach(personCacheApi.deletePersonWithId);
 
-    // 5. store updated & added persons from cache
+    // 5. store updated & added persons to cache
     [...changedPersons.updatedPersons, ...changedPersons.addedPersons]
       .map(personUtils.personTxToPerson)
       .forEach(personCacheApi.storePerson);
@@ -209,24 +208,10 @@ class MonthExpenseRepository {
     await expenseBackendApi.applyChanges(diff);
   }
 
-  async storePersonData(personData: PersonData[]) {
-    personData.forEach((person) => personCacheApi.storePerson(person));
-  }
-
-  async deletePersonData(personData: PersonData[]) {
-    personData
-      .map((person) => person._id)
-      .forEach(personCacheApi.deletePersonWithId);
-  }
-
   async applyPatches(patches: PersonDiff): ResponseData<Conflicts> {
     personCacheApi.applyChanges(patches);
     return expenseBackendApi.applyChanges(patches);
   }
-
-  _isIdVersionEqual = (a: PersonVersionId, b: PersonVersionId): boolean => {
-    return a._id == b._id && a.version == b.version;
-  };
 }
 
 export const monthExpenseRepository = new MonthExpenseRepository();
