@@ -50,7 +50,7 @@ const authLink = setContext((request, { headers }) => {
 });
 
 const graphqlClient = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({ addTypename: false }),
   link: from([authLink, httpLink]),
 });
 
