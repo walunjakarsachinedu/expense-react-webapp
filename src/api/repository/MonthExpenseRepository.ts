@@ -91,9 +91,9 @@ class MonthExpenseRepository {
    * Algorithm :-
    * 1. Delete deleted person, tx from patchProcessing
    * 2. Delete deleted person, tx from useExpenseStore
-   * 3. Prepare patch of saved persons  & txs (with new version)
-   * 4. Update person version from patchProcessing & useExpenseStore
-   * 5. send patch to backend
+   * 3. Delete deleted person, tx from cache
+   * 4. Prepare patch of saved persons & txs
+   * 5. Send patch to backend
    */
   async processConflicts() {
     const conflicts = useExpenseStore.getState().conflicts;
@@ -142,8 +142,6 @@ class MonthExpenseRepository {
       }
     });
 
-    // todo: make sure changes are reflected in cache properly
-
     // 2. Delete deleted person, tx from useExpenseStore
     useExpenseStore.setState(
       produce(
@@ -165,8 +163,15 @@ class MonthExpenseRepository {
       )
     );
 
-    // 3. Prepare patch of saved persons  & txs (with new version)
+    // 3. Delete deleted person, tx from cache
     const personData = useExpenseStore.getState().persons;
+    personToDelete.forEach(personCacheApi.deletePersonWithId);
+    txToDelete
+      .filter((tx) => !!tx)
+      .map((tx) => personData[tx.personId])
+      .forEach(personCacheApi.storePerson);
+
+    // 4. Prepare patch of saved persons & txs
     const personToSave = conflicts
       .filter((el) => el.isDeleted && !el.toDelete)
       .map((el) => el._id)
@@ -182,43 +187,20 @@ class MonthExpenseRepository {
         )
         .filter((tx) => !!tx)
         .reduce((acc, tx) => {
-          acc[tx.personId] ??= [];
-          acc[tx.personId].push(personData[tx.personId].txs[tx._id]);
+          acc[tx.personId] ??= {
+            version: personData[tx.personId].version,
+            txs: [],
+          };
+          acc[tx.personId].txs.push(personData[tx.personId].txs[tx._id]);
           return acc;
-        }, {} as Record<string, Tx[]>)
-    ).map<PersonPatch>(([personId, txs]) => ({
+        }, {} as Record<string, { txs: Tx[]; version: string }>)
+    ).map<PersonPatch>(([personId, data]) => ({
       _id: personId,
-      txDiff: { added: txs },
-      version: new ObjectId().toHexString(),
+      txDiff: { added: data.txs },
+      version: data.version,
     }));
 
-    // 4. Update person version from patchProcessing & useExpenseStore
-    txToSave.forEach((personPatch) => {
-      personUtils.updatePersonVersion(
-        patchProcessing.prevState,
-        personPatch._id,
-        personPatch.version
-      );
-      personUtils.updatePersonVersion(
-        patchProcessing.nextState,
-        personPatch._id,
-        personPatch.version
-      );
-    });
-    useExpenseStore.setState(
-      produce({ persons: personData }, (draft) => {
-        txToSave.forEach((personPatch) => {
-          personUtils.updatePersonVersion(
-            draft.persons,
-            personPatch._id,
-            personPatch.version
-          );
-        });
-        return draft;
-      })
-    );
-
-    // 5. send patch to backend
+    // 5. Send patch to backend
     const diff: PersonDiff = { added: personToSave, updated: txToSave };
     if (diff.added?.length == 0) delete diff.added;
     if (diff.updated?.length == 0) delete diff.updated;
