@@ -85,8 +85,17 @@ export type Conflicts = {
 
 export type ConflictPerson = {
   _id: string;
+  /** If true, person is deleted from backend */
   isDeleted: boolean;
-  txs?: { _id: string; isDeleted: boolean }[];
+  /** If true, delete locally; false saves to backend */
+  toDelete?: boolean;
+  txs?: {
+    _id: string;
+    /** If true, transaction is deleted from backend */
+    isDeleted: boolean;
+    /** If true, delete locally; false saves to backend */
+    toDelete?: boolean;
+  }[];
 };
 
 export type GraphqlResponse<T> = {

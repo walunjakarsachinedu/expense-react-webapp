@@ -1,8 +1,13 @@
 import { mountStoreDevtool } from "simple-zustand-devtools";
 import { create, StateCreator } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import {
+  inMemoryCache,
+  InMemoryCacheCategory,
+} from "../api/cache/InMemoryCacheApi";
+import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
-import { PersonData, TxType, Tx } from "../models/type";
+import { ConflictPerson, PersonData, Tx, TxType } from "../models/type";
 import { Prettify } from "../types/Prettify";
 import Constants from "../utils/constants";
 import { ObjectId } from "../utils/objectid";
@@ -10,16 +15,16 @@ import { patchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
-import {
-  inMemoryCache,
-  InMemoryCacheCategory,
-} from "../api/cache/InMemoryCacheApi";
-import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 
 export type ExpenseStore = {
   monthYear: string;
   persons: Record<string, PersonData>;
   personIds: { id: string; type: TxType }[]; // for maintaining order
+
+  conflicts?: ConflictPerson[];
+  isConflictsFound: boolean;
+
+  clearConflicts: () => void;
 
   setMonthYear: (monthYear: string) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
@@ -53,6 +58,14 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       monthYear: selectedMonth,
       persons: {},
       personIds: [],
+      isConflictsFound: false,
+
+      clearConflicts: () => {
+        set((store) => {
+          store.isConflictsFound = false;
+          store.conflicts = [];
+        });
+      },
       setMonthYear: (monthYear: string) => {
         // save change considering: user is changing month
         timer.timeout();
@@ -218,10 +231,14 @@ function setupDebounceTimer(
 
     const nextState = get().persons;
     patchProcessing.processPatch(nextState, async (patches) => {
+      if (utils.isPatchEmpty(patches)) return;
       console.log("patch: ", patches);
       await monthExpenseRepository.applyPatches(patches)?.then((conflicts) => {
-        if (!conflicts) return;
-        // TODO - add logic to show conflict to user
+        if (!conflicts?.data?.conflictPersons?.length) return;
+        useExpenseStore.setState({
+          isConflictsFound: true,
+          conflicts: conflicts.data.conflictPersons,
+        });
       });
     });
   });

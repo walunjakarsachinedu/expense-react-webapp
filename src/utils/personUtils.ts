@@ -5,6 +5,7 @@ import {
   PersonTx,
   Tx,
   TxPatch,
+  TxType,
 } from "../models/type";
 import utils from "./utils";
 
@@ -115,6 +116,45 @@ class PersonUtils {
 
     if (Object.keys(txPatch).length > 1) return txPatch;
   }
+
+  /**
+   * Deletes an entity based on provided IDs:
+   * 1. If `personId` is specified without `txId`, deletes the person from `persons` and `personIds` (if present).
+   * 2. If `txId` is specified, deletes the transaction.
+   */
+  deleteEntity = (
+    personData: {
+      persons: Record<string, PersonData> | null | undefined;
+      personIds?: { id: string; type: TxType }[];
+    },
+    personId: string,
+    txId?: string
+  ) => {
+    const { persons } = personData;
+    if (!persons) return;
+    if (!txId) {
+      delete persons[personId];
+      if (personData?.personIds)
+        personData.personIds = personData.personIds.filter(
+          (el) => el.id != personId
+        );
+    } else if (persons[personId]) {
+      delete persons[personId].txs[txId];
+      persons[personId].txIds = persons[personId].txIds.filter(
+        (id) => id != txId
+      );
+    }
+  };
+
+  updatePersonVersion = (
+    persons: Record<string, PersonData> | null | undefined,
+    personId: string,
+    newVersion: string
+  ) => {
+    if (persons && persons[personId]) {
+      persons[personId].version = newVersion;
+    }
+  };
 }
 
 const personUtils = new PersonUtils();

@@ -1,31 +1,40 @@
+import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { MenuItem } from "primereact/menuitem";
 import { memo, useState } from "react";
 import useToast from "../../hooks/useToast";
+import { ConflictPerson } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
+import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
 import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxs.css";
 import TxTag from "./TxTag";
-import utils from "../../utils/utils";
-import { Checkbox } from "primereact/checkbox";
 
 type Props = {
   id: string;
   /** Always true if showAsDeleted internal state is true */
   makeReadOnly?: boolean;
-  showDeleteCheckBox?: boolean;
+  conflictMode?: boolean;
 };
 
 const PersonTxs = memo(
-  ({ id, makeReadOnly = false, showDeleteCheckBox = false }: Props) => {
+  ({ id, makeReadOnly = false, conflictMode = false }: Props) => {
     const [showAsDeleted, setShowAsDeleted] = useState(false);
-    if (showDeleteCheckBox || showAsDeleted) makeReadOnly = true;
     const toast = useToast();
     const addExpense = useExpenseStore((store) => store.addExpense);
     const deletePerson = useExpenseStore((store) => store.deletePerson);
     const copyPerson = useExpenseStore((store) => store.copyPerson);
+
     const txIds = useExpenseStore((store) => store.persons[id].txIds);
+    const conflicts = useExpenseStore((store) => store.conflicts);
+    const conflict = conflicts?.find((conflict) => conflict._id == id);
+
+    const showDeleteCheckBox = conflictMode && conflict?.isDeleted;
+
+    if (showDeleteCheckBox || showAsDeleted || conflictMode) {
+      makeReadOnly = true;
+    }
 
     const actionItems: MenuItem[] = [
       {
@@ -68,8 +77,7 @@ const PersonTxs = memo(
                   id={txId}
                   personId={id}
                   alwaysShowAsDeleted={showAsDeleted}
-                  makeReadOnly={makeReadOnly}
-                  showDeleteCheckBox={false}
+                  conflictMode={conflictMode}
                 />
               ))}
           </div>
@@ -88,21 +96,32 @@ const PersonTxs = memo(
       ></div>
     );
 
+    const onCheckboxToggle = (isChecked: boolean) => {
+      setShowAsDeleted(isChecked);
+      if (!conflict) return;
+
+      useExpenseStore.setState({
+        conflicts: conflicts?.map<ConflictPerson>((el) =>
+          el._id == conflict._id ? { ...conflict, toDelete: isChecked } : el
+        ),
+      });
+    };
+
     return (
       <div className="PersonTxsComp">
         <div className="flex justify-content-between align-items-center">
           <div className="mr-2 flex align-items-center">
-            {showDeleteCheckBox ? (
+            {conflictMode && !showDeleteCheckBox && <div className="w-2rem" />}
+            {conflictMode && showDeleteCheckBox && (
               <Checkbox
                 value="deleted"
                 checked={showAsDeleted}
-                onClick={() => setShowAsDeleted(!showAsDeleted)}
+                onClick={() => onCheckboxToggle(!showAsDeleted)}
                 className="mr-2"
                 style={{ transform: "scale(0.70)", transformOrigin: "center" }}
               />
-            ) : (
-              <ContextMenuButton items={actionItems} />
             )}
+            {!conflictMode && <ContextMenuButton items={actionItems} />}
             <PersonName
               id={id}
               makeReadOnly={makeReadOnly}

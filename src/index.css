@@ -109,3 +109,8 @@ body {
 .p-dialog {
   border-color: rgb(53, 53, 53);
 }
+
+.blurred-overlay {
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,11 @@
+.ConflictResolutionDialog.p-dialog .p-dialog-content {
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 1rem;
+}
+
+.ConflictResolutionDialog.p-dialog {
+  max-height: 97%;
+  margin-top: 0.7rem;
+  max-width: min(97%, 1000px) !important;
+}

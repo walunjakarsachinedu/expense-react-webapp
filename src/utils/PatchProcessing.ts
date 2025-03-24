@@ -13,8 +13,8 @@ import utils from "./utils";
  *    - process newly calculated patch
  */
 class PatchProcessing {
-  private prevState?: Record<string, PersonData>;
-  private nextState?: Record<string, PersonData> | null;
+  prevState?: Record<string, PersonData>;
+  nextState?: Record<string, PersonData> | null;
   private action?: (patch: PersonDiff) => Promise<void>;
   private currentActionStatus?: TrackedPromise<void>;
 

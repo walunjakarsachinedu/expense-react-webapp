@@ -1,4 +1,4 @@
-import { ErrorCodes } from "../api/constants/ErrorContants";
+import { PersonDiff } from "../models/type";
 
 class Utility {
   static readonly provider = new Utility();
@@ -49,6 +49,13 @@ class Utility {
     const otherDigits = str.slice(0, -3);
     const formatted = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
     return otherDigits ? `${formatted},${lastThree}` : lastThree;
+  }
+
+  isPatchEmpty(diff: PersonDiff): boolean {
+    return (
+      Object.keys(diff).filter((id) => diff[id as keyof PersonDiff]?.length)
+        .length == 0
+    );
   }
 }
 

@@ -1,17 +1,18 @@
+import { produce } from "immer";
+import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { memo, useRef, useState } from "react";
 import useExpenseStore from "../../store/usePersonStore";
+import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
 import "./TxTag.css";
-import utils from "../../utils/utils";
-import { Checkbox } from "primereact/checkbox";
 
 type Props = {
   id: string;
   personId: string;
   /** Always true if showAsDeleted internal state is true */
   makeReadOnly?: boolean;
-  showDeleteCheckBox?: boolean;
+  conflictMode?: boolean;
   alwaysShowAsDeleted?: boolean;
 };
 
@@ -19,19 +20,31 @@ const TxTag = memo(
   ({
     id,
     personId,
-    showDeleteCheckBox = false,
     makeReadOnly = false,
+    conflictMode = false,
     alwaysShowAsDeleted = false,
   }: Props) => {
     const [showAsDeleted, setShowAsDeleted] = useState(false);
-    const isDeleted = alwaysShowAsDeleted || showAsDeleted;
-    if (showDeleteCheckBox || isDeleted) makeReadOnly = true;
     const tx = useExpenseStore((store) => store.persons[personId].txs[id]);
     const updateExpense = useExpenseStore((store) => store.updateExpense);
     const deleteExpense = useExpenseStore((store) => store.deleteExpense);
     const delayDebounceTimer = useExpenseStore(
       (store) => store.delayDebounceTimer
     );
+
+    const conflicts = useExpenseStore((store) => store.conflicts);
+    const conflict = conflicts?.find((conflict) => conflict._id == personId);
+
+    const isDeleted = alwaysShowAsDeleted || showAsDeleted;
+
+    const showDeleteCheckBox =
+      conflictMode &&
+      !conflict?.isDeleted &&
+      conflict?.txs?.find((tx) => tx._id == id && tx.isDeleted);
+
+    if (conflictMode || showDeleteCheckBox || isDeleted) {
+      makeReadOnly = true;
+    }
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const moneyValue = useRef(tx.money);
@@ -46,6 +59,20 @@ const TxTag = memo(
 
     const deleteTag = () => {
       deleteExpense(id, personId);
+    };
+
+    const onCheckboxToggle = (isChecked: boolean) => {
+      setShowAsDeleted(isChecked);
+      if (!conflict) return;
+
+      useExpenseStore.setState({
+        conflicts: produce(conflicts, (draft) => {
+          const conflict = draft?.find((el) => el._id == personId);
+          const txConflict = conflict?.txs?.find((el) => el._id == id);
+          if (txConflict) txConflict.toDelete = isChecked;
+          return draft;
+        }),
+      });
     };
 
     return (
@@ -134,7 +161,7 @@ const TxTag = memo(
                 value="deleted"
                 className="delete-checkbox"
                 checked={showAsDeleted}
-                onClick={() => setShowAsDeleted(!showAsDeleted)}
+                onClick={() => onCheckboxToggle(!showAsDeleted)}
                 style={{ transform: "scale(0.60)", transformOrigin: "center" }}
               />
             )}

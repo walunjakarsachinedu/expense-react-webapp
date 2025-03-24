@@ -1,7 +1,8 @@
+import ConflictResolutionDialog from "../components/ConflictResolutionDialog";
 import ExpensePanel from "../components/Transaction/ExpensePanel";
+import TxSummary from "../components/Transaction/TxSummary";
 import useMonthExpense from "../hooks/useMonthExpense";
 import { TxType } from "../models/type";
-import TxSummary from "../components/Transaction/TxSummary";
 
 const HomePage = () => {
   const { isLoading, error } = useMonthExpense();
@@ -17,6 +18,7 @@ const HomePage = () => {
       <br /> <br />
       <ExpensePanel type={TxType.Income}></ExpensePanel>
       <br /> <br />
+      <ConflictResolutionDialog />
     </>
   );
 };
