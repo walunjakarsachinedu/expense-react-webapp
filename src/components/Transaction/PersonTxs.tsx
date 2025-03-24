@@ -20,7 +20,6 @@ type Props = {
 
 const PersonTxs = memo(
   ({ id, makeReadOnly = false, conflictMode = false }: Props) => {
-    const [showAsDeleted, setShowAsDeleted] = useState(false);
     const toast = useToast();
     const addExpense = useExpenseStore((store) => store.addExpense);
     const deletePerson = useExpenseStore((store) => store.deletePerson);
@@ -29,6 +28,10 @@ const PersonTxs = memo(
     const txIds = useExpenseStore((store) => store.persons[id].txIds);
     const conflicts = useExpenseStore((store) => store.conflicts);
     const conflict = conflicts?.find((conflict) => conflict._id == id);
+
+    const [showAsDeleted, setShowAsDeleted] = useState(
+      conflict?.toDelete ?? false
+    );
 
     const showDeleteCheckBox = conflictMode && conflict?.isDeleted;
 

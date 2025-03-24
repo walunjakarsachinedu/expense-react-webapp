@@ -24,7 +24,6 @@ const TxTag = memo(
     conflictMode = false,
     alwaysShowAsDeleted = false,
   }: Props) => {
-    const [showAsDeleted, setShowAsDeleted] = useState(false);
     const tx = useExpenseStore((store) => store.persons[personId].txs[id]);
     const updateExpense = useExpenseStore((store) => store.updateExpense);
     const deleteExpense = useExpenseStore((store) => store.deleteExpense);
@@ -34,6 +33,9 @@ const TxTag = memo(
 
     const conflicts = useExpenseStore((store) => store.conflicts);
     const conflict = conflicts?.find((conflict) => conflict._id == personId);
+    const [showAsDeleted, setShowAsDeleted] = useState(
+      conflict?.toDelete ?? false
+    );
 
     const isDeleted = alwaysShowAsDeleted || showAsDeleted;
 
