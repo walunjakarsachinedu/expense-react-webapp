@@ -1,64 +1,73 @@
 import { PersonData, PersonDiff } from "../models/type";
+import useExpenseStore from "../store/usePersonStore";
 import { isPageUnloaded } from "./is-page-unloaded";
 import personUtils from "./personUtils";
 import TrackedPromise from "./TrackPromise";
 import utils from "./utils";
 
-/**
- * **Handles sequential patch processing.**
- * - when new state and action arrives then store it.
- * - when current patch is processed & new state exists, then
- *    - use next & prev state to calculate patch,
- *    - set prevState=nextState & nextState=null
- *    - process newly calculated patch
- */
+/** Manages sequential patch processing.  */
 class PatchProcessing {
   prevState?: Record<string, PersonData>;
-  nextState?: Record<string, PersonData> | null;
   private action?: (patch: PersonDiff) => Promise<void>;
   private currentActionStatus?: TrackedPromise<void>;
+  private isPatchInQueue: boolean = false;
 
   private scheduledAction?: () => void;
 
+  /**
+   * Algorithm:
+   * 1. If no prevState, store nextState as prevState & skip processing.
+   * 2. Calculate patch.
+   * 3. If offline, store patch & schedule to run once online.
+   * 4. If processing, store patch.
+   * 5. If not processing, process patch.
+   * 6. Process pending patches if any.
+   */
   processPatch(
     nextState: Record<string, PersonData>,
     action: (patch: PersonDiff) => Promise<void>
   ) {
-    this.nextState = nextState;
+    // 1. If no prevState, store nextState as prevState & skip processing.
     this.action = action;
     if (!this.prevState) {
-      this.prevState = this.nextState;
-      this.nextState = null;
+      this.prevState = nextState;
       return;
     }
 
+    // 2. Calculate patch.
     const patch = personUtils.personDiff({
-      updatedData: this.nextState,
+      updatedData: nextState,
       oldData: this.prevState,
     });
 
+    // 3. If offline, store patch & schedule to run once online.
     if (!navigator.onLine) {
       this._storePatch(patch);
       this._runOnceOnline(action);
+      this.isPatchInQueue = true;
       return;
     }
 
     const isPatchInProcess =
       this.currentActionStatus && !this.currentActionStatus.getIsResolved();
 
-    // store current patch when there is patch already in process
+    // 4. If processing, store patch.
     if (isPatchInProcess) {
       this._storePatch(patch);
+      this.isPatchInQueue = true;
     }
 
-    // process patch when there is no patch in process
+    // 5. If not processing, process patch.
     if (!isPatchInProcess) {
       this._deletePatch();
       this.prevState = nextState;
-      this.nextState = null;
+      this.isPatchInQueue = false;
       this.currentActionStatus = new TrackedPromise(
         this.action(patch).finally(() => {
-          if (this.nextState) this.processPatch(this.nextState, action);
+          if (!this.isPatchInQueue) return;
+          // 6. Process pending patches if any.
+          const nextState = useExpenseStore.getState().persons;
+          this.processPatch(nextState, action);
         })
       );
     }
@@ -104,8 +113,8 @@ class PatchProcessing {
       window.removeEventListener("online", this.scheduledAction);
     }
     const processPatch = () => {
-      if (this.nextState) this.processPatch(this.nextState, action);
-      else this.processPatchFromStorage(action);
+      const nextState = useExpenseStore.getState().persons;
+      this.processPatch(nextState, action);
     };
     window.addEventListener("online", () => {
       if (isPageUnloaded()) return;

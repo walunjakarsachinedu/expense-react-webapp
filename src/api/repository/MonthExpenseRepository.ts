@@ -99,7 +99,6 @@ class MonthExpenseRepository {
     if (!conflicts?.length) return;
 
     // todo: in-efficient solution, find alternative without cloning
-    patchProcessing.nextState = cloneDeep(patchProcessing.nextState);
     patchProcessing.prevState = cloneDeep(patchProcessing.prevState);
 
     const personToDelete = conflicts
@@ -121,20 +120,11 @@ class MonthExpenseRepository {
         { persons: patchProcessing.prevState },
         personId
       );
-      personUtils.deleteEntity(
-        { persons: patchProcessing.nextState },
-        personId
-      );
     });
     txToDelete.forEach((tx) => {
       if (tx?.personId) {
         personUtils.deleteEntity(
           { persons: patchProcessing.prevState },
-          tx.personId,
-          tx._id
-        );
-        personUtils.deleteEntity(
-          { persons: patchProcessing.nextState },
           tx.personId,
           tx._id
         );

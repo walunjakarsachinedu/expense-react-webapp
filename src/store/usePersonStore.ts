@@ -229,7 +229,7 @@ function setupDebounceTimer(): Timer {
     const nextState = useExpenseStore.getState().persons;
     patchProcessing.processPatch(nextState, async (patches) => {
       if (utils.isPatchEmpty(patches)) return;
-      console.log("patch: ", patches);
+      console.log("processing patch: ", patches);
       await monthExpenseRepository.applyPatches(patches)?.then((conflicts) => {
         if (!conflicts?.data?.conflictPersons?.length) return;
         useExpenseStore.setState({
