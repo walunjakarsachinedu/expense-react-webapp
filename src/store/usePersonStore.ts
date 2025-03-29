@@ -7,7 +7,13 @@ import {
 } from "../api/cache/InMemoryCacheApi";
 import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
-import { ConflictPerson, PersonData, Tx, TxType } from "../models/type";
+import {
+  ChangedPersons,
+  ConflictPerson,
+  PersonData,
+  Tx,
+  TxType,
+} from "../models/type";
 import { Prettify } from "../types/Prettify";
 import Constants from "../utils/constants";
 import { ObjectId } from "../utils/objectid";
@@ -27,6 +33,7 @@ export type ExpenseStore = {
   clearConflicts: () => void;
 
   setMonthYear: (monthYear: string) => void;
+  applyChanges: (monthYear: string, persons: ChangedPersons) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
   addPerson: (type: TxType) => void;
   deletePerson: (id: string) => void;
@@ -81,6 +88,18 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.monthYear = monthYear;
         });
         localStorage.setItem(Constants.monthStorageKey, monthYear);
+      },
+      applyChanges: (monthYear, changedPersons) => {
+        set((store) => {
+          store.monthYear = monthYear;
+          store.persons = personUtils.applyChanges(
+            store.persons,
+            changedPersons
+          );
+          store.personIds = Object.values(store.persons)
+            .sort((a, b) => a.index - b.index)
+            .map((person) => ({ id: person._id, type: person.type }));
+        });
       },
       setMonthData: (monthYear, persons) => {
         set((store) => {

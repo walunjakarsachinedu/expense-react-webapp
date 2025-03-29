@@ -1,6 +1,8 @@
 import { produce } from "immer";
 import { cloneDeep } from "lodash";
 import {
+  ChangedPersons,
+  Changes,
   Conflicts,
   PersonData,
   PersonDiff,
@@ -24,66 +26,72 @@ import { expenseBackendApi } from "../services/ExpenseBackendApi";
 class MonthExpenseRepository {
   /**
    * Algorithm :-
-   * 1. send pending patch
-   * 2. if data found in in-memory cache, then return data from cache
-   * 3. fetch cache & changed persons
-   * 4. remove un-used persons from cache
-   * 5. store updated & added persons to cache
-   * 6. merge changed persons with cache
+   * 1. send current local
+   * 2. apply server changes & conflicts
    */
-  async getMonthExpense(monthYear: string): Promise<PersonData[]> {
-    // 1. send pending patch
-    await patchProcessing.processPatchFromStorage(async (patches) => {
-      await monthExpenseRepository.applyPatches(patches);
-    });
+  async syncChanges(
+    monthYear: string,
+    diff: PersonDiff,
+    /** If true, skips diff send and just loads from cache if available else backend. */
+    justLoadData: boolean = false
+  ): Promise<void> {
+    if (justLoadData) {
+      const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
+        InMemoryCacheCategory.PersonMonthlyData,
+        monthYear
+      );
+      if (cachedPersonData) {
+        useExpenseStore.getState().setMonthData(monthYear, cachedPersonData);
+        return;
+      }
+    }
 
-    // 2. if data found in in-memory cache, then return data from cache
-    const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
-      InMemoryCacheCategory.PersonMonthlyData,
-      monthYear
+    // 1. send current local
+    const persons = useExpenseStore.getState().persons;
+    const personVersionIds: PersonVersionId[] = Object.keys(persons).map(
+      (_id) => ({ _id, version: persons[_id].version })
     );
-    if (cachedPersonData) return cachedPersonData;
-
-    // 3. fetch cache & changed persons
-    const persons: PersonData[] = personCacheApi.getAllPersons();
-
-    const personVersionIds: PersonVersionId[] = persons.map((person) => ({
-      _id: person._id,
-      version: person.version,
-    }));
-
-    const changedPersons = await expenseBackendApi
-      .getChangedPersons(monthYear, personVersionIds)
+    const changes = await expenseBackendApi
+      .syncChanges(diff, monthYear, personVersionIds)
       .then((result) => result.data!);
 
-    const cachedPersons = persons.filter(
-      (person) =>
-        !changedPersons.updatedPersons.find(({ _id }) => _id == person._id) &&
-        !changedPersons.deletedPersons.find((id) => id == person._id)
-    );
+    // 2. apply server changes & conflicts
+    return this.applyServerChanges(monthYear, changes);
+  }
 
-    const addedPersons = changedPersons.addedPersons.map(
-      personUtils.personTxToPerson
-    );
-    const updatedPersons = changedPersons.updatedPersons.map(
-      personUtils.personTxToPerson
-    );
+  /**
+   * Algorithm :-
+   * 1. apply changes to cache
+   * 2. apply changes to useExpenseStore
+   * 3. apply changes to patchProcessing
+   * 4. store conflicts to useExpenseStore
+   */
+  async applyServerChanges(monthYear: string, changes: Changes): Promise<void> {
+    const changedPersons = changes.changedPersons;
 
-    // 4. remove un-used persons from cache
+    // 1. apply changes to cache
     changedPersons.deletedPersons.forEach(personCacheApi.deletePersonWithId);
-
-    // 5. store updated & added persons to cache
     [...changedPersons.updatedPersons, ...changedPersons.addedPersons]
       .map(personUtils.personTxToPerson)
       .forEach(personCacheApi.storePerson);
 
-    // 6. merge changed persons with cache
-    return [...cachedPersons, ...addedPersons, ...updatedPersons]
-      .map((person) => {
-        person.txIds.forEach((id, index) => (person.txs[id].index = index));
-        return person;
-      })
-      .sort((person) => person.index - person.index);
+    // 2. apply changes to useExpenseStore
+    useExpenseStore.getState().applyChanges(monthYear, changedPersons);
+
+    // 3. apply changes to patchProcessing
+    if (patchProcessing.prevState) {
+      patchProcessing.prevState = personUtils.applyChanges(
+        patchProcessing.prevState,
+        changedPersons
+      );
+    }
+
+    // TODO: move logic to expense store
+    // 4. store conflicts to useExpenseStore
+    useExpenseStore.setState({
+      isConflictsFound: true,
+      conflicts: changes.conflictsPersons,
+    });
   }
 
   /**
@@ -131,6 +139,7 @@ class MonthExpenseRepository {
       }
     });
 
+    // TODO: move logic to expense store
     // 2. Delete deleted person, tx from useExpenseStore
     useExpenseStore.setState(
       produce(

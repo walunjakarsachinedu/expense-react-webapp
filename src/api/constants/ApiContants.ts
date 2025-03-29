@@ -84,6 +84,60 @@ export default class ApiContants {
     }
   `;
 
+  static readonly syncChanges = gql`
+    mutation SyncChanges(
+      $diff: PersonDiff
+      $month: String!
+      $personVersionIds: [PersonVersionId!]!
+    ) {
+      syncChanges(
+        diff: $diff
+        month: $month
+        personVersionIds: $personVersionIds
+      ) {
+        conflictsPersons {
+          _id
+          isDeleted
+          txs {
+            _id
+            isDeleted
+          }
+        }
+        changedPersons {
+          addedPersons {
+            _id
+            month
+            type
+            index
+            name
+            txs {
+              _id
+              index
+              money
+              tag
+            }
+            version
+          }
+          deletedPersons
+          updatedPersons {
+            _id
+            month
+            type
+            index
+            name
+            txs {
+              _id
+              index
+              money
+              tag
+            }
+            version
+          }
+        }
+      }
+    }
+  `;
+
   static readonly sendResetCode = gql`
     mutation SendPasswordResetCode($nonce: String!, $email: String!) {
       sendPasswordResetCode(nonce: $nonce, email: $email)

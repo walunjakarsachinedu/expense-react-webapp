@@ -1,4 +1,5 @@
 import {
+  ChangedPersons,
   PersonData,
   PersonDiff,
   PersonPatch,
@@ -7,6 +8,7 @@ import {
   TxPatch,
   TxType,
 } from "../models/type";
+import useExpenseStore from "../store/usePersonStore";
 import utils from "./utils";
 
 class PersonUtils {
@@ -155,6 +157,73 @@ class PersonUtils {
       persons[personId].version = newVersion;
     }
   };
+
+  /** Algorithm:
+   * - Apply add & delete changes directly.
+   * - For updates:
+   *    - Compute the local pending `diff`.
+   *    - Apply diff to `updatedPersons`, then use the result to replace existing persons.
+   */
+  applyChanges(
+    persons: Record<string, PersonData>,
+    changedPersons: ChangedPersons
+  ): Record<string, PersonData> {
+    // - Apply add & delete changes directly.
+    changedPersons.addedPersons
+      .map(personUtils.personTxToPerson)
+      .forEach((person) => (persons[person._id] = person));
+    changedPersons.deletedPersons.forEach((id) => delete persons[id]);
+
+    // - Compute the local pending `diff`.
+    const diff = personUtils.personDiff({
+      oldData: changedPersons.updatedPersons.reduce((acc, cur) => {
+        acc[cur._id] = personUtils.personTxToPerson(cur);
+        return acc;
+      }, {} as Record<string, PersonData>),
+      updatedData: useExpenseStore.getState().persons,
+    });
+    const updateDiff =
+      diff.updated?.reduce((acc, cur) => {
+        acc[cur._id] = cur;
+        return acc;
+      }, {} as Record<string, PersonPatch>) ?? {};
+
+    // - Apply diff to `updatedPersons`, then use the result to replace existing persons.
+    changedPersons.updatedPersons
+      .map(personUtils.personTxToPerson)
+      .map((person) => ({ person, patch: updateDiff[person._id] }))
+      .map(this._applyPatchToPerson)
+      .forEach((person) => (persons[person._id] = person));
+
+    return persons;
+  }
+
+  /** @returns object by skipping fields present in the `personPatch`. */
+  private _applyPatchToPerson(args: {
+    person: PersonData;
+    patch: PersonPatch | undefined;
+  }): PersonData {
+    const { patch, person } = args;
+    if (!patch) return person;
+
+    if (patch.index) person.index = patch.index;
+    if (patch.name) person.name = patch.name;
+    if (patch.txDiff) {
+      patch.txDiff.added?.forEach((tx) => (person.txs[tx._id] = tx));
+      patch.txDiff.deleted?.forEach((id) => delete person.txs[id]);
+      patch.txDiff.updated?.forEach((diff) => {
+        if (diff.index) person.txs[diff._id].index = diff.index;
+        if (diff.money) person.txs[diff._id].money = diff.money;
+        if (diff.tag) person.txs[diff._id].tag = diff.tag;
+      });
+      person.txIds = Object.values(person.txs)
+        .sort((a, b) => a.index - b.index)
+        .map((tx) => tx._id);
+    }
+    if (patch.version) person.version = patch.version;
+
+    return person;
+  }
 }
 
 const personUtils = new PersonUtils();
