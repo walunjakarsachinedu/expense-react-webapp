@@ -144,7 +144,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((person, index) => {
             if (store.persons[person.id].index != index) {
-              store.persons[person.id].version = ObjectId.getId();
               store.persons[person.id].index = index;
             }
           });
@@ -152,7 +151,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateName: (id, name) => {
         set((state) => {
-          state.persons[id].version = ObjectId.getId();
           state.persons[id].name = name;
         });
       },
@@ -168,7 +166,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((person, index) => {
             if (store.persons[person.id].index != index) {
-              store.persons[person.id].version = ObjectId.getId();
               store.persons[person.id].index = index;
             }
           });
@@ -180,7 +177,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       addExpense: (personId) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           const length = Object.keys(store.persons[personId].txs).length;
           const id = ObjectId.getId();
           store.persons[personId].txs[id] = { _id: id, index: length };
@@ -189,7 +185,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       deleteExpense: (id, personId) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           const person = store.persons[personId];
           // removing tx
           delete person.txs[id];
@@ -200,7 +195,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpense: (id: string, personId, updates) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           store.persons[personId].txs[id] = {
             ...store.persons[personId].txs[id],
             ...updates,
@@ -209,7 +203,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpenseIndex: (id, index, personId) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           const person = store.persons[personId];
           // removing from old index
           person.txIds = person.txIds.filter((txId) => txId != id);
@@ -257,7 +250,7 @@ function setupDebounceTimer(): Timer {
     patchProcessing.processPatch(nextState, async (patches) => {
       if (utils.isPatchEmpty(patches)) return;
       console.log("processing patch: ", patches);
-      await monthExpenseRepository.applyPatches(patches);
+      await monthExpenseRepository.applyPatchesAndSync(patches);
     });
   });
 

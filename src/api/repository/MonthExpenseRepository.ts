@@ -18,19 +18,47 @@ import {
 } from "../cache/InMemoryCacheApi";
 import { personCacheApi } from "../cache/PersonCacheApi";
 import { expenseBackendApi } from "../services/ExpenseBackendApi";
+import { ObjectId } from "../../utils/objectid";
+import Constants from "../../utils/constants";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
 class MonthExpenseRepository {
   async fetchMonthData(monthYear: string) {
-    await patchProcessing.processPatchFromStorage(async (patches) => {
-      await this.applyPatches(patches);
-    });
-    await this._syncChanges({}, { justLoadData: true, monthYear });
+    // note: if-else case are use because any of either will load data
+    if (localStorage.getItem(Constants.pendingPatchKey)) {
+      await patchProcessing.processPatchFromStorage(async (patches) => {
+        await this.applyPatchesAndSync(patches);
+      });
+    } else {
+      await this._syncChanges({
+        diff: {},
+        personVersionIds: [],
+        justLoadData: true,
+        monthYear,
+      });
+    }
   }
 
-  async applyPatches(patches: PersonDiff) {
+  /**
+   * Algorithm :-
+   * - apply patch to cache & backend
+   * - fetch & apply new changes from backend
+   *
+   * note: internally it uses `_syncChanges` method
+   */
+  async applyPatchesAndSync(patches: PersonDiff) {
+    const persons = useExpenseStore.getState().persons;
+    const personVersionIds: PersonVersionId[] = Object.keys(persons).map(
+      (_id) => ({ _id, version: persons[_id].version })
+    );
+    patches.updated?.forEach((person) => {
+      person.version = ObjectId.getId();
+    });
     personCacheApi.applyChanges(patches);
-    await this._syncChanges(patches);
+    await this._syncChanges({
+      diff: patches,
+      personVersionIds: personVersionIds,
+    });
   }
 
   /**
@@ -38,17 +66,16 @@ class MonthExpenseRepository {
    * 1. send current local to backend
    * 2. apply server changes & conflicts
    */
-  private async _syncChanges(
-    diff: PersonDiff,
-    options?: {
-      /** If true, skips diff send and just loads from cache if available else backend. */
-      justLoadData: boolean;
-      monthYear?: string;
-    }
-  ): Promise<void> {
-    const justLoadData = options?.justLoadData ?? false;
-    const monthYear =
-      options?.monthYear ?? useExpenseStore.getState().monthYear;
+  private async _syncChanges(args: {
+    diff: PersonDiff;
+    personVersionIds: PersonVersionId[];
+    /** If true, skips diff send and just loads from cache if available else backend. */
+    justLoadData?: boolean;
+    monthYear?: string;
+  }): Promise<void> {
+    const { diff, personVersionIds } = args;
+    const justLoadData = args?.justLoadData ?? false;
+    const monthYear = args?.monthYear ?? useExpenseStore.getState().monthYear;
 
     if (justLoadData) {
       const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
@@ -63,9 +90,6 @@ class MonthExpenseRepository {
 
     // 1. send current local
     const persons = useExpenseStore.getState().persons;
-    const personVersionIds: PersonVersionId[] = Object.keys(persons).map(
-      (_id) => ({ _id, version: persons[_id].version })
-    );
     const changes = await expenseBackendApi
       .syncChanges(diff, monthYear, personVersionIds)
       .then((result) => result.data!);
