@@ -2,12 +2,10 @@ import { produce } from "immer";
 import { cloneDeep } from "lodash";
 import {
   Changes,
-  Conflicts,
   PersonData,
   PersonDiff,
   PersonPatch,
   PersonVersionId,
-  ResponseData,
   Tx,
 } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
@@ -27,20 +25,31 @@ class MonthExpenseRepository {
     await patchProcessing.processPatchFromStorage(async (patches) => {
       await this.applyPatches(patches);
     });
-    await this.syncChanges(monthYear, {}, true);
+    await this._syncChanges({}, { justLoadData: true, monthYear });
+  }
+
+  async applyPatches(patches: PersonDiff) {
+    personCacheApi.applyChanges(patches);
+    await this._syncChanges(patches);
   }
 
   /**
    * Algorithm :-
-   * 1. send current local
+   * 1. send current local to backend
    * 2. apply server changes & conflicts
    */
-  async syncChanges(
-    monthYear: string,
+  private async _syncChanges(
     diff: PersonDiff,
-    /** If true, skips diff send and just loads from cache if available else backend. */
-    justLoadData: boolean = false
+    options?: {
+      /** If true, skips diff send and just loads from cache if available else backend. */
+      justLoadData: boolean;
+      monthYear?: string;
+    }
   ): Promise<void> {
+    const justLoadData = options?.justLoadData ?? false;
+    const monthYear =
+      options?.monthYear ?? useExpenseStore.getState().monthYear;
+
     if (justLoadData) {
       const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
         InMemoryCacheCategory.PersonMonthlyData,
@@ -207,11 +216,6 @@ class MonthExpenseRepository {
 
     if (utils.isPatchEmpty(diff)) return;
     await expenseBackendApi.applyChanges(diff);
-  }
-
-  async applyPatches(patches: PersonDiff): ResponseData<Conflicts> {
-    personCacheApi.applyChanges(patches);
-    return expenseBackendApi.applyChanges(patches);
   }
 }
 

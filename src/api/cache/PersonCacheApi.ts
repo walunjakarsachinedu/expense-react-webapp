@@ -1,6 +1,5 @@
 import { PersonData, PersonDiff } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
-import personUtils from "../../utils/personUtils";
 
 class PersonCacheApi {
   readonly storageKey = "cached_person_id_";

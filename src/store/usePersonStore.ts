@@ -69,6 +69,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       isConflictsFound: false,
 
       setConflicts: (conflicts) => {
+        if (!conflicts.length) return;
         set((_) => ({
           isConflictsFound: true,
           conflicts: conflicts,
@@ -256,13 +257,7 @@ function setupDebounceTimer(): Timer {
     patchProcessing.processPatch(nextState, async (patches) => {
       if (utils.isPatchEmpty(patches)) return;
       console.log("processing patch: ", patches);
-      await monthExpenseRepository.applyPatches(patches)?.then((conflicts) => {
-        if (!conflicts?.data?.conflictPersons?.length) return;
-        useExpenseStore.setState({
-          isConflictsFound: true,
-          conflicts: conflicts.data.conflictPersons,
-        });
-      });
+      await monthExpenseRepository.applyPatches(patches);
     });
   });
 
