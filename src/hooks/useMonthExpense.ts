@@ -7,7 +7,7 @@ const useMonthExpense = () => {
 
   return usePromise<void>({
     dependencies: ["monthExpense", monthYear],
-    asyncFn: () => monthExpenseRepository.syncChanges(monthYear, {}, true),
+    asyncFn: () => monthExpenseRepository.fetchMonthData(monthYear),
   });
 };
 

@@ -1,7 +1,6 @@
 import { produce } from "immer";
 import { cloneDeep } from "lodash";
 import {
-  ChangedPersons,
   Changes,
   Conflicts,
   PersonData,
@@ -24,6 +23,13 @@ import { expenseBackendApi } from "../services/ExpenseBackendApi";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
 class MonthExpenseRepository {
+  async fetchMonthData(monthYear: string) {
+    await patchProcessing.processPatchFromStorage(async (patches) => {
+      await this.applyPatches(patches);
+    });
+    await this.syncChanges(monthYear, {}, true);
+  }
+
   /**
    * Algorithm :-
    * 1. send current local
@@ -86,12 +92,8 @@ class MonthExpenseRepository {
       );
     }
 
-    // TODO: move logic to expense store
     // 4. store conflicts to useExpenseStore
-    useExpenseStore.setState({
-      isConflictsFound: true,
-      conflicts: changes.conflictsPersons,
-    });
+    useExpenseStore.getState().setConflicts(changes.conflictsPersons);
   }
 
   /**

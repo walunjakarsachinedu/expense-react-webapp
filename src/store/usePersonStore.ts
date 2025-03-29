@@ -30,6 +30,7 @@ export type ExpenseStore = {
   conflicts?: ConflictPerson[];
   isConflictsFound: boolean;
 
+  setConflicts: (conflicts: ConflictPerson[]) => void;
   clearConflicts: () => void;
 
   setMonthYear: (monthYear: string) => void;
@@ -67,6 +68,12 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       personIds: [],
       isConflictsFound: false,
 
+      setConflicts: (conflicts) => {
+        set((_) => ({
+          isConflictsFound: true,
+          conflicts: conflicts,
+        }));
+      },
       clearConflicts: () => {
         set((store) => {
           store.isConflictsFound = false;
