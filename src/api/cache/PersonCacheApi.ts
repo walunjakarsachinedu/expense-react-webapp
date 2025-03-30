@@ -16,6 +16,12 @@ class PersonCacheApi {
     localStorage.removeItem(this._getKeyFromId(id));
   };
 
+  clear() {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith(this.storageKey))
+      .forEach((key) => localStorage.removeItem(key));
+  }
+
   storePerson = (person: PersonData) => {
     localStorage.setItem(
       this._getKeyFromId(person._id),

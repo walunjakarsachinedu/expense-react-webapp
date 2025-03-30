@@ -119,12 +119,14 @@ class MonthExpenseRepository {
     const changedPersons = changes.changedPersons;
 
     // 1. apply changes to cache
-    Object.values(
+    const updateCacheData = Object.values(
       personUtils.applyChanges(
         utils.toMapById(personCacheApi.getAllPersons()),
         changes.changedPersons
       )
-    ).forEach(personCacheApi.storePerson);
+    );
+    personCacheApi.clear();
+    updateCacheData.forEach(personCacheApi.storePerson);
 
     // 2. apply changes to useExpenseStore
     useExpenseStore.getState().applyChanges(monthYear, changedPersons);
