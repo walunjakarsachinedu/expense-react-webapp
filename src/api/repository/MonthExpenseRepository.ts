@@ -22,8 +22,21 @@ import { expenseBackendApi } from "../services/ExpenseBackendApi";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
 class MonthExpenseRepository {
-  /** goal of this method is to fetch changes from server, with assumption of no month data in memory. */
+  /**
+   * Goal of this method is to fetch changes from server, with assumption of no month data in memory.
+   *
+   * note: first it try to load from in-memory cache.
+   */
   async fetchMonthData(monthYear: string) {
+    const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
+      InMemoryCacheCategory.PersonMonthlyData,
+      monthYear
+    );
+    if (cachedPersonData) {
+      useExpenseStore.getState().setMonthData(monthYear, cachedPersonData);
+      return;
+    }
+
     const patch = patchProcessing.getPatchAndDeleteFromStorage();
     await this.applyPatchesAndSync({
       patch: patch ?? {},
@@ -43,6 +56,7 @@ class MonthExpenseRepository {
    */
   async applyPatchesAndSync(args: {
     patch: PersonDiff;
+    /** Defaults to `true`.*/
     isMonthDataLoaded?: boolean;
     monthYear?: string;
   }) {
@@ -72,24 +86,10 @@ class MonthExpenseRepository {
   private async _syncChanges(args: {
     diff: PersonDiff;
     personVersionIds: PersonVersionId[];
-    /** If true, skips diff send and just loads from cache if available else backend. */
-    justLoadData?: boolean;
     monthYear?: string;
   }): Promise<void> {
     const { diff, personVersionIds } = args;
-    const justLoadData = args?.justLoadData ?? false;
     const monthYear = args?.monthYear ?? useExpenseStore.getState().monthYear;
-
-    if (justLoadData) {
-      const cachedPersonData = inMemoryCache.getCache<PersonData[]>(
-        InMemoryCacheCategory.PersonMonthlyData,
-        monthYear
-      );
-      if (cachedPersonData) {
-        useExpenseStore.getState().setMonthData(monthYear, cachedPersonData);
-        return;
-      }
-    }
 
     // 1. send current local
     const changes = await expenseBackendApi
