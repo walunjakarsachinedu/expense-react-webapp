@@ -30,10 +30,7 @@ class PersonUtils {
   personTxToPerson(person: PersonTx): PersonData {
     return {
       ...person,
-      txs: person.txs.reduce<Record<string, Tx>>(
-        (txMap, tx) => ({ ...txMap, [tx._id]: tx }),
-        {}
-      ),
+      txs: utils.toMapById(person.txs),
       txIds: person.txs.sort((a, b) => a.index - b.index).map((tx) => tx._id),
     };
   }
@@ -176,17 +173,12 @@ class PersonUtils {
 
     // - Compute the local pending `diff`.
     const diff = personUtils.personDiff({
-      oldData: changedPersons.updatedPersons.reduce((acc, cur) => {
-        acc[cur._id] = personUtils.personTxToPerson(cur);
-        return acc;
-      }, {} as Record<string, PersonData>),
+      oldData: utils.toMapById(
+        changedPersons.updatedPersons.map(personUtils.personTxToPerson)
+      ),
       updatedData: useExpenseStore.getState().persons,
     });
-    const updateDiff =
-      diff.updated?.reduce((acc, cur) => {
-        acc[cur._id] = cur;
-        return acc;
-      }, {} as Record<string, PersonPatch>) ?? {};
+    const updateDiff = utils.toMapById(diff.updated ?? []);
 
     // - Apply diff to `updatedPersons`, then use the result to replace existing persons.
     changedPersons.updatedPersons

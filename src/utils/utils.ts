@@ -57,6 +57,13 @@ class Utility {
         .length == 0
     );
   }
+
+  toMapById<T extends { _id: string }>(arr: T[]): Record<string, T> {
+    return arr.reduce((acc, cur) => {
+      acc[cur._id] = cur;
+      return acc;
+    }, {} as Record<string, T>);
+  }
 }
 
 const utils = new Utility();

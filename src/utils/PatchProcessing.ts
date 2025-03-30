@@ -78,8 +78,7 @@ class PatchProcessing {
     this.prevState = prevState;
   }
 
-  /** Processes the pending patch from storage if it is not older than 1 day. */
-  async processPatchFromStorage(action: (patch: PersonDiff) => Promise<void>) {
+  getPatchAndDeleteFromStorage(): PersonDiff | undefined {
     const patchStr = localStorage.getItem(Constants.pendingPatchKey);
     const pendingPatchTimeStamp =
       utils.parseNumber(
@@ -89,12 +88,9 @@ class PatchProcessing {
       Date.now() - pendingPatchTimeStamp <= 24 * 60 * 60 * 1000;
 
     this._deletePatch();
-
     if (!patchStr || !isPatchValid) return;
-
     try {
-      const patch: PersonDiff = JSON.parse(patchStr);
-      await action(patch);
+      return JSON.parse(patchStr);
     } catch {
       console.log("invalid patch found in local storage");
     }

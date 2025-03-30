@@ -9,6 +9,7 @@ import {
   Tx,
 } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
+import { ObjectId } from "../../utils/objectid";
 import { patchProcessing } from "../../utils/PatchProcessing";
 import personUtils from "../../utils/personUtils";
 import utils from "../../utils/utils";
@@ -18,46 +19,48 @@ import {
 } from "../cache/InMemoryCacheApi";
 import { personCacheApi } from "../cache/PersonCacheApi";
 import { expenseBackendApi } from "../services/ExpenseBackendApi";
-import { ObjectId } from "../../utils/objectid";
-import Constants from "../../utils/constants";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
 class MonthExpenseRepository {
+  /** goal of this method is to fetch changes from server, with assumption of no month data in memory. */
   async fetchMonthData(monthYear: string) {
-    // note: if-else case are use because any of either will load data
-    if (localStorage.getItem(Constants.pendingPatchKey)) {
-      await patchProcessing.processPatchFromStorage(async (patches) => {
-        await this.applyPatchesAndSync(patches);
-      });
-    } else {
-      await this._syncChanges({
-        diff: {},
-        personVersionIds: [],
-        justLoadData: true,
-        monthYear,
-      });
-    }
+    const patch = patchProcessing.getPatchAndDeleteFromStorage();
+    await this.applyPatchesAndSync({
+      patch: patch ?? {},
+      isMonthDataLoaded: false,
+      monthYear,
+    });
   }
 
   /**
    * Algorithm :-
+   * - build person id & version array using store if month data is loaded else cache
+   * - update version of each updated person in patch
    * - apply patch to cache & backend
    * - fetch & apply new changes from backend
    *
    * note: internally it uses `_syncChanges` method
    */
-  async applyPatchesAndSync(patches: PersonDiff) {
-    const persons = useExpenseStore.getState().persons;
+  async applyPatchesAndSync(args: {
+    patch: PersonDiff;
+    isMonthDataLoaded?: boolean;
+    monthYear?: string;
+  }) {
+    const { patch, isMonthDataLoaded = true, monthYear } = args;
+    const persons = isMonthDataLoaded
+      ? useExpenseStore.getState().persons
+      : utils.toMapById(personCacheApi.getAllPersons());
     const personVersionIds: PersonVersionId[] = Object.keys(persons).map(
       (_id) => ({ _id, version: persons[_id].version })
     );
-    patches.updated?.forEach((person) => {
+    patch.updated?.forEach((person) => {
       person.version = ObjectId.getId();
     });
-    personCacheApi.applyChanges(patches);
+    personCacheApi.applyChanges(patch);
     await this._syncChanges({
-      diff: patches,
+      diff: patch,
       personVersionIds: personVersionIds,
+      monthYear,
     });
   }
 
@@ -89,7 +92,6 @@ class MonthExpenseRepository {
     }
 
     // 1. send current local
-    const persons = useExpenseStore.getState().persons;
     const changes = await expenseBackendApi
       .syncChanges(diff, monthYear, personVersionIds)
       .then((result) => result.data!);
@@ -113,6 +115,12 @@ class MonthExpenseRepository {
     [...changedPersons.updatedPersons, ...changedPersons.addedPersons]
       .map(personUtils.personTxToPerson)
       .forEach(personCacheApi.storePerson);
+    personUtils.applyChanges(
+      utils.toMapById(
+        changedPersons.updatedPersons.map(personUtils.personTxToPerson)
+      ),
+      changes.changedPersons
+    );
 
     // 2. apply changes to useExpenseStore
     useExpenseStore.getState().applyChanges(monthYear, changedPersons);
