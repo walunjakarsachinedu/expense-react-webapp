@@ -223,6 +223,7 @@ const useExpenseStore = create<ExpenseStore>(
       const ignoreActions: (keyof ExpenseStore)[] = [
         "setMonthYear",
         "setMonthData",
+        "applyChanges",
         "copyPerson",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
