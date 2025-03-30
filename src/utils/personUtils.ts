@@ -156,22 +156,21 @@ class PersonUtils {
   };
 
   /** Algorithm:
-   * - Apply add & delete changes directly.
-   * - For updates:
-   *    - Compute the local pending `diff`.
-   *    - Apply diff to `updatedPersons`, then use the result to replace existing persons.
+   * 1. Apply add & delete changes directly.
+   * 2. Compute the local pending `diff`.
+   * 3. Apply diff to `updatedPersons`, then use the result to replace existing persons.
    */
   applyChanges(
     persons: Record<string, PersonData>,
     changedPersons: ChangedPersons
   ): Record<string, PersonData> {
-    // - Apply add & delete changes directly.
+    // 1. Apply add & delete changes directly.
     changedPersons.addedPersons
       .map(personUtils.personTxToPerson)
       .forEach((person) => (persons[person._id] = person));
     changedPersons.deletedPersons.forEach((id) => delete persons[id]);
 
-    // - Compute the local pending `diff`.
+    // 2. Compute the local pending `diff`.
     const diff = personUtils.personDiff({
       oldData: utils.toMapById(
         changedPersons.updatedPersons.map(personUtils.personTxToPerson)
@@ -180,7 +179,7 @@ class PersonUtils {
     });
     const updateDiff = utils.toMapById(diff.updated ?? []);
 
-    // - Apply diff to `updatedPersons`, then use the result to replace existing persons.
+    // 3. Apply diff to `updatedPersons`, then use the result to replace existing persons.
     changedPersons.updatedPersons
       .map(personUtils.personTxToPerson)
       .map((person) => ({ person, patch: updateDiff[person._id] }))

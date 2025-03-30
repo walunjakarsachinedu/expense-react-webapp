@@ -47,10 +47,10 @@ class MonthExpenseRepository {
 
   /**
    * Algorithm :-
-   * - build person id & version array using store if month data is loaded else cache
-   * - update version of each updated person in patch
-   * - apply patch to cache & backend
-   * - fetch & apply new changes from backend
+   * 1. build person id & version array using store if month data is loaded else cache
+   * 2. update version of each updated person in patch
+   * 3. apply patch to cache
+   * 4. call _syncChanges to sync change with backend
    *
    * note: internally it uses `_syncChanges` method
    */
@@ -61,16 +61,24 @@ class MonthExpenseRepository {
     monthYear?: string;
   }) {
     const { patch, isMonthDataLoaded = true, monthYear } = args;
+
+    // 1. build person id & version array using store if month data is loaded else cache
     const persons = isMonthDataLoaded
       ? useExpenseStore.getState().persons
       : utils.toMapById(personCacheApi.getAllPersons());
     const personVersionIds: PersonVersionId[] = Object.keys(persons).map(
       (_id) => ({ _id, version: persons[_id].version })
     );
+
+    // 2. update version of each updated person in patch
     patch.updated?.forEach((person) => {
       person.version = ObjectId.getId();
     });
+
+    // 3. apply patch to cache
     personCacheApi.applyChanges(patch);
+
+    // 4. call _syncChanges to sync change with backend
     await this._syncChanges({
       diff: patch,
       personVersionIds: personVersionIds,
@@ -111,16 +119,12 @@ class MonthExpenseRepository {
     const changedPersons = changes.changedPersons;
 
     // 1. apply changes to cache
-    changedPersons.deletedPersons.forEach(personCacheApi.deletePersonWithId);
-    [...changedPersons.updatedPersons, ...changedPersons.addedPersons]
-      .map(personUtils.personTxToPerson)
-      .forEach(personCacheApi.storePerson);
-    personUtils.applyChanges(
-      utils.toMapById(
-        changedPersons.updatedPersons.map(personUtils.personTxToPerson)
-      ),
-      changes.changedPersons
-    );
+    Object.values(
+      personUtils.applyChanges(
+        utils.toMapById(personCacheApi.getAllPersons()),
+        changes.changedPersons
+      )
+    ).forEach(personCacheApi.storePerson);
 
     // 2. apply changes to useExpenseStore
     useExpenseStore.getState().applyChanges(monthYear, changedPersons);
