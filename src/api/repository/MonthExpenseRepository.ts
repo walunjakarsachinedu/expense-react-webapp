@@ -266,7 +266,13 @@ class MonthExpenseRepository {
     if (diff.updated?.length == 0) delete diff.updated;
 
     if (utils.isPatchEmpty(diff)) return;
-    await expenseBackendApi.applyChanges(diff);
+    await expenseBackendApi.syncChanges(
+      diff,
+      useExpenseStore.getState().monthYear,
+      Object.values(useExpenseStore.getState().persons).map(
+        ({ _id, version }) => ({ _id, version })
+      )
+    );
   }
 
   loadStoreWithCache() {

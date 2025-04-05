@@ -48,13 +48,15 @@ class PersonUtils {
     };
   }
 
-  // todo: use this prepare changes to send to backend
   personDiff({
     updatedData,
     oldData,
+    includeVersionChange = false,
   }: {
     updatedData: Record<string, PersonData>;
     oldData: Record<string, PersonData>;
+    /** when true, also includes change containing just version change. */
+    includeVersionChange?: boolean;
   }): PersonDiff {
     const added = Object.keys(updatedData)
       .filter((_id) => !oldData[_id])
@@ -64,16 +66,23 @@ class PersonUtils {
     const updated: PersonPatch[] = Object.keys(updatedData)
       .filter((_id) => oldData[_id])
       .map((_id) => {
-        return this._personPatch(updatedData[_id], oldData[_id]);
+        return this._personPatch(
+          updatedData[_id],
+          oldData[_id],
+          includeVersionChange
+        );
       })
       .filter((personPatch) => personPatch !== undefined);
 
     return utils.removeEmptyArrayFields({ added, deleted, updated });
   }
 
+  /** note: return undefined for just version change  */
   _personPatch(
     newPerson: PersonData,
-    oldPerson: PersonData
+    oldPerson: PersonData,
+    /** when true, also includes change containing just version change. */
+    includeVersionChange: boolean = false
   ): PersonPatch | undefined {
     const added: Tx[] = Object.keys(newPerson.txs)
       .filter((_id) => !oldPerson.txs[_id])
@@ -98,6 +107,8 @@ class PersonUtils {
       delete personPatch.txDiff;
     }
     personPatch = utils.removeUndefinedFields(personPatch);
+
+    if (includeVersionChange) return personPatch;
 
     // if any field present other than _id, version then we return patch
     if (Object.keys(personPatch).length > 2) {
@@ -200,6 +211,7 @@ class PersonUtils {
       updatedData: utils.toMapById(
         changedPersons.updatedPersons.map(personUtils.personTxToPerson)
       ),
+      includeVersionChange: true,
     });
 
     // 5. Remove conflicting tx tags from `updateDiff`.
