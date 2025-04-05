@@ -132,10 +132,14 @@ function _getCursorPosition(element: HTMLElement) {
 function _setCursorPosition(element: HTMLElement, position: number) {
   if (element.childNodes.length === 0) return;
 
+  const textNode = element.childNodes[0];
+  const textLength = textNode.textContent?.length ?? 0;
+  const safePosition = Math.min(position, textLength);
+
   const range = document.createRange();
   const selection = window.getSelection()!;
 
-  range.setStart(element.childNodes[0], position);
+  range.setStart(element.childNodes[0], safePosition);
   range.collapse(true);
 
   selection.removeAllRanges();
