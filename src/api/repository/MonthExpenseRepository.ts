@@ -48,7 +48,7 @@ class MonthExpenseRepository {
   /**
    * Algorithm :-
    * 1. build person id & version array using store if month data is loaded else cache
-   * 2. update version of each updated person in patch
+   * 2. update version for updated persons in patch, patchProcessing, useExpenseStore
    * 3. apply patch to cache
    * 4. call _syncChanges to sync change with backend
    *
@@ -70,9 +70,27 @@ class MonthExpenseRepository {
       (_id) => ({ _id, version: persons[_id].version })
     );
 
-    // 2. update version of each updated person in patch
+    // 2. update version for updated persons in patch, cache, useExpenseStore
     patch.updated?.forEach((person) => {
-      person.version = ObjectId.getId();
+      const newVersion = ObjectId.getId();
+      person.version = newVersion;
+    });
+    if (patchProcessing.prevState) {
+      patchProcessing.prevState = produce(
+        patchProcessing.prevState,
+        (recipe) => {
+          patch.updated?.forEach((person) => {
+            recipe[person._id].version = person.version;
+          });
+        }
+      );
+    }
+    useExpenseStore.setState({
+      persons: produce(useExpenseStore.getState().persons, (recipe) => {
+        patch.updated?.forEach((person) => {
+          recipe[person._id].version = person.version;
+        });
+      }),
     });
 
     // 3. apply patch to cache
@@ -110,37 +128,32 @@ class MonthExpenseRepository {
 
   /**
    * Algorithm :-
-   * 1. apply changes to cache
+   * 1. store conflicts to useExpenseStore
    * 2. apply changes to useExpenseStore
-   * 3. apply changes to patchProcessing
-   * 4. store conflicts to useExpenseStore
+   * 3. apply changes to cache
+   * 4. apply changes to patchProcessing
    */
   async applyServerChanges(monthYear: string, changes: Changes): Promise<void> {
     const changedPersons = changes.changedPersons;
 
-    // 1. apply changes to cache
-    const updateCacheData = Object.values(
-      personUtils.applyChanges(
-        utils.toMapById(personCacheApi.getAllPersons()),
-        changes.changedPersons
-      )
-    );
-    personCacheApi.clear();
-    updateCacheData.forEach(personCacheApi.storePerson);
+    // 1. store conflicts to useExpenseStore
+    useExpenseStore.getState().setConflicts(changes.conflictsPersons);
 
     // 2. apply changes to useExpenseStore
     useExpenseStore.getState().applyChanges(monthYear, changedPersons);
 
-    // 3. apply changes to patchProcessing
+    // 3. apply changes to cache
+    personCacheApi.clear();
+    Object.values(useExpenseStore.getState().persons).forEach(
+      personCacheApi.storePerson
+    );
+
+    // 4. apply changes to patchProcessing
     if (patchProcessing.prevState) {
-      patchProcessing.prevState = personUtils.applyChanges(
-        patchProcessing.prevState,
-        changedPersons
+      patchProcessing.prevState = produce(patchProcessing.prevState, (recipe) =>
+        personUtils.applyChanges(recipe, changedPersons)
       );
     }
-
-    // 4. store conflicts to useExpenseStore
-    useExpenseStore.getState().setConflicts(changes.conflictsPersons);
   }
 
   /**
@@ -254,6 +267,13 @@ class MonthExpenseRepository {
 
     if (utils.isPatchEmpty(diff)) return;
     await expenseBackendApi.applyChanges(diff);
+  }
+
+  loadStoreWithCache() {
+    const monthYear = useExpenseStore.getState().monthYear;
+    const persons = personCacheApi.getAllPersons();
+    useExpenseStore.getState().setMonthData(monthYear, persons);
+    console.log("loaded store with cache data \\_(ツ)_/");
   }
 }
 

@@ -9,6 +9,7 @@ import {
   TxType,
 } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
+import { patchProcessing } from "./PatchProcessing";
 import utils from "./utils";
 
 class PersonUtils {
@@ -158,7 +159,10 @@ class PersonUtils {
   /** Algorithm:
    * 1. Apply add & delete changes directly.
    * 2. Compute the local pending `diff`.
-   * 3. Apply diff to `updatedPersons`, then use the result to replace existing persons.
+   * 3. Apply local diff to `updatedPersons`.
+   * 4. Calculate `updateDiff` between person in `useExpenseStore` and `updatedPersons`.
+   * 5. Remove conflicting tx tags from `updateDiff`.
+   * 6. Apply `updateDiff` to `useExpenseStore`.
    */
   applyChanges(
     persons: Record<string, PersonData>,
@@ -171,22 +175,73 @@ class PersonUtils {
     changedPersons.deletedPersons.forEach((id) => delete persons[id]);
 
     // 2. Compute the local pending `diff`.
-    const diff = personUtils.personDiff({
+    const localDiff = patchProcessing.prevState
+      ? personUtils.personDiff({
+          oldData: patchProcessing.prevState,
+          updatedData: useExpenseStore.getState().persons,
+        })
+      : null;
+
+    // 3. Apply local diff to `updatedPersons`.
+    changedPersons.updatedPersons = this.applyUpdateDiffToPersons({
+      persons: changedPersons.updatedPersons.map(personUtils.personTxToPerson),
+      diff: localDiff,
+    }).map(personUtils.personToPersonTx);
+
+    // 4. Calculate `updateDiff` between person in useExpenseStore and `updatedPersons`.
+    const updateDiff = personUtils.personDiff({
       oldData: utils.toMapById(
+        Object.values(useExpenseStore.getState().persons).filter((person) =>
+          changedPersons.updatedPersons.find(
+            (updatedPerson) => updatedPerson._id === person._id
+          )
+        )
+      ),
+      updatedData: utils.toMapById(
         changedPersons.updatedPersons.map(personUtils.personTxToPerson)
       ),
-      updatedData: useExpenseStore.getState().persons,
     });
-    const updateDiff = utils.toMapById(diff.updated ?? []);
 
-    // 3. Apply diff to `updatedPersons`, then use the result to replace existing persons.
-    changedPersons.updatedPersons
-      .map(personUtils.personTxToPerson)
-      .map((person) => ({ person, patch: updateDiff[person._id] }))
-      .map(this._applyPatchToPerson)
-      .forEach((person) => (persons[person._id] = person));
+    // 5. Remove conflicting tx tags from `updateDiff`.
+    const conflicts = useExpenseStore.getState().conflicts;
+    if (conflicts) {
+      updateDiff.updated?.forEach((updatedPerson) => {
+        if (updatedPerson.txDiff?.deleted) {
+          updatedPerson.txDiff.deleted = updatedPerson.txDiff.deleted.filter(
+            (txId) => {
+              return !conflicts?.find((person) => {
+                return (
+                  !person.isDeleted &&
+                  person.txs?.find((tx) => tx._id == txId && tx.isDeleted)
+                );
+              });
+            }
+          );
+        }
+      });
+    }
 
+    // 6. Apply `updateDiff` to useExpenseStore.
+    this.applyUpdateDiffToPersons({
+      persons: Object.values(persons),
+      diff: updateDiff,
+    });
     return persons;
+  }
+
+  /** Apply update patches in inline way to persons with matching _id.  */
+  applyUpdateDiffToPersons(args: {
+    persons: PersonData[];
+    diff: PersonDiff | null;
+  }) {
+    const { persons, diff } = args;
+    if (!diff) return persons;
+    const updateDiff: Record<string, PersonPatch | undefined> = utils.toMapById(
+      diff.updated ?? []
+    );
+    return persons
+      .map((person) => ({ person, patch: updateDiff[person._id] }))
+      .map(personUtils._applyPatchToPerson);
   }
 
   /** @returns object by skipping fields present in the `personPatch`. */
@@ -200,12 +255,13 @@ class PersonUtils {
     if (patch.index) person.index = patch.index;
     if (patch.name) person.name = patch.name;
     if (patch.txDiff) {
-      patch.txDiff.added?.forEach((tx) => (person.txs[tx._id] = tx));
-      patch.txDiff.deleted?.forEach((id) => delete person.txs[id]);
+      const newTxs = person.txs;
+      patch.txDiff.added?.forEach((tx) => (newTxs[tx._id] = tx));
+      patch.txDiff.deleted?.forEach((id) => delete newTxs[id]);
       patch.txDiff.updated?.forEach((diff) => {
-        if (diff.index) person.txs[diff._id].index = diff.index;
-        if (diff.money) person.txs[diff._id].money = diff.money;
-        if (diff.tag) person.txs[diff._id].tag = diff.tag;
+        if (diff.index) newTxs[diff._id].index = diff.index;
+        if (diff.money) newTxs[diff._id].money = diff.money;
+        if (diff.tag) newTxs[diff._id].tag = diff.tag;
       });
       person.txIds = Object.values(person.txs)
         .sort((a, b) => a.index - b.index)

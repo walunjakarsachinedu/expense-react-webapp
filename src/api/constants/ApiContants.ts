@@ -95,14 +95,6 @@ export default class ApiContants {
         month: $month
         personVersionIds: $personVersionIds
       ) {
-        conflictsPersons {
-          _id
-          isDeleted
-          txs {
-            _id
-            isDeleted
-          }
-        }
         changedPersons {
           addedPersons {
             _id
@@ -118,7 +110,6 @@ export default class ApiContants {
             }
             version
           }
-          deletedPersons
           updatedPersons {
             _id
             month
@@ -132,6 +123,15 @@ export default class ApiContants {
               tag
             }
             version
+          }
+          deletedPersons
+        }
+        conflictsPersons {
+          _id
+          isDeleted
+          txs {
+            _id
+            isDeleted
           }
         }
       }

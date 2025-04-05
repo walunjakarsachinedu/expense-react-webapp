@@ -40,6 +40,11 @@ export default function EditableElem({
   const cursorRef = useRef<number | null>(null);
   const [textState, setState] = useState<string>(initialText ?? "");
 
+  // use to trigger re-render when value of initialText change
+  useEffect(() => {
+    setState(initialText ?? "");
+  }, [initialText]);
+
   useEffect(() => {
     if (!cursorRef.current || contentRef.current !== document.activeElement)
       return;

@@ -225,6 +225,7 @@ const useExpenseStore = create<ExpenseStore>(
         "setMonthData",
         "applyChanges",
         "copyPerson",
+        "setConflicts",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
       // delayDebounceTimer action - delay the timer only if user is working
