@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import moneyIcon from "../images/money-icon.svg";
+import moneyIcon from "../images/app-icon.svg";
 import useExpenseStore, { timer } from "../store/usePersonStore";
 import utils from "../utils/utils";
 import MonthPicker from "./MonthPicker";
@@ -48,7 +48,7 @@ export default function NavBar() {
           <img
             src={moneyIcon}
             alt="Icon"
-            style={{ marginRight: 10, height: "16px" }}
+            style={{ marginRight: 12, height: "16px" }}
           />
           <b>Expense Tracker</b>
         </Row>
