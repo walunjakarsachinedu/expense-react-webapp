@@ -7,7 +7,13 @@ import {
 } from "../api/cache/InMemoryCacheApi";
 import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 import applyMiddleware from "../middleware/core/applyMiddleware";
-import { ConflictPerson, PersonData, Tx, TxType } from "../models/type";
+import {
+  ChangedPersons,
+  ConflictPerson,
+  PersonData,
+  Tx,
+  TxType,
+} from "../models/type";
 import { Prettify } from "../types/Prettify";
 import Constants from "../utils/constants";
 import { ObjectId } from "../utils/objectid";
@@ -24,9 +30,11 @@ export type ExpenseStore = {
   conflicts?: ConflictPerson[];
   isConflictsFound: boolean;
 
+  setConflicts: (conflicts: ConflictPerson[]) => void;
   clearConflicts: () => void;
 
   setMonthYear: (monthYear: string) => void;
+  applyChanges: (monthYear: string, persons: ChangedPersons) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
   addPerson: (type: TxType) => void;
   deletePerson: (id: string) => void;
@@ -60,6 +68,13 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       personIds: [],
       isConflictsFound: false,
 
+      setConflicts: (conflicts) => {
+        if (!conflicts.length) return;
+        set((_) => ({
+          isConflictsFound: true,
+          conflicts: conflicts,
+        }));
+      },
       clearConflicts: () => {
         set((store) => {
           store.isConflictsFound = false;
@@ -81,6 +96,18 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.monthYear = monthYear;
         });
         localStorage.setItem(Constants.monthStorageKey, monthYear);
+      },
+      applyChanges: (monthYear, changedPersons) => {
+        set((store) => {
+          store.monthYear = monthYear;
+          store.persons = personUtils.applyChanges(
+            store.persons,
+            changedPersons
+          );
+          store.personIds = Object.values(store.persons)
+            .sort((a, b) => a.index - b.index)
+            .map((person) => ({ id: person._id, type: person.type }));
+        });
       },
       setMonthData: (monthYear, persons) => {
         set((store) => {
@@ -117,7 +144,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((person, index) => {
             if (store.persons[person.id].index != index) {
-              store.persons[person.id].version = ObjectId.getId();
               store.persons[person.id].index = index;
             }
           });
@@ -125,7 +151,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateName: (id, name) => {
         set((state) => {
-          state.persons[id].version = ObjectId.getId();
           state.persons[id].name = name;
         });
       },
@@ -141,7 +166,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           // syncing index from personIds with persons list
           store.personIds.forEach((person, index) => {
             if (store.persons[person.id].index != index) {
-              store.persons[person.id].version = ObjectId.getId();
               store.persons[person.id].index = index;
             }
           });
@@ -153,7 +177,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       addExpense: (personId) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           const length = Object.keys(store.persons[personId].txs).length;
           const id = ObjectId.getId();
           store.persons[personId].txs[id] = { _id: id, index: length };
@@ -162,7 +185,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       deleteExpense: (id, personId) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           const person = store.persons[personId];
           // removing tx
           delete person.txs[id];
@@ -173,7 +195,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpense: (id: string, personId, updates) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           store.persons[personId].txs[id] = {
             ...store.persons[personId].txs[id],
             ...updates,
@@ -182,7 +203,6 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       },
       updateExpenseIndex: (id, index, personId) => {
         set((store) => {
-          store.persons[personId].version = ObjectId.getId();
           const person = store.persons[personId];
           // removing from old index
           person.txIds = person.txIds.filter((txId) => txId != id);
@@ -203,7 +223,9 @@ const useExpenseStore = create<ExpenseStore>(
       const ignoreActions: (keyof ExpenseStore)[] = [
         "setMonthYear",
         "setMonthData",
+        "applyChanges",
         "copyPerson",
+        "setConflicts",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
       // delayDebounceTimer action - delay the timer only if user is working
@@ -227,16 +249,10 @@ function setupDebounceTimer(): Timer {
     console.info("scheduling patch processing");
 
     const nextState = useExpenseStore.getState().persons;
-    patchProcessing.processPatch(nextState, async (patches) => {
-      if (utils.isPatchEmpty(patches)) return;
-      console.log("processing patch: ", patches);
-      await monthExpenseRepository.applyPatches(patches)?.then((conflicts) => {
-        if (!conflicts?.data?.conflictPersons?.length) return;
-        useExpenseStore.setState({
-          isConflictsFound: true,
-          conflicts: conflicts.data.conflictPersons,
-        });
-      });
+    patchProcessing.processPatch(nextState, async (patch) => {
+      if (utils.isPatchEmpty(patch)) return;
+      console.log("processing patch: ", patch);
+      await monthExpenseRepository.applyPatchesAndSync({ patch });
     });
   });
 

@@ -1,6 +1,5 @@
 import { PersonData, PersonDiff } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
-import personUtils from "../../utils/personUtils";
 
 class PersonCacheApi {
   readonly storageKey = "cached_person_id_";
@@ -16,6 +15,12 @@ class PersonCacheApi {
   deletePersonWithId = (id: string) => {
     localStorage.removeItem(this._getKeyFromId(id));
   };
+
+  clear() {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith(this.storageKey))
+      .forEach((key) => localStorage.removeItem(key));
+  }
 
   storePerson = (person: PersonData) => {
     localStorage.setItem(

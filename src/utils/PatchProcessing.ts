@@ -1,5 +1,6 @@
 import { PersonData, PersonDiff } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
+import Constants from "./constants";
 import { isPageUnloaded } from "./is-page-unloaded";
 import personUtils from "./personUtils";
 import TrackedPromise from "./TrackPromise";
@@ -77,34 +78,32 @@ class PatchProcessing {
     this.prevState = prevState;
   }
 
-  /** Processes the pending patch from storage if it is not older than 1 day. */
-  async processPatchFromStorage(action: (patch: PersonDiff) => Promise<void>) {
-    const patchStr = localStorage.getItem("pendingPatch");
+  getPatchAndDeleteFromStorage(): PersonDiff | undefined {
+    const patchStr = localStorage.getItem(Constants.pendingPatchKey);
     const pendingPatchTimeStamp =
-      utils.parseNumber(localStorage.getItem("pendingPatchTimeStamp")) ?? 0;
+      utils.parseNumber(
+        localStorage.getItem(Constants.pendingPatchTimeStampKey)
+      ) ?? 0;
     const isPatchValid =
       Date.now() - pendingPatchTimeStamp <= 24 * 60 * 60 * 1000;
 
     this._deletePatch();
-
     if (!patchStr || !isPatchValid) return;
-
     try {
-      const patch: PersonDiff = JSON.parse(patchStr);
-      await action(patch);
+      return JSON.parse(patchStr);
     } catch {
       console.log("invalid patch found in local storage");
     }
   }
 
   private _storePatch(patch: PersonDiff) {
-    localStorage.setItem("pendingPatch", JSON.stringify(patch));
-    localStorage.setItem("pendingPatchTimeStamp", `${Date.now()}`);
+    localStorage.setItem(Constants.pendingPatchKey, JSON.stringify(patch));
+    localStorage.setItem(Constants.pendingPatchTimeStampKey, `${Date.now()}`);
   }
 
   private _deletePatch() {
-    localStorage.removeItem("pendingPatch");
-    localStorage.removeItem("pendingPatchTimeStamp");
+    localStorage.removeItem(Constants.pendingPatchKey);
+    localStorage.removeItem(Constants.pendingPatchTimeStampKey);
   }
 
   /** schedule action to run once when online. */

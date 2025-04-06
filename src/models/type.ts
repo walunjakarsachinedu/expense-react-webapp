@@ -45,6 +45,11 @@ export type PersonVersionId = {
   version: string;
 };
 
+export type Changes = {
+  conflictsPersons: ConflictPerson[];
+  changedPersons: ChangedPersons;
+};
+
 export type ChangedPersons = {
   addedPersons: PersonTx[];
   updatedPersons: PersonTx[];

@@ -30,49 +30,49 @@ export default class ApiContants {
     }
   `;
 
-  static readonly changedPersonsQuery = gql`
-    query ChangedPersons(
+  static readonly syncChanges = gql`
+    mutation SyncChanges(
+      $diff: PersonDiff
       $month: String!
       $personVersionIds: [PersonVersionId!]!
     ) {
-      changedPersons(month: $month, personVersionIds: $personVersionIds) {
-        addedPersons {
-          _id
-          month
-          type
-          index
-          name
-          txs {
+      syncChanges(
+        diff: $diff
+        month: $month
+        personVersionIds: $personVersionIds
+      ) {
+        changedPersons {
+          addedPersons {
             _id
+            month
+            type
             index
-            money
-            tag
+            name
+            txs {
+              _id
+              index
+              money
+              tag
+            }
+            version
           }
-          version
-        }
-        deletedPersons
-        updatedPersons {
-          _id
-          month
-          type
-          index
-          name
-          txs {
+          updatedPersons {
             _id
+            month
+            type
             index
-            money
-            tag
+            name
+            txs {
+              _id
+              index
+              money
+              tag
+            }
+            version
           }
-          version
+          deletedPersons
         }
-      }
-    }
-  `;
-
-  static readonly applyPatchQuery = gql`
-    mutation ApplyUpdates($diff: PersonDiff) {
-      applyUpdates(diff: $diff) {
-        conflictPersons {
+        conflictsPersons {
           _id
           isDeleted
           txs {

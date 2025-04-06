@@ -1,9 +1,8 @@
 import { FetchResult } from "@apollo/client";
 import cloneDeep from "lodash/cloneDeep";
 import {
-  ChangedPersons,
   ChangePasswordInput,
-  Conflicts,
+  Changes,
   PersonDiff,
   PersonVersionId,
   ResponseData,
@@ -39,27 +38,17 @@ export class ExpenseBackendApi {
     );
   }
 
-  async getChangedPersons(
+  async syncChanges(
+    diff: PersonDiff,
     month: string,
     personVersionIds: PersonVersionId[]
-  ): ResponseData<ChangedPersons> {
-    return handleResponse<ChangedPersons>(
-      graphqlClient.query({
-        query: ApiContants.changedPersonsQuery,
-        variables: { month, personVersionIds },
-        fetchPolicy: "network-only",
-      }),
-      "changedPersons"
-    );
-  }
-
-  async applyChanges(diff: PersonDiff): ResponseData<Conflicts> {
-    return handleResponse<Conflicts>(
+  ): ResponseData<Changes> {
+    return handleResponse<Changes>(
       graphqlClient.mutate({
-        mutation: ApiContants.applyPatchQuery,
-        variables: { diff },
+        mutation: ApiContants.syncChanges,
+        variables: { diff, month, personVersionIds },
       }),
-      "applyUpdates"
+      "syncChanges"
     );
   }
 
