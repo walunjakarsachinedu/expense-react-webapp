@@ -25,7 +25,7 @@ function LoginPage() {
   } = useLoginValidation();
 
   const { email, password } = getValues();
-  const { run: performLogin, isLoading, result } = useLogin(email, password);
+  const { run: performLogin, isLoading, result } = useLogin(getValues);
 
   if (result?.data) return <Navigate to="/" />;
 
