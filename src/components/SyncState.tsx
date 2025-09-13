@@ -13,15 +13,16 @@ function SyncState() {
   }, [syncState, setSyncState]);
 
   const getIcon = () => {
+    const iconPath = "/icons";
     switch (syncState) {
       case 'synced':
-        return '/src/assets/icons/Sync-Icon.svg';
+        return `${iconPath}/Sync-Icon.svg`;
       case 'syncing':
-        return '/src/assets/icons/Syncing-Icon.svg';
+        return `${iconPath}/Syncing-Icon.svg`;
       case 'unSync':
-        return '/src/assets/icons/UnSync-Icon.svg';
+        return `${iconPath}/UnSync-Icon.svg`;
       case 'syncError':
-        return '/src/assets/icons/UnSync-Error-Icon.svg';
+        return `${iconPath}/UnSync-Error-Icon.svg`;
       default:
         return '';
     }
