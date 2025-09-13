@@ -1,6 +1,7 @@
 import { PersonData, PersonDiff } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
 
+/** Cache data in local storage. */
 class PersonCacheApi {
   readonly storageKey = "cached_person_id_";
   _getKeyFromId = (id: string) => `${this.storageKey}${id}`;
@@ -40,4 +41,5 @@ class PersonCacheApi {
   }
 }
 
+/** Cache data in local storage. */
 export const personCacheApi = new PersonCacheApi();

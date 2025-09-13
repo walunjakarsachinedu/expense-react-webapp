@@ -34,6 +34,7 @@ export type ExpenseStore = {
   clearConflicts: () => void;
 
   setMonthYear: (monthYear: string) => void;
+  /** Use to apply changes from server to client. */
   applyChanges: (monthYear: string, persons: ChangedPersons) => void;
   setMonthData: (monthYear: string, persons: PersonData[]) => void;
   addPerson: (type: TxType) => void;
@@ -220,6 +221,7 @@ const useExpenseStore = create<ExpenseStore>(
   applyMiddleware({
     store: personStore,
     beforeMiddlware: (action) => {
+      /** Represent actions which doesn't cause data change because of user. */
       const ignoreActions: (keyof ExpenseStore)[] = [
         "setMonthYear",
         "setMonthData",

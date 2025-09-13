@@ -167,11 +167,13 @@ class PersonUtils {
     }
   };
 
-  /** Algorithm:
+  /** Apply changes from `changedPersons` to `persons` object. USECASE: Apply changes recieved from server.
+   * 
+   * Algorithm:
    * 1. Apply add & delete changes directly.
    * 2. Compute the local pending `diff`.
-   * 3. Apply local diff to `updatedPersons`.
-   * 4. Calculate `updateDiff` between person in `useExpenseStore` and `updatedPersons`.
+   * 3. Apply local diff to `updatedPersons`. (Goal: to accurately calculate `updatedDiff`)
+   * 4. Calculate `updateDiff` between person in `useExpenseStore` and `updatedPersons`. (Goal: to update person version same as on server.)
    * 5. Remove conflicting tx tags from `updateDiff`.
    * 6. Apply `updateDiff` to `useExpenseStore`.
    */
@@ -193,14 +195,15 @@ class PersonUtils {
         })
       : null;
 
-    // 3. Apply local diff to `updatedPersons`.
+    // 3. Apply local diff to `updatedPersons`. (Goal: to accurately calculate `updatedDiff`)
     changedPersons.updatedPersons = this.applyUpdateDiffToPersons({
       persons: changedPersons.updatedPersons.map(personUtils.personTxToPerson),
       diff: localDiff,
     }).map(personUtils.personToPersonTx);
 
-    // 4. Calculate `updateDiff` between person in useExpenseStore and `updatedPersons`.
+    // 4. Calculate `updateDiff` between person in useExpenseStore and `updatedPersons`. (Goal: to update person version same as on server.)
     const updateDiff = personUtils.personDiff({
+      // getting person from store which are updated from backend.
       oldData: utils.toMapById(
         Object.values(useExpenseStore.getState().persons).filter((person) =>
           changedPersons.updatedPersons.find(

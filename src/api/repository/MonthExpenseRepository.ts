@@ -125,7 +125,7 @@ class MonthExpenseRepository {
       .then((result) => result.data!);
 
     // 2. apply server changes & conflicts
-    return this.applyServerChanges(monthYear, changes);
+    return this._applyServerChanges(monthYear, changes);
   }
 
   /**
@@ -135,7 +135,7 @@ class MonthExpenseRepository {
    * 3. apply changes to cache
    * 4. apply changes to patchProcessing
    */
-  async applyServerChanges(monthYear: string, changes: Changes): Promise<void> {
+  async _applyServerChanges(monthYear: string, changes: Changes): Promise<void> {
     const changedPersons = changes.changedPersons;
 
     // 1. store conflicts to useExpenseStore
