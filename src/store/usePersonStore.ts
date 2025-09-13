@@ -11,6 +11,7 @@ import {
   ChangedPersons,
   ConflictPerson,
   PersonData,
+  SyncStates,
   Tx,
   TxType,
 } from "../models/type";
@@ -23,6 +24,7 @@ import Timer from "../utils/Timer";
 import utils from "../utils/utils";
 
 export type ExpenseStore = {
+  syncState: SyncStates;
   monthYear: string;
   persons: Record<string, PersonData>;
   personIds: { id: string; type: TxType }[]; // for maintaining order
@@ -30,6 +32,7 @@ export type ExpenseStore = {
   conflicts?: ConflictPerson[];
   isConflictsFound: boolean;
 
+  setSyncState: (state: SyncStates) => void;
   setConflicts: (conflicts: ConflictPerson[]) => void;
   clearConflicts: () => void;
 
@@ -64,11 +67,17 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       utils.formatToMonthYear(Date.now());
 
     return {
+      syncState: "synced",
       monthYear: selectedMonth,
       persons: {},
       personIds: [],
       isConflictsFound: false,
 
+      setSyncState: (state) => {
+        set((store) => {
+          store.syncState = state;
+        })
+      },
       setConflicts: (conflicts) => {
         if (!conflicts.length) return;
         set((_) => ({
@@ -95,6 +104,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
 
         set((store) => {
           store.monthYear = monthYear;
+          store.syncState = "synced";
         });
         localStorage.setItem(Constants.monthStorageKey, monthYear);
       },
@@ -228,6 +238,7 @@ const useExpenseStore = create<ExpenseStore>(
         "applyChanges",
         "copyPerson",
         "setConflicts",
+        "setSyncState"
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
       // delayDebounceTimer action - delay the timer only if user is working
@@ -236,6 +247,8 @@ const useExpenseStore = create<ExpenseStore>(
       }
       // delay save
       timer.startOrDelay();
+
+      useExpenseStore.getState().setSyncState("unSync");
     },
   })
 );

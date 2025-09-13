@@ -8,6 +8,7 @@ import "./NavBar.css";
 import authService from "../core/authService";
 import OfflineAlert from "./OfflineAlert";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import SyncState from "./SyncState";
 
 export default function NavBar() {
   const month = useExpenseStore((store) => store.monthYear);
@@ -36,7 +37,7 @@ export default function NavBar() {
       <ConfirmDialog />
       <OfflineAlert></OfflineAlert>
       <div
-        className="blur-bg flex justify-content-center"
+        className="blur-bg flex justify-content-center align-items-center"
         style={{
           width: "100%",
           padding: 10,
@@ -54,6 +55,7 @@ export default function NavBar() {
         </Row>
 
         <div style={{ width: 70 }}></div>
+        <SyncState></SyncState>
         <Row>
           <div className="mr-3"></div>
           <MonthPicker

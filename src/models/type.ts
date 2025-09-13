@@ -121,3 +121,6 @@ export type VerifyResetCodeInput = {
   email: string;
   nonce: string;
 };
+
+
+export type SyncStates = "synced"|"unSync"|"syncing"|"syncError"|"";

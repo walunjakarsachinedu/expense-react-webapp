@@ -156,6 +156,8 @@ class MonthExpenseRepository {
         personUtils.applyChanges(recipe, changedPersons)
       );
     }
+
+    useExpenseStore.getState().setSyncState("synced");
   }
 
   /** Delete entities marked as deleted, save those not marked as deleted. */

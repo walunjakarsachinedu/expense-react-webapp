@@ -46,6 +46,7 @@ class PatchProcessing {
       this._storePatch(patch);
       this._runOnceOnline(action);
       this.isPatchInQueue = true;
+      useExpenseStore.getState().setSyncState("syncError");
       return;
     }
 
@@ -63,12 +64,15 @@ class PatchProcessing {
       this._deletePatch();
       this.prevState = nextState;
       this.isPatchInQueue = false;
+      useExpenseStore.getState().setSyncState("syncing");
       this.currentActionStatus = new TrackedPromise(
         this.action(patch).finally(() => {
-          if (!this.isPatchInQueue) return;
-          // 6. Process pending patches if any.
-          const nextState = useExpenseStore.getState().persons;
-          this.processPatch(nextState, action);
+          if(this.isPatchInQueue) {
+            // 6. Process pending patches if any.
+            const nextState = useExpenseStore.getState().persons;
+            this.processPatch(nextState, action);
+          }
+          useExpenseStore.getState().setSyncState("synced");
         })
       );
     }
