@@ -123,4 +123,4 @@ export type VerifyResetCodeInput = {
 };
 
 
-export type SyncStates = "synced"|"unSync"|"syncing"|"syncError"|"";
+export type SyncStates = "synced"|"unSync"|"syncing"|"syncError"|"none";

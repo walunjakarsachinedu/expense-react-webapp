@@ -67,7 +67,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       utils.formatToMonthYear(Date.now());
 
     return {
-      syncState: "synced",
+      syncState: "none",
       monthYear: selectedMonth,
       persons: {},
       personIds: [],
@@ -75,6 +75,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
 
       setSyncState: (state) => {
         set((store) => {
+          if(store.syncState == "none" && state == "synced") return;
           store.syncState = state;
         })
       },
@@ -104,7 +105,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
 
         set((store) => {
           store.monthYear = monthYear;
-          store.syncState = "synced";
+          store.setSyncState("synced");
         });
         localStorage.setItem(Constants.monthStorageKey, monthYear);
       },

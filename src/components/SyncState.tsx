@@ -7,7 +7,7 @@ function SyncState() {
 
   useEffect(() => {
     if (syncState === 'synced') {
-      const timer = setTimeout(() => setSyncState(''), 2000);
+      const timer = setTimeout(() => setSyncState('none'), 2000);
       return () => clearTimeout(timer);
     }
   }, [syncState, setSyncState]);
@@ -28,7 +28,7 @@ function SyncState() {
     }
   };
 
-  return syncState == ""
+  return syncState == "none"
     ? <div style={{ width: 23 }}></div>
     : getIcon() && (
       <img src={getIcon()} alt={syncState} style={{ height: 16 }} />
