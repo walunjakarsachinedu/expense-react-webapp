@@ -8,7 +8,7 @@ import "./InfoDialog.css";
 const InfoDialog = () => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [content, setContent] = useState("");
-  const onCloseRef = useRef<() => void>();
+  const onCloseRef = useRef<() => void>(undefined);
 
   const showDialog = (content: string, onClose: () => void) => {
     setContent(content);

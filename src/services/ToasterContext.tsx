@@ -1,9 +1,9 @@
 import { Toast } from "primereact/toast";
 import { createContext, ReactNode, RefObject, useRef } from "react";
 
-type ToasterContext = RefObject<Toast>;
+type ToasterContext = RefObject<Toast | null>;
 
-const ToastContext = createContext<ToasterContext>({} as RefObject<Toast>);
+const ToastContext = createContext<ToasterContext>({} as RefObject<Toast | null>);
 
 type Props = {
   children: ReactNode;
