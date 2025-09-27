@@ -1,6 +1,6 @@
 import { Calendar } from "primereact/calendar";
 import { useClickOutside } from "primereact/hooks";
-import { useRef, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 import utils from "../utils/utils";
 import "./MonthPicker.css";
 import useIsOffline from "../hooks/useIsOffline";
@@ -15,10 +15,10 @@ const MonthPicker = ({ initialDate, onDateChange }: Prop) => {
   const isOffline = useIsOffline();
   const [date, setDate] = useState<Date>(initialDate);
   const [isMonthPickerVisible, setIsMonthPickerVisible] = useState(false);
-  const overlayRef = useRef(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
-  useClickOutside(overlayRef, (event: Event) => {
+  useClickOutside(overlayRef as RefObject<Element>, (event: Event) => {
     if (buttonRef.current && buttonRef.current.contains(event.target as Node)) {
       return;
     }
@@ -31,15 +31,14 @@ const MonthPicker = ({ initialDate, onDateChange }: Prop) => {
     <div className="relative">
       <div
         ref={buttonRef}
-        className={`flex align-items-center  select-none border-1 border-round border-200 icon-btn p-0 white-space-nowrap ${
-          isOffline ? "disabled cursor-not-allowed" : ""
-        }`}
+        className={`flex align-items-center  select-none border-1 border-round border-200 icon-btn p-0 white-space-nowrap ${isOffline ? "disabled cursor-not-allowed" : ""
+          }`}
         onClick={
           !isOffline
             ? () => {
-                setIsMonthPickerVisible((value) => !value);
-                console.log("showing month picker");
-              }
+              setIsMonthPickerVisible((value) => !value);
+              console.log("showing month picker");
+            }
             : undefined
         }
       >
@@ -47,9 +46,8 @@ const MonthPicker = ({ initialDate, onDateChange }: Prop) => {
           {utils.formatToMonthYear(date)}
         </div>
         <div
-          className={`pi pi-calendar icon-btn  mr-1 ${
-            isOffline ? "cursor-not-allowed" : ""
-          }`}
+          className={`pi pi-calendar icon-btn  mr-1 ${isOffline ? "cursor-not-allowed" : ""
+            }`}
           style={{ fontSize: ".9rem" }}
         ></div>
       </div>
