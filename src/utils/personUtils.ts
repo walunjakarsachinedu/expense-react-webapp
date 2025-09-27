@@ -1,3 +1,4 @@
+import { produce } from "immer";
 import {
   ChangedPersons,
   PersonData,
@@ -29,10 +30,13 @@ class PersonUtils {
 
   // object is frozen
   personTxToPerson(person: PersonTx): PersonData {
+    const txs = utils.toMapById(person.txs);
     return {
-      ...person,
-      txs: utils.toMapById(person.txs),
-      txIds: person.txs.sort((a, b) => a.index - b.index).map((tx) => tx._id),
+      ...person, 
+      txs: txs,
+      txIds: Object.values(txs)
+        .sort((a, b) => a.index - b.index)
+        .map((tx) => tx._id),
     };
   }
 
@@ -46,6 +50,15 @@ class PersonUtils {
       type: person.type,
       month: person.month,
     };
+  }
+
+  /** remove duplicate tx and correct all index. */
+  sanitizePerson(person: PersonData): PersonData {
+    person.txIds = Object.values(person.txs)
+      .sort((a, b) => a.index - b.index)
+      .map((tx) => tx._id);
+    person.txs = utils.toMapById(person.txIds.map(_id => person.txs[_id]));
+    return person;
   }
 
   personDiff({
@@ -236,7 +249,7 @@ class PersonUtils {
       });
     }
 
-    // 6. Apply `updateDiff` to useExpenseStore.
+    // 6. Apply `updateDiff` to persons.
     this.applyUpdateDiffToPersons({
       persons: Object.values(persons),
       diff: updateDiff,

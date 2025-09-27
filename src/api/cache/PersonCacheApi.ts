@@ -1,5 +1,7 @@
+import { produce } from "immer";
 import { PersonData, PersonDiff } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
+import personUtils from "../../utils/personUtils";
 
 /** Cache data in local storage. */
 class PersonCacheApi {
@@ -10,7 +12,8 @@ class PersonCacheApi {
     return Object.keys(localStorage)
       .filter((key) => key.startsWith(this.storageKey))
       .map((id) => localStorage.getItem(id))
-      .map((data) => JSON.parse(data!));
+      .map((data) => JSON.parse(data!) as PersonData)
+      .map(personUtils.sanitizePerson);
   };
 
   deletePersonWithId = (id: string) => {
@@ -24,6 +27,7 @@ class PersonCacheApi {
   }
 
   storePerson = (person: PersonData) => {
+    person = produce(person, personUtils.sanitizePerson);
     localStorage.setItem(
       this._getKeyFromId(person._id),
       JSON.stringify({ ...person })
