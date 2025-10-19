@@ -13,6 +13,7 @@
   "dependencies": {
     "@apollo/client": "3.12.11",
     "@hookform/resolvers": "4.1.3",
+    "codemirror": "^6.0.2",
     "immer": "10.1.1",
     "lodash": "4.17.21",
     "primeflex": "3.3.1",

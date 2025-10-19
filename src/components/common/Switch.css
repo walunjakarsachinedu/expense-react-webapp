@@ -1,0 +1,11 @@
+.Switch .highlight-bg {
+  border-radius: 4px;
+  background-color: #818cf8;
+  color: black
+
+}
+
+.Switch {
+  background-color: #818df826;
+  border-radius: 10px;
+}
