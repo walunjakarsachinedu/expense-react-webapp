@@ -16,27 +16,23 @@ const PlainTextEditor = ({ value = '', onChange, placeholderText = 'Enter notes.
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
 
-  // keep latest onChange without recreating the editor
-  const onChangeRef = useRef(onChange)
-  useEffect(() => { onChangeRef.current = onChange }, [onChange])
-
-  // compartments to reconfigure extensions after creation
   const placeholderCompartment = useRef(new Compartment()).current
   const themeCompartment = useRef(new Compartment()).current
 
-  // create the editor ONCE
   useEffect(() => {
     if (!hostRef.current) return
 
     const updateListener = EditorView.updateListener.of((update) => {
       if (!update.docChanged) return
-      onChangeRef.current?.(update.state.doc.toString())
+      onChange?.(update.state.doc.toString())
     })
 
     const theme = EditorView.theme({
       '&': {
-        color: 'rgba(255, 255, 255, 0.85)',
-        backgroundColor: 'transparent',
+        color: 'var(--text-color)',
+        backgroundColor: 'var(--surface-ground)',
+        fontFamily: 'var(--font-family)',
+        fontWeight: 400,
         height: '100%',
         outline: '1px solid rgba(129, 140, 248, 0.60)',
         outlineOffset: '2px',
@@ -45,8 +41,11 @@ const PlainTextEditor = ({ value = '', onChange, placeholderText = 'Enter notes.
         outline: '1px solid rgba(129, 140, 248, 0.60)',
         outlineOffset: '2px',
       },
-      // caret (native) + cm-cursor (drawn)
-      '.cm-content': { caretColor: BRAND },
+      '.cm-content': {
+        fontFamily: 'var(--font-family)',
+        fontWeight: 400,
+        caretColor: BRAND,
+      },
       '&.cm-focused .cm-cursor': { borderLeftColor: BRAND },
       // selection (drawn and native)
       '.cm-selectionBackground, &.cm-focused .cm-selectionBackground, .cm-content ::selection': {
@@ -55,7 +54,7 @@ const PlainTextEditor = ({ value = '', onChange, placeholderText = 'Enter notes.
     }, { dark: true })
 
     const state = EditorState.create({
-      doc: value, // seed once
+      doc: value,
       extensions: [
         minimalSetup,
         placeholderCompartment.of(placeholder(placeholderText)),
