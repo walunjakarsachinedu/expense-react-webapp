@@ -1,4 +1,5 @@
-import { PersonData, PersonDiff } from "../models/type";
+import { cloneDeep } from "lodash";
+import { MonthData, PersonData, MonthDiff } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
 import Constants from "./constants";
 import { isPageUnloaded } from "./is-page-unloaded";
@@ -8,8 +9,8 @@ import utils from "./utils";
 
 /** Manages sequential patch processing.  */
 class PatchProcessing {
-  prevState?: Record<string, PersonData>;
-  private action?: (patch: PersonDiff) => Promise<void>;
+  prevState?: MonthData;
+  private action?: (patch: MonthDiff) => Promise<void>;
   private currentActionStatus?: TrackedPromise<void>;
   private isPatchInQueue: boolean = false;
 
@@ -17,31 +18,37 @@ class PatchProcessing {
 
   /**
    * Algorithm:
-   * 1. If no prevState, store nextState as prevState & skip processing.
-   * 2. Calculate patch.
-   * 3. If offline, store patch & schedule to run once online.
-   * 4. If processing, store patch.
-   * 5. If not processing, process patch.
-   * 6. Process pending patches if any.
+   * - Sanitize nextState
+   * - If no prevState, store nextState as prevState & skip processing.
+   * - Calculate patch.
+   * - If offline, store patch & schedule to run once online.
+   * - If processing, store patch.
+   * - If not processing, process patch.
+   * - Process pending patches if any.
    */
   processPatch(
-    nextState: Record<string, PersonData>,
-    action: (patch: PersonDiff) => Promise<void>
+    nextState: MonthData,
+    action: (patch: MonthDiff) => Promise<void>
   ) {
-    // 1. If no prevState, store nextState as prevState & skip processing.
+    /// - Sanitize nextState
+    nextState = utils.sanitizeMonthData(nextState);
+
+    /// - If no prevState, store nextState as prevState & skip processing.
     this.action = action;
     if (!this.prevState) {
       this.prevState = nextState;
       return;
     }
 
-    // 2. Calculate patch.
-    const patch = personUtils.personDiff({
+    /// - Calculate patch.
+    const patch = personUtils.monthDiff({
       updatedData: nextState,
       oldData: this.prevState,
     });
 
-    // 3. If offline, store patch & schedule to run once online.
+
+
+    /// - If offline, store patch & schedule to run once online.
     if (!navigator.onLine) {
       this._storePatch(patch);
       this._runOnceOnline(action);
@@ -53,13 +60,13 @@ class PatchProcessing {
     const isPatchInProcess =
       this.currentActionStatus && !this.currentActionStatus.getIsResolved();
 
-    // 4. If processing, store patch.
+    /// - If processing, store patch.
     if (isPatchInProcess) {
       this._storePatch(patch);
       this.isPatchInQueue = true;
     }
 
-    // 5. If not processing, process patch.
+    /// - If not processing, process patch.
     if (!isPatchInProcess) {
       this._deletePatch();
       this.prevState = nextState;
@@ -69,7 +76,7 @@ class PatchProcessing {
         this.action(patch).finally(() => {
           if(this.isPatchInQueue) {
             // 6. Process pending patches if any.
-            const nextState = useExpenseStore.getState().persons;
+            const nextState = useExpenseStore.getState().getMonthData();
             this.processPatch(nextState, action);
           }
           useExpenseStore.getState().setSyncState("synced");
@@ -78,11 +85,12 @@ class PatchProcessing {
     }
   }
 
-  setPrevState(prevState: Record<string, PersonData>) {
-    this.prevState = prevState;
+  setPrevState(prevState: MonthData) {
+    /// Sanitize prevState
+    this.prevState = utils.sanitizeMonthData(prevState);
   }
 
-  getPatchAndDeleteFromStorage(): PersonDiff | undefined {
+  getPatchAndDeleteFromStorage(): MonthDiff | undefined {
     const patchStr = localStorage.getItem(Constants.pendingPatchKey);
     const pendingPatchTimeStamp =
       utils.parseNumber(
@@ -100,7 +108,7 @@ class PatchProcessing {
     }
   }
 
-  private _storePatch(patch: PersonDiff) {
+  private _storePatch(patch: MonthDiff) {
     localStorage.setItem(Constants.pendingPatchKey, JSON.stringify(patch));
     localStorage.setItem(Constants.pendingPatchTimeStampKey, `${Date.now()}`);
   }
@@ -111,12 +119,12 @@ class PatchProcessing {
   }
 
   /** schedule action to run once when online. */
-  private _runOnceOnline(action: (patch: PersonDiff) => Promise<void>) {
+  private _runOnceOnline(action: (patch: MonthDiff) => Promise<void>) {
     if (this.scheduledAction) {
       window.removeEventListener("online", this.scheduledAction);
     }
     const processPatch = () => {
-      const nextState = useExpenseStore.getState().persons;
+      const nextState = useExpenseStore.getState().getMonthData();
       this.processPatch(nextState, action);
     };
     window.addEventListener("online", () => {

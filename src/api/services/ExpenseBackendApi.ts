@@ -3,10 +3,10 @@ import cloneDeep from "lodash/cloneDeep";
 import {
   ChangePasswordInput,
   Changes,
-  PersonDiff,
-  PersonVersionId,
+  CurrentState,
+  MonthDiff,
   ResponseData,
-  VerifyResetCodeInput,
+  VerifyResetCodeInput
 } from "../../models/type";
 import graphqlClient from "../client/graphqlClient";
 import ApiContants from "../constants/ApiContants";
@@ -39,14 +39,14 @@ export class ExpenseBackendApi {
   }
 
   async syncChanges(
-    diff: PersonDiff,
+    diff: MonthDiff,
     month: string,
-    personVersionIds: PersonVersionId[]
+    currentState: CurrentState
   ): ResponseData<Changes> {
     return handleResponse<Changes>(
       graphqlClient.mutate({
         mutation: ApiContants.syncChanges,
-        variables: { diff, month, personVersionIds },
+        variables: { diff, month, currentState },
       }),
       "syncChanges"
     );

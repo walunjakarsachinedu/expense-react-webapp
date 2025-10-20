@@ -1,4 +1,4 @@
-import { PersonDiff } from "../models/type";
+import { MonthData, MonthDiff, MonthlyNotes } from "../models/type";
 
 class Utility {
   static readonly provider = new Utility();
@@ -51,11 +51,8 @@ class Utility {
     return otherDigits ? `${formatted},${lastThree}` : lastThree;
   }
 
-  isPatchEmpty(diff: PersonDiff): boolean {
-    return (
-      Object.keys(diff).filter((id) => diff[id as keyof PersonDiff]?.length)
-        .length == 0
-    );
+  isPatchEmpty(diff: MonthDiff): boolean {
+    return !(diff.added?.length || diff.updated?.length || diff.deleted?.length || diff.monthlyNotes); 
   }
 
   toMapById<T extends { _id: string }>(arr: T[]): Record<string, T> {
@@ -63,6 +60,10 @@ class Utility {
       acc[cur._id] = cur;
       return acc;
     }, {} as Record<string, T>);
+  }
+
+  sanitizeMonthData(monthData: MonthData): MonthData {
+    return {persons: monthData.persons, monthlyNotes: monthData.monthlyNotes};
   }
 }
 

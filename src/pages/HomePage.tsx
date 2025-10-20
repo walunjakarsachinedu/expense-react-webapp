@@ -1,12 +1,12 @@
+import { useState } from "react";
 import CenteredContent from "../components/common/CenteredContent";
+import Switch from "../components/common/Switch";
 import ConflictResolutionDialog from "../components/ConflictResolutionDialog";
+import MonthlyNotes from "../components/MonthlyNotes";
 import ExpensePanel from "../components/Transaction/ExpensePanel";
 import TxSummary from "../components/Transaction/TxSummary";
 import useMonthExpense from "../hooks/useMonthExpense";
 import { TxType } from "../models/type";
-import Switch from "../components/common/Switch";
-import { useState } from "react";
-import PlainTextEditor from "../components/common/PlainTextEditor";
 
 const HomePage = () => {
   const { isLoading, error } = useMonthExpense();
@@ -39,7 +39,7 @@ const HomePage = () => {
           </> 
           : <>
             <CenteredContent>
-              <PlainTextEditor></PlainTextEditor>
+              <MonthlyNotes></MonthlyNotes>
             </CenteredContent>
           </>
       }

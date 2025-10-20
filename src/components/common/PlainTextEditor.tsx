@@ -1,54 +1,99 @@
 import React, { useEffect, useRef } from 'react'
 import { EditorView, minimalSetup } from 'codemirror'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Compartment } from '@codemirror/state'
 import { placeholder } from '@codemirror/view'
 
 const BRAND = '#818cf8'
 const SEL_BG = 'rgba(129, 140, 248, 0.35)'
 
-const PlainTextEditor: React.FC = () => {
-  const editorRef = useRef<HTMLDivElement>(null)
+type Props = {
+  value?: string
+  onChange?: (txt: string) => void
+  placeholderText?: string
+}
+
+const PlainTextEditor = ({ value = '', onChange, placeholderText = 'Enter notes...' }: Props) => {
+  const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
 
+  // keep latest onChange without recreating the editor
+  const onChangeRef = useRef(onChange)
+  useEffect(() => { onChangeRef.current = onChange }, [onChange])
+
+  // compartments to reconfigure extensions after creation
+  const placeholderCompartment = useRef(new Compartment()).current
+  const themeCompartment = useRef(new Compartment()).current
+
+  // create the editor ONCE
   useEffect(() => {
-    if (!editorRef.current) return
+    if (!hostRef.current) return
 
-    const state = EditorState.create({
-      doc: '',
-      extensions: [
-        minimalSetup,
-        placeholder('Enter notes...'),
-        EditorView.theme({
-          '&': {
-            color: 'rgba(255, 255, 255, 0.85)',
-            backgroundColor: 'transparent',
-            height: '100%',
-            outline: '1px solid rgba(129, 140, 248, 0.60)',
-            outlineOffset: '2px',
-          },
-
-          // Focus ring
-          '&.cm-focused': {
-            outline: '1px solid rgba(129, 140, 248, 0.60)',
-            outlineOffset: '2px',
-          },
-
-          // Caret & cursor
-          '&.cm-focused .cm-cursor': { borderLeftColor: BRAND },
-
-          // Selection (drawn only)
-          "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
-            backgroundColor: SEL_BG,
-          },
-        }, { dark: true })
-      ]
+    const updateListener = EditorView.updateListener.of((update) => {
+      if (!update.docChanged) return
+      onChangeRef.current?.(update.state.doc.toString())
     })
 
-    viewRef.current = new EditorView({ state, parent: editorRef.current })
-    return () => viewRef.current?.destroy()
-  }, [])
+    const theme = EditorView.theme({
+      '&': {
+        color: 'rgba(255, 255, 255, 0.85)',
+        backgroundColor: 'transparent',
+        height: '100%',
+        outline: '1px solid rgba(129, 140, 248, 0.60)',
+        outlineOffset: '2px',
+      },
+      '&.cm-focused': {
+        outline: '1px solid rgba(129, 140, 248, 0.60)',
+        outlineOffset: '2px',
+      },
+      // caret (native) + cm-cursor (drawn)
+      '.cm-content': { caretColor: BRAND },
+      '&.cm-focused .cm-cursor': { borderLeftColor: BRAND },
+      // selection (drawn and native)
+      '.cm-selectionBackground, &.cm-focused .cm-selectionBackground, .cm-content ::selection': {
+        backgroundColor: SEL_BG,
+      },
+    }, { dark: true })
 
-  return <div ref={editorRef} style={{ minHeight: '200px', height: '100%' }} />
+    const state = EditorState.create({
+      doc: value, // seed once
+      extensions: [
+        minimalSetup,
+        placeholderCompartment.of(placeholder(placeholderText)),
+        themeCompartment.of(theme),
+        updateListener,
+      ],
+    })
+
+    viewRef.current = new EditorView({ state, parent: hostRef.current })
+    return () => {
+      viewRef.current?.destroy()
+      viewRef.current = null
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // mount once
+
+  // controlled value -> editor
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) return
+    const current = view.state.doc.toString()
+    if (value !== current) {
+      view.dispatch({
+        changes: { from: 0, to: current.length, insert: value ?? '' },
+      })
+    }
+  }, [value])
+
+  // update placeholder without recreating editor
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) return
+    view.dispatch({
+      effects: placeholderCompartment.reconfigure(placeholder(placeholderText)),
+    })
+  }, [placeholderText, placeholderCompartment])
+
+  return <div ref={hostRef} style={{ minHeight: '200px', height: '100%' }} />
 }
 
 export default PlainTextEditor

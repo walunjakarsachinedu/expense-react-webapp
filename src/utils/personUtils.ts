@@ -1,8 +1,9 @@
-import { produce } from "immer";
 import {
   ChangedPersons,
+  MonthData,
+  MonthDiff,
+  MonthlyNotes,
   PersonData,
-  PersonDiff,
   PersonPatch,
   PersonTx,
   Tx,
@@ -61,33 +62,47 @@ class PersonUtils {
     return person;
   }
 
-  personDiff({
+  monthDiff({
     updatedData,
     oldData,
     includeVersionChange = false,
   }: {
-    updatedData: Record<string, PersonData>;
-    oldData: Record<string, PersonData>;
+    updatedData: MonthData;
+    oldData: MonthData;
     /** when true, also includes change containing just version change. */
     includeVersionChange?: boolean;
-  }): PersonDiff {
-    const added = Object.keys(updatedData)
-      .filter((_id) => !oldData[_id])
-      .map((_id) => updatedData[_id])
+  }): MonthDiff {
+    /// sanitize data
+    updatedData = utils.sanitizeMonthData(updatedData);
+    oldData = utils.sanitizeMonthData(oldData);
+
+    const added = Object.keys(updatedData.persons)
+      .filter((_id) => !oldData.persons[_id])
+      .map((_id) => updatedData.persons[_id])
+      .filter(Boolean)
       .map((person) => this.personToPersonTx(person));
-    const deleted = Object.keys(oldData).filter((_id) => !updatedData[_id]);
-    const updated: PersonPatch[] = Object.keys(updatedData)
-      .filter((_id) => oldData[_id])
+    const deleted = Object.keys(oldData.persons).filter((_id) => !updatedData.persons[_id]);
+    const updated: PersonPatch[] = Object.keys(updatedData.persons)
+      .filter((_id) => oldData.persons[_id])
       .map((_id) => {
         return this._personPatch(
-          updatedData[_id],
-          oldData[_id],
+          updatedData.persons[_id],
+          oldData.persons[_id],
           includeVersionChange
         );
       })
       .filter((personPatch) => personPatch !== undefined);
 
-    return utils.removeEmptyArrayFields({ added, deleted, updated });
+      const monthDiff: MonthDiff = utils.removeEmptyArrayFields({ added, deleted, updated } satisfies MonthDiff);
+      if(updatedData.monthlyNotes && updatedData.monthlyNotes.notes != oldData.monthlyNotes?.notes) {
+        monthDiff.monthlyNotes = {
+          _id: updatedData.monthlyNotes._id,
+          version: updatedData.monthlyNotes.version, 
+          notes: updatedData.monthlyNotes.notes
+        };
+      }
+
+      return monthDiff;
   }
 
   /** note: return undefined for just version change  */
@@ -180,57 +195,66 @@ class PersonUtils {
     }
   };
 
-  /** Apply changes from `changedPersons` to `persons` object. USECASE: Apply changes recieved from server.
+  /** Apply changes recieved from server. Specifically, apply changes from `changedPersons` & `monthlyNotes` to `store` object. 
    * 
    * Algorithm:
-   * 1. Apply add & delete changes directly.
-   * 2. Compute the local pending `diff`.
-   * 3. Apply local diff to `updatedPersons`. (Goal: to accurately calculate `updatedDiff`)
-   * 4. Calculate `updateDiff` between person in `useExpenseStore` and `updatedPersons`. (Goal: to update person version same as on server.)
-   * 5. Remove conflicting tx tags from `updateDiff`.
-   * 6. Apply `updateDiff` to `useExpenseStore`.
+   * - Apply add & delete changes directly.
+   * - Compute the local pending `diff`.
+   * - Apply local diff to `updatedPersons`. (Goal: to accurately calculate `updatedDiff`)
+   * - Calculate `updateDiff` between person in `useExpenseStore` and `updatedPersons`. (Goal: to update person version same as on server.)
+   * - Remove conflicting tx tags from `updateDiff`.
+   * - Apply `updateDiff` to `useExpenseStore`.
+   * - Apply monthlyNotes
    */
   applyChanges(
-    persons: Record<string, PersonData>,
-    changedPersons: ChangedPersons
+    store: MonthData,
+    changedPersons: ChangedPersons,
+    monthlyNotes?: MonthlyNotes
   ): Record<string, PersonData> {
-    // 1. Apply add & delete changes directly.
+    const persons = store.persons;
+    /// - Apply add & delete changes directly.
     changedPersons.addedPersons
       .map(personUtils.personTxToPerson)
       .forEach((person) => (persons[person._id] = person));
     changedPersons.deletedPersons.forEach((id) => delete persons[id]);
 
-    // 2. Compute the local pending `diff`.
+    /// - Compute the local pending `diff`.
     const localDiff = patchProcessing.prevState
-      ? personUtils.personDiff({
+      ? personUtils.monthDiff({
           oldData: patchProcessing.prevState,
-          updatedData: useExpenseStore.getState().persons,
+          updatedData: useExpenseStore.getState().getMonthData() 
         })
       : null;
 
-    // 3. Apply local diff to `updatedPersons`. (Goal: to accurately calculate `updatedDiff`)
+    /// - Apply local diff to `updatedPersons`. (Goal: to accurately calculate `updatedDiff`)
     changedPersons.updatedPersons = this.applyUpdateDiffToPersons({
       persons: changedPersons.updatedPersons.map(personUtils.personTxToPerson),
       diff: localDiff,
     }).map(personUtils.personToPersonTx);
 
-    // 4. Calculate `updateDiff` between person in useExpenseStore and `updatedPersons`. (Goal: to update person version same as on server.)
-    const updateDiff = personUtils.personDiff({
+    /// - Calculate `updateDiff` between person in useExpenseStore and `updatedPersons`. (Goal: to update person version same as on server.)
+    const updateDiff = personUtils.monthDiff({
       // getting person from store which are updated from backend.
-      oldData: utils.toMapById(
-        Object.values(useExpenseStore.getState().persons).filter((person) =>
-          changedPersons.updatedPersons.find(
-            (updatedPerson) => updatedPerson._id === person._id
+      oldData: {
+        persons: utils.toMapById(
+          Object.values(useExpenseStore.getState().persons).filter((person) =>
+            changedPersons.updatedPersons.find(
+              (updatedPerson) => updatedPerson._id === person._id
+            )
           )
-        )
-      ),
-      updatedData: utils.toMapById(
-        changedPersons.updatedPersons.map(personUtils.personTxToPerson)
-      ),
+        ),
+        monthlyNotes: useExpenseStore.getState().monthlyNotes
+      },
+      updatedData: {
+        persons: utils.toMapById(
+          changedPersons.updatedPersons.map(personUtils.personTxToPerson)
+        ),
+        monthlyNotes: monthlyNotes
+      },
       includeVersionChange: true,
     });
 
-    // 5. Remove conflicting tx tags from `updateDiff`.
+    /// - Remove conflicting tx tags from `updateDiff`.
     const conflicts = useExpenseStore.getState().conflicts;
     if (conflicts) {
       updateDiff.updated?.forEach((updatedPerson) => {
@@ -249,18 +273,23 @@ class PersonUtils {
       });
     }
 
-    // 6. Apply `updateDiff` to persons.
+    /// - Apply `updateDiff` to persons.
     this.applyUpdateDiffToPersons({
       persons: Object.values(persons),
       diff: updateDiff,
     });
+
+    /// - Apply monthlyNotes
+    if(monthlyNotes?.notes) {
+      store.monthlyNotes = monthlyNotes;
+    }
     return persons;
   }
 
   /** Apply update patches in inline way to persons with matching _id.  */
   applyUpdateDiffToPersons(args: {
     persons: PersonData[];
-    diff: PersonDiff | null;
+    diff: MonthDiff | null;
   }) {
     const { persons, diff } = args;
     if (!diff) return persons;

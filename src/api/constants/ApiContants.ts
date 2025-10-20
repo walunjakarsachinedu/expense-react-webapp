@@ -32,14 +32,14 @@ export default class ApiContants {
 
   static readonly syncChanges = gql`
     mutation SyncChanges(
-      $diff: PersonDiff
+      $diff: MonthDiff
       $month: String!
-      $personVersionIds: [PersonVersionId!]!
+      $currentState: CurrentState
     ) {
       syncChanges(
         diff: $diff
         month: $month
-        personVersionIds: $personVersionIds
+        currentState: $currentState
       ) {
         changedPersons {
           addedPersons {
@@ -79,6 +79,11 @@ export default class ApiContants {
             _id
             isDeleted
           }
+        }
+        monthlyNotes {
+          _id
+          notes
+          version
         }
       }
     }

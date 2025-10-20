@@ -40,15 +40,35 @@ export interface Tx {
   tag?: string;
 }
 
-export type PersonVersionId = {
+
+
+export type VersionId = {
   _id: string;
   version: string;
-};
+}
+
+export type CurrentState = {
+  personVersionIds: VersionId[]
+  monthlyNotesVersionId?: VersionId
+}
 
 export type Changes = {
   conflictsPersons: ConflictPerson[];
   changedPersons: ChangedPersons;
+  monthlyNotes: MonthlyNotes;
 };
+
+export type MonthlyNotes = {
+  _id: string;
+  version?: string;
+  notes: string;
+}
+
+
+export type MonthData = {
+  persons: Record<string, PersonData>;
+  monthlyNotes?: MonthlyNotes;
+}
 
 export type ChangedPersons = {
   addedPersons: PersonTx[];
@@ -56,10 +76,11 @@ export type ChangedPersons = {
   deletedPersons: string[];
 };
 
-export type PersonDiff = {
+export type MonthDiff = {
   added?: PersonTx[];
   updated?: PersonPatch[];
   deleted?: string[];
+  monthlyNotes?: MonthlyNotes;
 };
 
 export type PersonPatch = {

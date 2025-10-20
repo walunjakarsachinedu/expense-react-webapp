@@ -10,6 +10,8 @@ import applyMiddleware from "../middleware/core/applyMiddleware";
 import {
   ChangedPersons,
   ConflictPerson,
+  MonthData,
+  MonthlyNotes,
   PersonData,
   SyncStates,
   Tx,
@@ -28,6 +30,7 @@ export type ExpenseStore = {
   monthYear: string;
   persons: Record<string, PersonData>;
   personIds: { id: string; type: TxType }[]; // for maintaining order
+  monthlyNotes: MonthlyNotes;
 
   conflicts?: ConflictPerson[];
   isConflictsFound: boolean;
@@ -36,10 +39,13 @@ export type ExpenseStore = {
   setConflicts: (conflicts: ConflictPerson[]) => void;
   clearConflicts: () => void;
 
+  updateMonthlyNotes: (notes: string) => void;
+
   setMonthYear: (monthYear: string) => void;
   /** Use to apply changes from server to client. */
-  applyChanges: (monthYear: string, persons: ChangedPersons) => void;
-  setMonthData: (monthYear: string, persons: PersonData[]) => void;
+  applyChanges: (monthYear: string, persons: ChangedPersons, monthlyNotes?: MonthlyNotes) => void;
+  setMonthData: (monthYear: string, monthData: MonthData) => void;
+  getMonthData: () => MonthData;
   addPerson: (type: TxType) => void;
   deletePerson: (id: string) => void;
   updateName: (id: string, name: string) => void;
@@ -72,6 +78,9 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       persons: {},
       personIds: [],
       isConflictsFound: false,
+      monthlyNotes: {
+        notes: ""
+      } as MonthlyNotes,
 
       setSyncState: (state) => {
         set((store) => {
@@ -92,15 +101,23 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.conflicts = [];
         });
       },
+
+      updateMonthlyNotes: (notes: string) => {
+        set((store) => {
+          if(!store.monthlyNotes._id) store.monthlyNotes._id = ObjectId.getId();
+          store.monthlyNotes.notes = notes;
+        }) 
+      },
+
       setMonthYear: (monthYear: string) => {
         // save change considering: user is changing month
         timer.timeout();
 
         // caching before switching to different month
-        inMemoryCache.setCache(
+        inMemoryCache.setCache<MonthData>(
           InMemoryCacheCategory.PersonMonthlyData,
           storeApi.getState().monthYear,
-          Object.values(storeApi.getState().persons)
+          storeApi.getState().getMonthData()
         );
 
         set((store) => {
@@ -109,28 +126,37 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
         });
         localStorage.setItem(Constants.monthStorageKey, monthYear);
       },
-      applyChanges: (monthYear, changedPersons) => {
+      getMonthData: () => {
+        return {
+          persons: storeApi.getState().persons, 
+          monthlyNotes: storeApi.getState().monthlyNotes
+        };
+      },
+      applyChanges: (monthYear, changedPersons, monthlyNotes) => {
         set((store) => {
           store.monthYear = monthYear;
           store.persons = personUtils.applyChanges(
-            store.persons,
+            store,
             changedPersons
           );
           store.personIds = Object.values(store.persons)
             .sort((a, b) => a.index - b.index)
             .map((person) => ({ id: person._id, type: person.type }));
+          if(monthlyNotes) store.monthlyNotes = monthlyNotes;
         });
       },
-      setMonthData: (monthYear, persons) => {
+      setMonthData: (monthYear, monthData) => {
         set((store) => {
           store.monthYear = monthYear;
           store.persons = {};
+          const persons = Object.values(monthData.persons); 
           persons.forEach((person) => (store.persons[person._id] = person));
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
             .map((person) => ({ id: person._id, type: person.type }));
-          patchProcessing.setPrevState(store.persons);
+          if(monthData.monthlyNotes) store.monthlyNotes = monthData.monthlyNotes;
         });
+        patchProcessing.setPrevState(storeApi.getState().getMonthData());
       },
       addPerson: (type) =>
         set((store) => {
@@ -236,10 +262,11 @@ const useExpenseStore = create<ExpenseStore>(
       const ignoreActions: (keyof ExpenseStore)[] = [
         "setMonthYear",
         "setMonthData",
+        "getMonthData",
         "applyChanges",
         "copyPerson",
         "setConflicts",
-        "setSyncState"
+        "setSyncState",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
       // delayDebounceTimer action - delay the timer only if user is working
@@ -264,7 +291,7 @@ function setupDebounceTimer(): Timer {
   timer.stopEvent.subscribe(() => {
     console.info("scheduling patch processing");
 
-    const nextState = useExpenseStore.getState().persons;
+    const nextState = useExpenseStore.getState().getMonthData();
     patchProcessing.processPatch(nextState, async (patch) => {
       if (utils.isPatchEmpty(patch)) return;
       console.log("processing patch: ", patch);
