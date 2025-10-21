@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react'
-import { EditorView, minimalSetup } from 'codemirror'
-import { EditorState, Compartment } from '@codemirror/state'
+import { Compartment, EditorState } from '@codemirror/state'
 import { placeholder } from '@codemirror/view'
+import { EditorView, minimalSetup } from 'codemirror'
+import { useEffect, useRef } from 'react'
 
 const BRAND = '#818cf8'
 const SEL_BG = 'rgba(129, 140, 248, 0.35)'

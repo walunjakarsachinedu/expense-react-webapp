@@ -22,7 +22,7 @@ const HomePage = () => {
           {/* <div className="text-color-secondary">View Type</div>  */}
           <Switch 
             values={['month', 'notes']} 
-            defaultValue={viewType} 
+            selectedValue={viewType} 
             onSelect={(value:string) => setViewType(value as "month"|"notes")}
           ></Switch>
         </div>
