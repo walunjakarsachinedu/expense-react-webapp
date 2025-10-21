@@ -24,10 +24,13 @@ import { patchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
+import authService from "../core/authService";
 
 export type ExpenseStore = {
   syncState: SyncStates;
   monthYear: string;
+  /** use to track changes in `monthYear`. */
+  previousMonthYear: string;
   persons: Record<string, PersonData>;
   personIds: { id: string; type: TxType }[]; // for maintaining order
   monthlyNotes: MonthlyNotes;
@@ -43,7 +46,7 @@ export type ExpenseStore = {
 
   setMonthYear: (monthYear: string) => void;
   /** Use to apply changes from server to client. */
-  applyChanges: (monthYear: string, persons: ChangedPersons, monthlyNotes?: MonthlyNotes) => void;
+  applyChanges: (persons: ChangedPersons, monthlyNotes?: MonthlyNotes) => void;
   setMonthData: (monthYear: string, monthData: MonthData) => void;
   getMonthData: () => MonthData;
   addPerson: (type: TxType) => void;
@@ -61,6 +64,8 @@ export type ExpenseStore = {
   ) => void;
   updateExpenseIndex: (id: string, index: number, personId: string) => void;
   delayDebounceTimer: () => void;
+  /** clear data of current month from store. */
+  clear: () => void;
 };
 
 let timer: Timer;
@@ -75,6 +80,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
     return {
       syncState: "none",
       monthYear: selectedMonth,
+      previousMonthYear: selectedMonth,
       persons: {},
       personIds: [],
       isConflictsFound: false,
@@ -121,6 +127,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
         );
 
         set((store) => {
+          store.previousMonthYear = store.monthYear;
           store.monthYear = monthYear;
           store.setSyncState("synced");
         });
@@ -132,9 +139,8 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           monthlyNotes: storeApi.getState().monthlyNotes
         };
       },
-      applyChanges: (monthYear, changedPersons, monthlyNotes) => {
+      applyChanges: (changedPersons, monthlyNotes) => {
         set((store) => {
-          store.monthYear = monthYear;
           store.persons = personUtils.applyChanges(
             store,
             changedPersons
@@ -154,7 +160,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.personIds = persons
             .sort((a, b) => a.index - b.index)
             .map((person) => ({ id: person._id, type: person.type }));
-          if(monthData.monthlyNotes) store.monthlyNotes = monthData.monthlyNotes;
+          store.monthlyNotes = monthData.monthlyNotes ?? ({notes: ""} as MonthlyNotes);
         });
         patchProcessing.setPrevState(storeApi.getState().getMonthData());
       },
@@ -250,10 +256,18 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           person.txIds.forEach((id, index) => (person.txs[id].index = index));
         });
       },
+      clear: () => {
+        set((store) => {
+          store.persons = {};
+          store.personIds = [];
+          store.monthlyNotes = { notes: "" } as MonthlyNotes;
+        })
+      },
       /** used by middleware to delay debounce timer */
       delayDebounceTimer: () => {},
     };
   });
+
 const useExpenseStore = create<ExpenseStore>(
   applyMiddleware({
     store: personStore,
@@ -267,6 +281,7 @@ const useExpenseStore = create<ExpenseStore>(
         "copyPerson",
         "setConflicts",
         "setSyncState",
+        "clear",
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
       // delayDebounceTimer action - delay the timer only if user is working
@@ -295,12 +310,22 @@ function setupDebounceTimer(): Timer {
     patchProcessing.processPatch(nextState, async (patch) => {
       if (utils.isPatchEmpty(patch)) return;
       console.log("processing patch: ", patch);
-      await monthExpenseRepository.applyPatchesAndSync({ patch });
+      await monthExpenseRepository.applyPatchesAndSync({ patch, isMonthChanged: false });
     });
   });
 
   return timer;
 }
+
+function initializeStore() {
+  const isExpired = authService.isTokenExpired(); 
+  if(isExpired) authService.clearSessionData(); 
+  else queueMicrotask(() => monthExpenseRepository.loadStoreWithCache());
+}
+
+// store initialization
+initializeStore();
+
 
 export { timer };
 

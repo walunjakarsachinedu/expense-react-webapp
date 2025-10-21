@@ -42,34 +42,45 @@ class MonthExpenseRepository {
     const patch = patchProcessing.getPatchAndDeleteFromStorage();
     await this.applyPatchesAndSync({
       patch: patch ?? {},
-      isMonthDataLoaded: false,
+      isMonthChanged: useExpenseStore.getState().monthYear != useExpenseStore.getState().previousMonthYear,
       monthYear,
     });
   }
 
   /**
    * Algorithm :-
-   * - build person id & version array using store if month data is loaded else cache
+   * - if month data is not loaded, then clear previous month data
+   * - build person id & version array and monthlyNotes version id
    * - update version for updated persons & monthlyNotes in patch, patchProcessing, useExpenseStore
    * - apply patch to cache
    * - call _syncChanges to sync change with backend
+   *   - include currentState if `isMonthDataLoaded` is true
    *
    * note: internally it uses `_syncChanges` method
    */
   async applyPatchesAndSync(args: {
     patch: MonthDiff;
-    /** Defaults to `true`.*/
-    isMonthDataLoaded?: boolean;
+    isMonthChanged: boolean;
     monthYear?: string;
   }) {
-    const { patch, isMonthDataLoaded = true, monthYear } = args;
+    const { patch, isMonthChanged, monthYear } = args;
 
-    /// - build person id & version array using store if month data is loaded else cache
-    const monthData = isMonthDataLoaded ? useExpenseStore.getState().getMonthData() : monthCacheApi.getMonthData();
-    const persons = monthData.persons;
+    /// - if month data is not loaded, then clear previous month data
+    if(isMonthChanged) {
+      useExpenseStore.getState().clear();
+      monthCacheApi.clear();
+      patchProcessing.prevState = undefined;
+    }
+
+    /// - build person id & version array and monthlyNotes version id
+    const persons = useExpenseStore.getState().getMonthData().persons;
     const personVersionIds: VersionId[] = Object.keys(persons).map(
       (_id) => ({ _id, version: persons[_id].version })
     );
+    const notes = useExpenseStore.getState().getMonthData().monthlyNotes;
+    const monthlyNotes: VersionId|undefined = notes?._id && notes.version 
+      ? { _id: notes?._id, version: notes?.version }
+      : undefined;
 
     /// - update version for updated persons & monthlyNotes in patch, cache, useExpenseStore
     patch.updated?.forEach((person) => {
@@ -112,12 +123,11 @@ class MonthExpenseRepository {
     monthCacheApi.applyChanges(patch);
 
     /// - call _syncChanges to sync change with backend
-    const notes = (isMonthDataLoaded ? useExpenseStore.getState().getMonthData() : monthCacheApi.getMonthData()).monthlyNotes;
     await this._syncChanges({
       diff: patch,
       currenState: {
-        personVersionIds: personVersionIds,
-        monthlyNotesVersionId: notes && notes._id && notes.version ? {_id: notes._id, version: notes.version} : undefined,
+        personVersionIds: isMonthChanged ? [] : personVersionIds,
+        monthlyNotesVersionId: isMonthChanged  ? undefined : monthlyNotes,
       },
       monthYear,
     });
@@ -159,14 +169,15 @@ class MonthExpenseRepository {
     useExpenseStore.getState().setConflicts(changes.conflictsPersons);
 
     // 2. apply changes to useExpenseStore
-    useExpenseStore.getState().applyChanges(monthYear, changedPersons, changes.monthlyNotes);
+    useExpenseStore.getState().applyChanges(changedPersons, changes.monthlyNotes);
 
     // 3. apply changes to cache
-    monthCacheApi.clear();
-    Object.values(useExpenseStore.getState().persons).forEach(
-      monthCacheApi.storePerson
-    );
-    monthCacheApi.storeMonthlyNotes(useExpenseStore.getState().monthlyNotes);
+    monthCacheApi.applyChanges({
+      added: changedPersons.addedPersons, 
+      deleted: changedPersons.deletedPersons, 
+      updated: changedPersons.updatedPersons,
+      monthlyNotes: changes.monthlyNotes 
+    });
 
     // 4. apply changes to patchProcessing
     if (patchProcessing.prevState) {

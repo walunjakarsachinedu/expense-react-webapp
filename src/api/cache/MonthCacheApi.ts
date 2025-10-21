@@ -13,7 +13,6 @@ class MonthCacheApi {
   /** @return key for storing person. */
   private _getPersonKey = (id: string) => `${this.personStorageKey}/${id}`;
 
-  // TODO: minimise call to getMonthData function
   getMonthData = (): MonthData => {
     return {
       persons: utils.toMapById(this._getAllPersons()),
@@ -33,6 +32,7 @@ class MonthCacheApi {
     localStorage.removeItem(this._getPersonKey(id));
   };
 
+  /** clear data of current month from cache. */
   clear() {
     Object.keys(localStorage)
       .filter((key) => key.startsWith(this.storageKey))
@@ -50,7 +50,12 @@ class MonthCacheApi {
   /**
    * Apply patch - updation, deletion, addition.
    */
-  applyChanges(patches: MonthDiff) {
+  applyChanges(patches: {
+    added?: {_id: string}[], 
+    updated?: {_id: string}[], 
+    deleted?: string[], 
+    monthlyNotes?: MonthlyNotes
+  }) {
     const persons = useExpenseStore.getState().persons;
     patches.added?.forEach((person) => this.storePerson(persons[person._id]));
     patches.updated?.forEach((person) => this.storePerson(persons[person._id]));

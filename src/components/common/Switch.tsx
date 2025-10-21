@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react';
 import './Switch.css';
 
 type Props = {
@@ -8,6 +8,10 @@ type Props = {
 }
 export default function Switch({ values, defaultValue, onSelect }: Props) {
   const [selected, setSelected] = useState(defaultValue);
+
+  useEffect(() => {
+    setSelected(defaultValue);
+  }, [defaultValue])
 
   const onChange = (value: string) => {
     setSelected(value);
