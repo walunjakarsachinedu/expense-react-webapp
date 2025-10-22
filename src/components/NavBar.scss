@@ -7,7 +7,7 @@
 }
 
 .blur-bg {
-  background-color: rgba(--surface-ground, 0.8) !important;
+  background-color: rgba(var(--surface-ground), 0.8) !important;
   backdrop-filter: blur(3px);
   border-bottom: 0px !important;
   box-shadow: none !important;

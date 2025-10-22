@@ -1,4 +1,4 @@
-import './Switch.css';
+import './Switch.scss';
 
 type Props = {
   selectedValue?: string;

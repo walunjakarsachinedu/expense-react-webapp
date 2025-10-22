@@ -3,11 +3,11 @@ import "primeflex/primeflex.css";
 import "primeicons/primeicons.css";
 import "primereact/resources/primereact.min.css";
 import "primereact/resources/themes/lara-dark-indigo/theme.css";
-import "./theme/colors.css";
-import "./theme/theme.css";
+import "./theme/colors.scss";
+import "./theme/theme.scss";
 
 import { PrimeReactProvider } from "primereact/api";
-import "./App.css";
+import "./App.scss";
 import AppRouter from "./AppRouter";
 import { TimerProvider } from "./services/TimerContext";
 import { ToastProvider } from "./services/ToasterContext";

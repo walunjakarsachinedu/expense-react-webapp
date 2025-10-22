@@ -4,7 +4,7 @@ import moneyIcon from "../images/app-icon.svg";
 import useExpenseStore, { timer } from "../store/usePersonStore";
 import utils from "../utils/utils";
 import MonthPicker from "./MonthPicker";
-import "./NavBar.css";
+import "./NavBar.scss";
 import authService from "../core/authService";
 import OfflineAlert from "./OfflineAlert";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";

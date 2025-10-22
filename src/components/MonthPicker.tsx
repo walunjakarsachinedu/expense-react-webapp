@@ -2,7 +2,7 @@ import { Calendar } from "primereact/calendar";
 import { useClickOutside } from "primereact/hooks";
 import { RefObject, useRef, useState } from "react";
 import utils from "../utils/utils";
-import "./MonthPicker.css";
+import "./MonthPicker.scss";
 import useIsOffline from "../hooks/useIsOffline";
 
 type Prop = {

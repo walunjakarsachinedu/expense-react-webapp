@@ -1,7 +1,7 @@
 import { ContextMenu } from "primereact/contextmenu";
 import { MenuItem } from "primereact/menuitem";
 import { useRef } from "react";
-import "./ContextMenuButton.css";
+import "./ContextMenuButton.scss";
 
 type Props = {
   items: MenuItem[];

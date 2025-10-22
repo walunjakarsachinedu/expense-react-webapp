@@ -5,7 +5,7 @@ import { memo, useRef, useState } from "react";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
-import "./TxTag.css";
+import "./TxTag.scss";
 
 type Props = {
   id: string;

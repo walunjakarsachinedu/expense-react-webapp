@@ -3,7 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { monthExpenseRepository } from "../api/repository/MonthExpenseRepository";
 import { TxType } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
-import "./ConflictResolutionDialog.css";
+import "./ConflictResolutionDialog.scss";
 import ConflictResolutionPanel from "./Transaction/ConflictResolutionPanel";
 
 function ConflictResolutionDialog() {

@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import './ContentEditable.css';
+import './ContentEditable.scss';
 
 type Props = {
   onChange?: (text: string) => void;

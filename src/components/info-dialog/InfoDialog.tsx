@@ -2,7 +2,7 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useImperativeHandle, useRef, useState } from "react";
 import { infoDialogRef } from "./infoDialogRef";
-import "./InfoDialog.css";
+import "./InfoDialog.scss";
 
 /** simple dialog, which expose its functionality to `dialogRef`. */
 const InfoDialog = () => {

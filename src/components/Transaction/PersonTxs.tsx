@@ -8,7 +8,7 @@ import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
 import ContextMenuButton from "../ContextMenuButton";
-import "./PersonTxs.css";
+import "./PersonTxs.scss";
 import TxTag from "./TxTag";
 
 type Props = {
