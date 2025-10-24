@@ -5,6 +5,7 @@ import React, {
   KeyboardEventHandler,
   useEffect,
 } from "react";
+import { useSelectAllOnFocus } from "../../hooks/useSelectAllOnFocus";
 
 interface Props {
   placeHolder?: string;
@@ -22,6 +23,8 @@ interface Props {
 
   initialText?: string;
   className?: string;
+  /** select all text on focus of input. */
+  selectAllOnFocus?: boolean;
 }
 
 export default function EditableElem({
@@ -34,6 +37,7 @@ export default function EditableElem({
   placeHolder = "",
   className = "",
   isReadonly = false,
+  selectAllOnFocus,
   onChange,
   onFocus,
   onBlur,
@@ -42,6 +46,8 @@ export default function EditableElem({
   const contentRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<number | null>(null);
   const [textState, setState] = useState<string>(initialText ?? "");
+
+  useSelectAllOnFocus(contentRef, selectAllOnFocus);
 
   // use to trigger re-render when value of initialText change
   useEffect(() => {

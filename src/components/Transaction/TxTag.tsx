@@ -198,6 +198,7 @@ const TxTag = memo(
                     isReadonly={makeReadOnly || isDeleted}
                     maxNumber={31}
                     className="underline"
+                    selectAllOnFocus={true}
                     onKeyUp={(e) => {
                       const target = e.target as HTMLElement;
                       performedAt.current = utils.parseNumber(
