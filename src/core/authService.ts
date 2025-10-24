@@ -1,5 +1,7 @@
 import { NavigateFunction } from "react-router-dom";
 import utils from "../utils/utils";
+import { inMemoryCache } from "../api/cache/InMemoryCacheApi";
+import useExpenseStore from "../store/usePersonStore";
 
 class AuthService {
   logout(navigate?: NavigateFunction) {
@@ -11,7 +13,10 @@ class AuthService {
     }
   }
 
+  /** Clear data from store, inMemoryCache, localStorage. */
   clearSessionData() {
+    useExpenseStore.getState().clear();
+    inMemoryCache.clear();
     localStorage.clear();
   }
 

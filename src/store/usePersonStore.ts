@@ -320,8 +320,10 @@ function setupDebounceTimer(): Timer {
 
 function initializeStore() {
   const isExpired = authService.isTokenExpired(); 
-  if(isExpired) authService.clearSessionData(); 
-  else queueMicrotask(() => monthExpenseRepository.loadStoreWithCache());
+  queueMicrotask(() => {
+    if(isExpired) authService.clearSessionData(); 
+    else monthExpenseRepository.loadStoreWithCache();
+  });
 }
 
 // store initialization

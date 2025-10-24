@@ -51,6 +51,11 @@ class InMemoryCache {
       delete this.inMemoryStorage[category][oldestKey];
     }
   }
+
+  /** Clear cache. */
+  clear() {
+    Object.keys(this.inMemoryStorage).forEach(key => delete this.inMemoryStorage[key]);
+  }
 }
 
 export const inMemoryCache = new InMemoryCache({
