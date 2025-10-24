@@ -21,6 +21,13 @@ class Utility {
     return `${month}-${year}`;
   }
 
+  /** get short month name (e.g., "Oct") from "MM-yyyy" */
+  getShortMonthName(monthYear: string): string {
+    const [month, year] = monthYear.split("-").map(Number);
+    const date = new Date(year, month - 1);
+    return date.toLocaleString("en", { month: "short" }); // e.g., "Oct"
+  }
+
   /** parse date string of format: MM-yyyy */
   parseDate(monthYear: string): Date {
     const [month, year] = monthYear.split("-").map(Number);

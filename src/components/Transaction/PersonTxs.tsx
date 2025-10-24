@@ -70,7 +70,7 @@ const PersonTxs = memo(
       txIds.length > 0 ? (
         <>
           <br />
-          <div className="flex align-items-center flex-wrap gap-2">
+          <div className="flex align-items-center flex-wrap gap-2 mt-2">
             {txIds
               .slice()
               .reverse()

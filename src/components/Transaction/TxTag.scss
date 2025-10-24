@@ -1,33 +1,75 @@
-.remove-btn {
-  position: absolute;
-  top: -0.3rem;
-  right: -0.35rem;
-  color: var(--text-color);
-  font-size: 9px;
-  padding: 2px;
-  border: 1px solid var(--surface-border-highlighted);
-  border-radius: 4px;
-  cursor: pointer;
-}
 
-.deleted.Tag::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 1px; /* Adjust thickness */
-  background-color: var(--gray-400); /* Matches text color */
-  transform: scale(1.1);
-}
+.TxTag {
+  --active-bg-color: rgb(21,21,21);
+  
+  &.active {
+    background-color: var(--active-bg-color);
+  }
 
-.Tag .delete-checkbox {
-  position: absolute;
-  top: -0.6rem;
-  right: -0.6rem;
-}
+  &.expanded {
+    .extra-info {
+      background-color: var(--active-bg-color);
+      position: absolute;
+        top: 125%;
+        left: 0px;
+      word-break: keep-all;   /* don't break inside words */
+      width: 140px;
+      padding: 6px;
+      border-radius: 6px;
+      border: solid 1px var(--surface-border-highlighted);
+      z-index: 1;
+      padding: 0.5rem 0.4rem;
+    }
+  }
 
-.Tag .delete-checkbox:hover {
-  transform: scale(0.7) !important;
-  transition: transform 0.2s ease-in-out;
+  .action-menu {
+    position: absolute;
+    top: -1.7rem;
+    right: -.2rem;
+    color: var(--text-color);
+    font-size: 9px;
+    padding: 2px;
+    border: 1px solid var(--surface-border-highlighted);
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .expand-btn {
+    @extend .action-menu; 
+    top: -1.2rem;
+    left: .3rem;
+    right: unset;
+    padding: 2px 4px;
+    background-color: var(--primary-color);
+  }
+
+  .remove-btn {
+    @extend .action-menu; 
+    top: -.3rem;
+    right: -.35rem;
+    background-color: var(--primary-color);
+  }
+
+  &.deleted::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px; /* Adjust thickness */
+    background-color: var(--gray-400); /* Matches text color */
+    transform: scale(1.1);
+  }
+
+  .delete-checkbox {
+    position: absolute;
+    top: -0.6rem;
+    right: -0.6rem;
+  }
+
+  .delete-checkbox:hover {
+    transform: scale(0.7) !important;
+    transition: transform 0.2s ease-in-out;
+  }
 }

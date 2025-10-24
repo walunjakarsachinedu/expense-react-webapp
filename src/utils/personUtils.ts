@@ -150,6 +150,7 @@ class PersonUtils {
       index: oldTx.index != newTx.index ? newTx.index : undefined,
       money: oldTx.money != newTx.money ? newTx.money : undefined,
       tag: oldTx.tag != newTx.tag ? newTx.tag : undefined,
+      performedAt: oldTx.performedAt != newTx.performedAt ? newTx.performedAt : undefined,
     };
     txPatch = utils.removeUndefinedFields(txPatch);
 
@@ -319,6 +320,7 @@ class PersonUtils {
         if (diff.index) newTxs[diff._id].index = diff.index;
         if (diff.money) newTxs[diff._id].money = diff.money;
         if (diff.tag) newTxs[diff._id].tag = diff.tag;
+        if (diff.performedAt || diff.performedAt == null) newTxs[diff._id].performedAt = diff.performedAt;
       });
       person.txIds = Object.values(person.txs)
         .sort((a, b) => a.index - b.index)

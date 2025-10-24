@@ -28,6 +28,7 @@ import authService from "../core/authService";
 
 export type ExpenseStore = {
   syncState: SyncStates;
+  /** store in format: mm-yyyy. e.g. 10-2025. */
   monthYear: string;
   /** use to track changes in `monthYear`. */
   previousMonthYear: string;

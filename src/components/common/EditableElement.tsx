@@ -11,6 +11,8 @@ interface Props {
   preventNewline?: boolean;
   trimInput?: boolean;
   numberOnly?: boolean;
+  /** in numberOnly mode, maximum limit on number. */
+  maxNumber?: number;
   maxCharacter?: number;
   isReadonly?: boolean;
   onFocus?: FocusEventHandler<HTMLSpanElement> | undefined;
@@ -24,6 +26,7 @@ interface Props {
 
 export default function EditableElem({
   numberOnly = false,
+  maxNumber,
   preventNewline = false,
   trimInput = false,
   maxCharacter,
@@ -63,7 +66,17 @@ export default function EditableElem({
   };
 
   const applyFilters = (str: string) => {
-    if (numberOnly) str = str.replace(/[^0-9]/g, "");
+    if (numberOnly) {
+      str = str.replace(/[^0-9]/g, "");
+      if(maxNumber && str.length) {
+        let num = Number(str);
+        while (str.length && num > maxNumber) {
+          const str = num.toString();
+          num = Number(str.slice(1));
+        }
+        str = num.toString();
+      }
+    }
     if (preventNewline) str = str.replace(/\n/g, "");
     if (maxCharacter && str.length > maxCharacter) {
       str = textState;
@@ -99,6 +112,18 @@ export default function EditableElem({
     onBlur?.(e);
   };
 
+  const handleOnFocus = (e: React.FocusEvent<HTMLSpanElement, Element>) => {
+    onFocus?.(e);
+    // Fix for mobile keyboard hiding input
+    setTimeout(() => {
+      if (!contentRef.current) return;
+      contentRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }, 300);
+  };
+
   return (
     <span
       ref={contentRef}
@@ -107,7 +132,7 @@ export default function EditableElem({
       data-placeholder={placeHolder}
       onInput={handleInput}
       onKeyUp={onKeyUp}
-      onFocus={onFocus}
+      onFocus={handleOnFocus}
       className={`editable ${className}`}
       onBlur={handleOnBlur}
       {...(preventNewline

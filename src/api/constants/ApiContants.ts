@@ -53,6 +53,7 @@ export default class ApiContants {
               index
               money
               tag
+              performedAt
             }
             version
           }
@@ -67,6 +68,7 @@ export default class ApiContants {
               index
               money
               tag
+              performedAt
             }
             version
           }

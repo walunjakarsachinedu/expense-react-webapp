@@ -2,6 +2,7 @@ import { produce } from "immer";
 import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { memo, useRef, useState } from "react";
+import useClickOutside from "../../hooks/onClickOutside";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
@@ -30,12 +31,15 @@ const TxTag = memo(
     const delayDebounceTimer = useExpenseStore(
       (store) => store.delayDebounceTimer
     );
+    const monthYear = useExpenseStore((store) => store.monthYear);
 
     const conflicts = useExpenseStore((store) => store.conflicts);
     const conflict = conflicts?.find((conflict) => conflict._id == personId);
     const [showAsDeleted, setShowAsDeleted] = useState(
       conflict?.toDelete ?? false
     );
+
+    const [showExtraInfo, setShowExtraInfo] = useState(false);
 
     const isDeleted = alwaysShowAsDeleted || showAsDeleted;
 
@@ -51,11 +55,21 @@ const TxTag = memo(
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const moneyValue = useRef(tx.money);
     const tagValue = useRef(tx.tag);
+    const performedAt = useRef(tx.performedAt);
+
+    const elRef = useRef<HTMLElement>(null);
+
+    useClickOutside({
+      ref: elRef, 
+      onOutsideClick: () => {setIsEditing(false); setShowExtraInfo(false);}, 
+      active: isEditing 
+    });
 
     const saveState = async () => {
       updateExpense(id, personId, {
         money: moneyValue.current,
         tag: tagValue.current,
+        performedAt: performedAt.current,
       });
     };
 
@@ -79,8 +93,10 @@ const TxTag = memo(
 
     return (
       <div
-        className={`Tag relative 
-        ${makeReadOnly ? "readonly" : ""} ${isDeleted ? "deleted" : ""}`}
+        onClick={() => setIsEditing(true)}
+        ref={(ref) => {elRef.current = ref;}}
+        className={`TxTag relative 
+        ${makeReadOnly ? "readonly" : ""} ${isDeleted ? "deleted" : ""} ${isEditing ? "active": ""} ${showExtraInfo ? "expanded" : ""}`}
       >
         <Tag
           style={{
@@ -90,7 +106,6 @@ const TxTag = memo(
                 ? "--surface-border-highlighted"
                 : "--surface-border") +
               ")",
-            backgroundColor: "var(--highlight-bg)",
             color: "var(--text-color)",
           }}
         >
@@ -109,7 +124,6 @@ const TxTag = memo(
                 setIsEditing(true);
                 delayDebounceTimer();
               }}
-              onBlur={(e) => setIsEditing(false)}
               onKeyUp={(e) => {
                 const target = e.target as HTMLElement;
                 tagValue.current = target.textContent ?? "";
@@ -135,7 +149,6 @@ const TxTag = memo(
                 setIsEditing(true);
                 delayDebounceTimer();
               }}
-              onBlur={() => setIsEditing(false)}
               onKeyUp={(e) => {
                 const target = e.target as HTMLElement;
                 moneyValue.current = utils.parseNumber(
@@ -150,23 +163,52 @@ const TxTag = memo(
             >
               &nbsp;/-
             </span>
-            {isEditing ? (
-              <span
-                onMouseDown={deleteTag}
-                className="remove-btn pi pi-times hover-grow"
-              ></span>
-            ) : (
-              ""
-            )}
+            {isEditing && <>
+              <div 
+              >
+                <span 
+                  className={`expand-btn pi ${showExtraInfo ? 'pi-angle-up' : "pi-angle-down"}` }
+                  onMouseDown={() => setShowExtraInfo(!showExtraInfo)}
+                ></span>
+                <span
+                  className="remove-btn pi pi-times hover-grow"
+                  onMouseDown={deleteTag}
+                ></span>
+              </div>
+            </>}
             {!alwaysShowAsDeleted && showDeleteCheckBox && (
               <Checkbox
                 value="deleted"
                 className="delete-checkbox"
                 checked={showAsDeleted}
-                onClick={() => onCheckboxToggle(!showAsDeleted)}
+                onClick={() => {setTimeout(() => setIsEditing(true));onCheckboxToggle(!showAsDeleted)}}
                 style={{ transform: "scale(0.60)", transformOrigin: "center" }}
               />
             )}
+            {isEditing && showExtraInfo && <>
+              <div className="extra-info flex flex-column gap-1">
+                <div className="mb-2 font-bold">Transaction Info</div>
+                <div>
+                  <span className="text-color-secondary">Performed at: </span> 
+                  <EditableElem
+                    initialText={tx.performedAt?.toString() ?? ""}
+                    placeHolder="dd"
+                    preventNewline={true}
+                    numberOnly={true}
+                    isReadonly={makeReadOnly || isDeleted}
+                    maxNumber={31}
+                    className="underline"
+                    onKeyUp={(e) => {
+                      const target = e.target as HTMLElement;
+                      performedAt.current = utils.parseNumber(
+                        target.textContent ?? ""
+                      );
+                      saveState();
+                    }}
+                  ></EditableElem>-{utils.getShortMonthName(monthYear)}
+                </div>
+              </div>
+            </>}
           </div>
         </Tag>
       </div>
