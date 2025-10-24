@@ -225,6 +225,9 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           const length = Object.keys(store.persons[personId].txs).length;
           const id = ObjectId.getId();
           store.persons[personId].txs[id] = { _id: id, index: length };
+          if(store.monthYear == utils.formatToMonthYear(Date.now())) {
+            store.persons[personId].txs[id].performedAt = new Date().getDate();
+          }
           store.persons[personId].txIds.push(id);
         });
       },
