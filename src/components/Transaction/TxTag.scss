@@ -12,8 +12,7 @@
       position: absolute;
         top: 125%;
         left: 0px;
-      word-break: keep-all;   /* don't break inside words */
-      width: 140px;
+      white-space: nowrap;   
       padding: 6px;
       border-radius: 6px;
       border: solid 1px var(--surface-border-highlighted);
