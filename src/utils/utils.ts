@@ -56,12 +56,9 @@ class Utility {
     ) as T;
   }
 
+  /** add comma. */
   formatNumber(num: number): string {
-    const str = num.toString();
-    const lastThree = str.slice(-3);
-    const otherDigits = str.slice(0, -3);
-    const formatted = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
-    return otherDigits ? `${formatted},${lastThree}` : lastThree;
+    return num.toLocaleString('en-IN');
   }
 
   isPatchEmpty(diff: MonthDiff): boolean {
