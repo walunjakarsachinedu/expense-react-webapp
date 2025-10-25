@@ -178,11 +178,11 @@ const PersonName = ({
 };
 
 const PersonTotal = ({ id }: Props) => {
+  const filter = useExpenseStore(store => store.filter);
   const person = useExpenseStore((store) => store.persons[id]);
-  const total = Object.values(person.txs).reduce(
-    (total, tx) => total + (tx.money ?? 0),
-    0
-  );
+  const total = Object.values(person.txs)
+    .filter(tx => personUtils.isTxSatisfyFilter(tx._id, filter))
+    .reduce((total, tx) => total + (tx.money ?? 0), 0);
   if (Object.keys(person.txs).length == 0 || total == 0) return null;
   return (
     <>
