@@ -28,6 +28,12 @@ class Utility {
     return date.toLocaleString("en", { month: "short" }); // e.g., "Oct"
   }
 
+  /** get last day number of month (e.g., 31) from "MM-yyyy" */
+  getLastDayOfMonth(monthYear: string): number {
+    const [month, year] = monthYear.split("-").map(Number);
+    return new Date(year, month, 0).getDate();
+  }
+
   /** parse date string of format: MM-yyyy */
   parseDate(monthYear: string): Date {
     const [month, year] = monthYear.split("-").map(Number);

@@ -1,5 +1,6 @@
 import {
   ChangedPersons,
+  Filter,
   MonthData,
   MonthDiff,
   MonthlyNotes,
@@ -329,6 +330,10 @@ class PersonUtils {
     if (patch.version) person.version = patch.version;
 
     return person;
+  }
+
+  isTxSatisfyFilter(txId: string, filter: Filter) {
+    return !filter.filteredTxIds || filter.filteredTxIds.has(txId) || filter.ignoreTxIds?.has(txId); 
   }
 }
 

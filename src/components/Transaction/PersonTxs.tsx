@@ -10,6 +10,7 @@ import EditableElem from "../common/EditableElement";
 import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxs.scss";
 import TxTag from "./TxTag";
+import personUtils from "../../utils/personUtils";
 
 type Props = {
   id: string;
@@ -25,7 +26,9 @@ const PersonTxs = memo(
     const deletePerson = useExpenseStore((store) => store.deletePerson);
     const copyPerson = useExpenseStore((store) => store.copyPerson);
 
-    const txIds = useExpenseStore((store) => store.persons[id].txIds);
+    const filter = useExpenseStore((store) => store.filter);
+    const txIds = useExpenseStore((store) => store.persons[id].txIds)
+      .filter(txId => personUtils.isTxSatisfyFilter(txId, filter));
     const conflicts = useExpenseStore((store) => store.conflicts);
     const conflict = conflicts?.find((conflict) => conflict._id == id);
 

@@ -196,7 +196,7 @@ const TxTag = memo(
                     preventNewline={true}
                     numberOnly={true}
                     isReadonly={makeReadOnly || isDeleted}
-                    maxNumber={31}
+                    maxNumber={utils.getLastDayOfMonth(monthYear)}
                     className="underline"
                     selectAllOnFocus={true}
                     onKeyUp={(e) => {

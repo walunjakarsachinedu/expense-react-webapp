@@ -10,6 +10,7 @@ import applyMiddleware from "../middleware/core/applyMiddleware";
 import {
   ChangedPersons,
   ConflictPerson,
+  Filter,
   MonthData,
   MonthlyNotes,
   PersonData,
@@ -39,6 +40,8 @@ export type ExpenseStore = {
   conflicts?: ConflictPerson[];
   isConflictsFound: boolean;
 
+  filter: Filter;
+
   setSyncState: (state: SyncStates) => void;
   setConflicts: (conflicts: ConflictPerson[]) => void;
   clearConflicts: () => void;
@@ -64,9 +67,10 @@ export type ExpenseStore = {
     tx: Prettify<Omit<Tx, "_id" | "index">>
   ) => void;
   updateExpenseIndex: (id: string, index: number, personId: string) => void;
-  delayDebounceTimer: () => void;
   /** clear data of current month from store. */
   clear: () => void;
+  updateFilter: (filter: Filter) => void;
+  delayDebounceTimer: () => void;
 };
 
 let timer: Timer;
@@ -88,6 +92,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
       monthlyNotes: {
         notes: ""
       } as MonthlyNotes,
+      filter: {},
 
       setSyncState: (state) => {
         set((store) => {
@@ -150,6 +155,16 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             .sort((a, b) => a.index - b.index)
             .map((person) => ({ id: person._id, type: person.type }));
           if(monthlyNotes) store.monthlyNotes = monthlyNotes;
+
+          if(store.filter.filteredTxIds) {
+            [...changedPersons.addedPersons, ...changedPersons.updatedPersons].forEach((person) => {
+                Object.values(person.txs)
+                  .filter(tx => _isTxSatisfyFilter(tx, store.filter))
+                  .forEach(tx => {
+                    store.filter.filteredTxIds!.add(tx._id);
+                  });
+            });
+          }
         });
       },
       setMonthData: (monthYear, monthData) => {
@@ -229,6 +244,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             store.persons[personId].txs[id].performedAt = new Date().getDate();
           }
           store.persons[personId].txIds.push(id);
+          store.filter.ignoreTxIds?.add(id);
         });
       },
       deleteExpense: (id, personId) => {
@@ -247,6 +263,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             ...store.persons[personId].txs[id],
             ...updates,
           };
+          store.filter.ignoreTxIds?.add(id);
         });
       },
       updateExpenseIndex: (id, index, personId) => {
@@ -265,6 +282,25 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.persons = {};
           store.personIds = [];
           store.monthlyNotes = { notes: "" } as MonthlyNotes;
+        })
+      },
+      updateFilter: (filter) => {
+        set((store) => {
+          store.filter = { ...filter, ignoreTxIds: new Set() };
+
+          if (!filter.startDay || !filter.endDay) return;
+
+          const filteredTxIds = new Set<string>();
+          Object.values(store.persons)
+            .forEach(person => {
+              Object.values(person.txs)
+                .filter(tx => _isTxSatisfyFilter(tx, filter))
+                .forEach(tx => {
+                  filteredTxIds.add(tx._id);
+                });
+            });
+
+          store.filter.filteredTxIds = filteredTxIds;
         })
       },
       /** used by middleware to delay debounce timer */
@@ -286,6 +322,7 @@ const useExpenseStore = create<ExpenseStore>(
         "setConflicts",
         "setSyncState",
         "clear",
+        "updateFilter"
       ];
       if (ignoreActions.includes(action as keyof ExpenseStore)) return;
       // delayDebounceTimer action - delay the timer only if user is working
@@ -319,6 +356,11 @@ function setupDebounceTimer(): Timer {
   });
 
   return timer;
+}
+
+function _isTxSatisfyFilter(tx: Tx, filter: Filter) {
+  return tx.performedAt
+  && (tx.performedAt >= filter.startDay! && tx.performedAt <= filter.endDay!); 
 }
 
 function initializeStore() {

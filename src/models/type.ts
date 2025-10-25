@@ -149,3 +149,13 @@ export type VerifyResetCodeInput = {
 
 
 export type SyncStates = "synced"|"unSync"|"syncing"|"syncError"|"none";
+
+export type Filter = {
+  /** day of month. */
+  startDay?: number; 
+  /** day of month. */
+  endDay?: number;
+  filteredTxIds?: Set<string>;
+  /** Tx to always show by ignoring filter. (to prevent issue if user edit performedAt when filtering is applied) */
+  ignoreTxIds?: Set<string>;
+}

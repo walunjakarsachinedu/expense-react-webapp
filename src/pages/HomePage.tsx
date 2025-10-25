@@ -7,6 +7,8 @@ import ExpensePanel from "../components/Transaction/ExpensePanel";
 import TxSummary from "../components/Transaction/TxSummary";
 import useMonthExpense from "../hooks/useMonthExpense";
 import { TxType } from "../models/type";
+import { Slider } from "primereact/slider";
+import DayRangeFilter from "../components/common/DayRangeFilter";
 
 const HomePage = () => {
   const { isLoading, error } = useMonthExpense();
@@ -18,12 +20,13 @@ const HomePage = () => {
   return (
     <>
       <CenteredContent>
-        <div className="flex justify-content-end align-items-center gap-2">
-          {/* <div className="text-color-secondary">View Type</div>  */}
+        <div className="mb-2 flex flex-wrap-reverse justify-content-end align-items-center column-gap-2 row-gap-3">
+          {viewType == "month" && <DayRangeFilter></DayRangeFilter>}
           <Switch 
             values={['month', 'notes']} 
             selectedValue={viewType} 
             onSelect={(value:string) => setViewType(value as "month"|"notes")}
+            className="ml-2"
           ></Switch>
         </div>
       </CenteredContent>
@@ -31,9 +34,9 @@ const HomePage = () => {
         viewType == 'month' 
           ? <>
             <TxSummary></TxSummary>
-            <br /> <br />
+            <br />
             <ExpensePanel type={TxType.Expense}></ExpensePanel>
-            <br /> <br />
+            <br />
             <ExpensePanel type={TxType.Income}></ExpensePanel>
             <br /> <br />
           </> 
