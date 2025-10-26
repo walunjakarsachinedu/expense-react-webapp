@@ -3,6 +3,7 @@ import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { memo, useRef, useState } from "react";
 import useClickOutside from "../../hooks/onClickOutside";
+import { usePreventRightOverflow } from "../../hooks/usePreventRightOverflow";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
@@ -40,6 +41,7 @@ const TxTag = memo(
     );
 
     const [showExtraInfo, setShowExtraInfo] = useState(false);
+    const extraInfoRef = useRef<HTMLDivElement>(null);
 
     const isDeleted = alwaysShowAsDeleted || showAsDeleted;
 
@@ -90,6 +92,10 @@ const TxTag = memo(
         }),
       });
     };
+
+
+    // make sures extra-info panel is always visible
+    usePreventRightOverflow(extraInfoRef, [showExtraInfo]);
 
     return (
       <div
@@ -186,7 +192,7 @@ const TxTag = memo(
               />
             )}
             {isEditing && showExtraInfo && <>
-              <div className="extra-info flex flex-column gap-1">
+              <div ref={extraInfoRef} className="extra-info flex flex-column gap-1">
                 <div className="mb-2 font-bold">Transaction Info</div>
                 <div>
                   <span className="text-color-secondary">Performed at: </span> 
