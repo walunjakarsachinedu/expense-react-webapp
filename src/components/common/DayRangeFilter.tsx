@@ -57,7 +57,7 @@ export default function DayRangeFilter() {
         }
         <Button 
           size="small" 
-          className="w-100 flex items-center justify-center" 
+          className="w-100 flex items-center justify-center white-space-nowrap" 
           style={{
             padding: "0.4rem 0.5rem", 
             maxWidth: "9rem", 

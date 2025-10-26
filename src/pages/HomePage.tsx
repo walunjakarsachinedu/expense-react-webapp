@@ -20,7 +20,7 @@ const HomePage = () => {
   return (
     <>
       <CenteredContent>
-        <div className="mb-2 flex flex-wrap-reverse justify-content-end align-items-center column-gap-2 row-gap-3">
+        <div className="mb-2 flex flex-wrap justify-content-end align-items-center column-gap-2 row-gap-3">
           {viewType == "month" && <DayRangeFilter></DayRangeFilter>}
           <Switch 
             values={['month', 'notes']} 
