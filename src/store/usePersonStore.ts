@@ -25,7 +25,7 @@ import { patchProcessing } from "../utils/PatchProcessing";
 import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
-import authService from "../core/authService";
+import { monthCacheApi } from "../api/cache/MonthCacheApi";
 
 export type ExpenseStore = {
   syncState: SyncStates;
@@ -81,6 +81,9 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
     const selectedMonth =
       localStorage.getItem(Constants.monthStorageKey) ??
       utils.formatToMonthYear(Date.now());
+    if(!localStorage.getItem(Constants.monthStorageKey)) {
+      localStorage.setItem(Constants.monthStorageKey, selectedMonth);
+    }
 
     return {
       syncState: "none",
@@ -125,7 +128,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
         // save change considering: user is changing month
         timer.timeout();
 
-        // caching before switching to different month
+        // in-memory caching before switching to different month
         inMemoryCache.setCache<MonthData>(
           InMemoryCacheCategory.PersonMonthlyData,
           storeApi.getState().monthYear,
@@ -138,6 +141,9 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           store.setSyncState("synced");
         });
         localStorage.setItem(Constants.monthStorageKey, monthYear);
+
+        // clearing cache if month is different
+        if(!monthCacheApi.isMonthCached()) monthCacheApi.clear();
       },
       getMonthData: () => {
         return {
@@ -165,6 +171,8 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
                   });
             });
           }
+
+          monthCacheApi.setCacheMonthYear(storeApi.getState().monthYear);
         });
       },
       setMonthData: (monthYear, monthData) => {
@@ -178,6 +186,7 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
             .map((person) => ({ id: person._id, type: person.type }));
           store.monthlyNotes = monthData.monthlyNotes ?? ({notes: ""} as MonthlyNotes);
         });
+        monthCacheApi.cacheMonthData(monthYear, monthData);
         patchProcessing.setPrevState(storeApi.getState().getMonthData());
       },
       addPerson: (type) =>
@@ -362,17 +371,6 @@ function _isTxSatisfyFilter(tx: Tx, filter: Filter) {
   return tx.performedAt
   && (tx.performedAt >= filter.startDay! && tx.performedAt <= filter.endDay!); 
 }
-
-function initializeStore() {
-  const isExpired = authService.isTokenExpired(); 
-  queueMicrotask(() => {
-    if(isExpired) authService.clearSessionData(); 
-    else monthExpenseRepository.loadStoreWithCache();
-  });
-}
-
-// store initialization
-initializeStore();
 
 
 export { timer };

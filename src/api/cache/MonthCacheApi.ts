@@ -3,12 +3,15 @@ import { PersonData, MonthDiff, MonthData, MonthlyNotes } from "../../models/typ
 import useExpenseStore from "../../store/usePersonStore";
 import personUtils from "../../utils/personUtils";
 import utils from "../../utils/utils";
+import Constants from "../../utils/constants";
 
 /** Cache data in local storage. */
 class MonthCacheApi {
   readonly storageKey = "cache/month";
   readonly personStorageKey = `${this.storageKey}/person`;
   readonly monthlyNotesKey = `${this.storageKey}/monthlyNotes`;
+  /** Represent monthYear the data in cache corresponds to. */
+  readonly cachedMonthYearKey = `${this.storageKey}/cachedMonthYear`; 
 
   /** @return key for storing person. */
   private _getPersonKey = (id: string) => `${this.personStorageKey}/${id}`;
@@ -79,6 +82,30 @@ class MonthCacheApi {
   storeMonthlyNotes = (monthlyNotes: MonthlyNotes|undefined) => {
     if(!monthlyNotes) return;
     localStorage.setItem(this.monthlyNotesKey, JSON.stringify(monthlyNotes));
+  }
+
+  setCacheMonthYear(monthYear: string) {
+    localStorage.setItem(this.cachedMonthYearKey, monthYear);
+  }
+
+  isMonthCached(): boolean {
+    return !!localStorage.getItem(this.cachedMonthYearKey) 
+      && !!localStorage.getItem(Constants.monthStorageKey) 
+      && localStorage.getItem(this.cachedMonthYearKey) == localStorage.getItem(Constants.monthStorageKey); 
+  }
+
+  cacheMonthData(monthYear: string, monthData: MonthData) {
+    if(this.isMonthCached()) return;
+
+    this.clear();
+
+    Object.values(monthData.persons).forEach(
+      (person) => this.storePerson(person)
+    )
+    this.storeMonthlyNotes(monthData.monthlyNotes);
+
+    this.setCacheMonthYear(monthYear);
+    localStorage.setItem(Constants.monthStorageKey, monthYear);
   }
 }
 

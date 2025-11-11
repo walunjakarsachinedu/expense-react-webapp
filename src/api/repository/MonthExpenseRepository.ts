@@ -39,12 +39,24 @@ class MonthExpenseRepository {
       return;
     }
 
+    const isMonthCached = monthCacheApi.isMonthCached();
+    if(isMonthCached) {
+      this.loadStoreWithCache();
+    }
+
+    useExpenseStore.getState().setSyncState("syncing");
+
     const patch = patchProcessing.getPatchAndDeleteFromStorage();
-    await this.applyPatchesAndSync({
+    const promise = this.applyPatchesAndSync({
       patch: patch ?? {},
       isMonthChanged: useExpenseStore.getState().monthYear != useExpenseStore.getState().previousMonthYear,
       monthYear,
     });
+
+    /** 
+     * only wait if store is not loaded with cached month data. 
+     * waiting will make loading indicator to show until changes from server not applied. */
+    if(!isMonthCached) await promise;
   }
 
   /**
