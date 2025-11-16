@@ -1,6 +1,11 @@
 
 .TxTag {
   --active-bg-color: rgb(21,21,21);
+  border-radius: 6px;
+
+  & > .p-tag.p-component {
+    display: inline-block;
+  }
   
   &.active {
     background-color: var(--active-bg-color);
@@ -36,7 +41,7 @@
 
   .expand-btn {
     @extend .action-menu; 
-    top: -1.2rem;
+    top: -1.4rem;
     left: .3rem;
     right: unset;
     padding: 2px 4px;
@@ -45,7 +50,7 @@
 
   .remove-btn {
     @extend .action-menu; 
-    top: -.3rem;
+    top: -.4rem;
     right: -.35rem;
     background-color: var(--primary-color);
   }

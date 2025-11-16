@@ -36,7 +36,7 @@ export interface PersonTx {
 export interface Tx {
   _id: string;
   index: number;
-  money?: number;
+  money?: number|null;
   tag?: string;
   /** represent day in month, when transaction is performed. */
   performedAt?: number;
@@ -103,7 +103,7 @@ export type TxDiff = {
 export type TxPatch = {
   _id: string;
   index?: number;
-  money?: number;
+  money?: number|null;
   tag?: string;
   /** represent day in month, when transaction is performed. */
   performedAt?: number;
@@ -119,14 +119,16 @@ export type ConflictPerson = {
   isDeleted: boolean;
   /** If true, delete locally; false saves to backend */
   toDelete?: boolean;
-  txs?: {
-    _id: string;
-    /** If true, transaction is deleted from backend */
-    isDeleted: boolean;
-    /** If true, delete locally; false saves to backend */
-    toDelete?: boolean;
-  }[];
+  txs?: ConflictTx[];
 };
+
+export type ConflictTx = {
+  _id: string;
+  /** If true, transaction is deleted from backend */
+  isDeleted: boolean;
+  /** If true, delete locally; false saves to backend */
+  toDelete?: boolean;
+}
 
 export type GraphqlResponse<T> = {
   data?: T;

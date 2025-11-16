@@ -22,7 +22,7 @@ const TxTag = memo(
   ({
     id,
     personId,
-    makeReadOnly = false,
+    makeReadOnly: readOnlyMode = false,
     conflictMode = false,
     alwaysShowAsDeleted = false,
   }: Props) => {
@@ -51,13 +51,14 @@ const TxTag = memo(
       conflict?.txs?.find((tx) => tx._id == id && tx.isDeleted);
 
     if (conflictMode || showDeleteCheckBox || isDeleted) {
-      makeReadOnly = true;
+      readOnlyMode = true;
     }
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const moneyValue = useRef(tx.money);
     const tagValue = useRef(tx.tag);
     const performedAt = useRef(tx.performedAt);
+    const editMode = !readOnlyMode && isEditing;
 
     const elRef = useRef<HTMLElement>(null);
 
@@ -69,7 +70,7 @@ const TxTag = memo(
 
     const saveState = async () => {
       updateExpense(id, personId, {
-        money: moneyValue.current,
+        money: moneyValue.current ?? null,
         tag: tagValue.current,
         performedAt: performedAt.current,
       });
@@ -99,16 +100,16 @@ const TxTag = memo(
 
     return (
       <div
-        onClick={() => setIsEditing(true)}
+        onClick={() => !readOnlyMode && setIsEditing(true)}
         ref={(ref) => {elRef.current = ref;}}
         className={`TxTag relative 
-        ${makeReadOnly ? "readonly" : ""} ${isDeleted ? "deleted" : ""} ${isEditing ? "active": ""} ${showExtraInfo ? "expanded" : ""}`}
+        ${readOnlyMode ? "readonly" : ""} ${isDeleted ? "deleted" : ""} ${editMode ? "active": ""} ${showExtraInfo ? "expanded" : ""}`}
       >
         <Tag
           style={{
             border:
               "solid 1px var(" +
-              (isEditing
+              (editMode
                 ? "--surface-border-highlighted"
                 : "--surface-border") +
               ")",
@@ -125,7 +126,7 @@ const TxTag = memo(
               preventNewline={true}
               trimInput={true}
               maxCharacter={24}
-              isReadonly={makeReadOnly || isDeleted}
+              isReadonly={readOnlyMode || isDeleted}
               onFocus={() => {
                 setIsEditing(true);
                 delayDebounceTimer();
@@ -150,7 +151,7 @@ const TxTag = memo(
               placeHolder="money"
               preventNewline={true}
               numberOnly={true}
-              isReadonly={makeReadOnly || isDeleted}
+              isReadonly={readOnlyMode || isDeleted}
               onFocus={() => {
                 setIsEditing(true);
                 delayDebounceTimer();
@@ -169,7 +170,7 @@ const TxTag = memo(
             >
               &nbsp;/-
             </span>
-            {isEditing && <>
+            {editMode && <>
               <div 
               >
                 <span 
@@ -191,7 +192,7 @@ const TxTag = memo(
                 style={{ transform: "scale(0.60)", transformOrigin: "center" }}
               />
             )}
-            {isEditing && showExtraInfo && <>
+            {editMode && showExtraInfo && <>
               <div ref={extraInfoRef} className="extra-info flex flex-column gap-1">
                 <div className="mb-2 font-bold">Transaction Info</div>
                 <div>
@@ -201,7 +202,7 @@ const TxTag = memo(
                     placeHolder="dd"
                     preventNewline={true}
                     numberOnly={true}
-                    isReadonly={makeReadOnly || isDeleted}
+                    isReadonly={readOnlyMode || isDeleted}
                     maxNumber={utils.getLastDayOfMonth(monthYear)}
                     className="underline"
                     selectAllOnFocus={true}

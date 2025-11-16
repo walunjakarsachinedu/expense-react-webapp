@@ -1,8 +1,9 @@
 import { produce } from "immer";
-import { cloneDeep } from "lodash";
+import { cloneDeep, update } from "lodash";
 import {
   Changes,
   ConflictPerson,
+  ConflictTx,
   CurrentState,
   MonthData,
   MonthDiff,
@@ -21,6 +22,7 @@ import {
 } from "../cache/InMemoryCacheApi";
 import { monthCacheApi } from "../cache/MonthCacheApi";
 import { expenseBackendApi } from "../services/ExpenseBackendApi";
+import TrackedPromise from "../../utils/TrackPromise";
 
 /** contains backend, cache interaction for operation related to month based transactions. */
 class MonthExpenseRepository {
@@ -57,6 +59,9 @@ class MonthExpenseRepository {
      * only wait if store is not loaded with cached month data. 
      * waiting will make loading indicator to show until changes from server not applied. */
     if(!isMonthCached) await promise;
+    else {
+      patchProcessing.setCurrentActionStatus(new TrackedPromise(promise));
+    }
   }
 
   /**
@@ -169,21 +174,25 @@ class MonthExpenseRepository {
 
   /**
    * Algorithm :-
-   * 1. store conflicts to useExpenseStore
-   * 2. apply changes to useExpenseStore
-   * 3. apply changes to cache
-   * 4. apply changes to patchProcessing
+   * - move server deletes that conflict with client updates to conflicts
+   * - store conflicts to useExpenseStore
+   * - apply changes to useExpenseStore
+   * - apply changes to cache
+   * - apply changes to patchProcessing
    */
   async _applyServerChanges(monthYear: string, changes: Changes): Promise<void> {
+    /// - move server deletes that conflict with client updates to conflicts
+    changes = this.includeLocalConflicts(changes);
+
     const changedPersons = changes.changedPersons;
 
-    // 1. store conflicts to useExpenseStore
+    /// - store conflicts to useExpenseStore
     useExpenseStore.getState().setConflicts(changes.conflictsPersons);
 
-    // 2. apply changes to useExpenseStore
+    /// - apply changes to useExpenseStore
     useExpenseStore.getState().applyChanges(changedPersons, changes.monthlyNotes);
 
-    // 3. apply changes to cache
+    /// - apply changes to cache
     monthCacheApi.applyChanges({
       added: changedPersons.addedPersons, 
       deleted: changedPersons.deletedPersons, 
@@ -191,7 +200,7 @@ class MonthExpenseRepository {
       monthlyNotes: changes.monthlyNotes 
     });
 
-    // 4. apply changes to patchProcessing
+    /// - apply changes to patchProcessing
     if (patchProcessing.prevState) {
       patchProcessing.setPrevState(
         produce(patchProcessing.prevState, (recipe) => {
@@ -201,6 +210,99 @@ class MonthExpenseRepository {
     }
 
     useExpenseStore.getState().setSyncState("synced");
+  }
+
+  /** Algorithm:-
+   * - includes conflicting local changes. 
+   *    - find person level conflict
+   *    - find tx level conflict
+   *    - merge person & tx level conflict with server conflict 
+   * - remove server delete changes which are conflicting.
+   * 
+   * note: conflict: entity updated locally but deleted from server
+   * */
+  includeLocalConflicts(serverChanges: Changes): Changes {
+    if(patchProcessing.prevState) {
+      const localDiff = personUtils.monthDiff({
+        updatedData: useExpenseStore.getState().getMonthData(),
+        oldData: patchProcessing.prevState,
+      });
+      if(localDiff.updated?.length) {
+        
+        /// - find person level conflict
+        const conflictingDeletedPersons = serverChanges.changedPersons.deletedPersons
+          .filter(id => localDiff?.updated?.some(patch => patch._id == id))
+          .map(_id => ({_id, isDeleted: true} as ConflictPerson));
+        
+
+        /// - find tx level conflict
+        const conflictTxs = localDiff.updated
+          .filter(person => person.txDiff?.updated?.length)
+          .map(person => ({
+            localPatch: person,
+            updated: serverChanges.changedPersons.updatedPersons.find(({_id}) => _id == person._id), 
+          }))
+          .filter(data => data.updated)
+          .map(({localPatch, updated}) => ({
+            localPatch, 
+            serverPatch: personUtils.personPatch(
+              personUtils.personTxToPerson(updated!), 
+              useExpenseStore.getState().persons[localPatch._id]
+            )
+          }))
+          .map(({localPatch, serverPatch}) => {
+            // tx updated locally but deleted on server
+            const conflictingTx = serverPatch?.txDiff?.deleted
+              ?.filter(id => localPatch.txDiff?.updated?.some(txPatch => txPatch._id == id));
+            return {
+              _id: localPatch._id,
+              txs: conflictingTx?.map(_id => ({_id, isDeleted: true})),
+              isDeleted: false
+            } satisfies ConflictPerson;
+          })
+          .filter(conflict => conflict.txs?.length);
+
+          /// - merge person & tx level conflict with server conflict
+          const conflictsPersons = Object.values([
+            ...serverChanges.conflictsPersons, 
+            ...conflictingDeletedPersons,
+            ...conflictTxs
+          ].reduce((acc, cur) => {
+            if(acc[cur._id]) {
+              if(!acc[cur._id]?.isDeleted) {
+                // priority => person conflict take priority over tx conflict
+                if(cur.isDeleted) {
+                  acc[cur._id].isDeleted = true;
+                  delete acc[cur._id].txs;
+                }
+                // merge txs conflict array
+                else {
+                  acc[cur._id].txs = Object.values([
+                    ...(acc[cur._id].txs ?? []),  
+                    ...(cur.txs ?? []) 
+                  ].reduce((acc, cur) => {
+                    acc[cur._id] ??= cur;
+                    return acc;
+                  }, {} as Record<string, ConflictTx>));
+                }
+              } 
+            }
+
+            acc[cur._id] ??= cur;
+
+            return acc;
+          }, {} as Record<string, ConflictPerson>));
+
+        /// - remove server delete changes which are conflicting.
+        serverChanges.changedPersons.deletedPersons = serverChanges.changedPersons
+          .deletedPersons.filter(
+            id => !conflictsPersons.some(conflictPerson => conflictPerson._id == id)
+          );
+
+        return { ...serverChanges, conflictsPersons };
+      }
+    }
+    return serverChanges;
   }
 
   /** Delete entities marked as deleted, save those not marked as deleted. */
@@ -313,6 +415,8 @@ class MonthExpenseRepository {
                   ?.filter((tx) => tx.isDeleted && !tx.toDelete)
                   .forEach((tx) => delete txs[tx._id]);
               });
+
+            Object.values(persons).forEach(person => personUtils.normalizePerson(person, true));
           }
         )
       )

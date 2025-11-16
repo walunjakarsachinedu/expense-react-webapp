@@ -1,3 +1,4 @@
+import { produce } from "immer";
 import {
   ChangedPersons,
   Filter,
@@ -32,7 +33,8 @@ class PersonUtils {
 
   // object is frozen
   personTxToPerson(person: PersonTx): PersonData {
-    const txs = utils.toMapById(person.txs);
+    const txs = utils.toMapById(personUtils.normalizedPersonTxs(person.txs));
+
     return {
       ...person, 
       txs: txs,
@@ -43,6 +45,8 @@ class PersonUtils {
   }
 
   personToPersonTx(person: PersonData): PersonTx {
+    person.txs = utils.toMapById(personUtils.normalizedPersonTxs(Object.values(person.txs)));
+    
     return {
       _id: person._id,
       name: person.name,
@@ -54,8 +58,22 @@ class PersonUtils {
     };
   }
 
+  normalizedPersonTxs(txs: Tx[], inline: boolean=false): Tx[] {
+    const fn = (txs: Tx[]) => {
+      txs.sort((a,b) => a.index - b.index).forEach((tx, idx) => tx.index = idx);
+    };
+
+    if(inline) {
+      fn(txs);
+      return txs;
+    }
+
+    return produce(txs, fn);
+  }
+
   /** remove duplicate tx and correct all index. */
-  sanitizePerson(person: PersonData): PersonData {
+  normalizePerson(person: PersonData, inline: boolean=false): PersonData {
+    person.txs = utils.toMapById(personUtils.normalizedPersonTxs(Object.values(person.txs), inline));
     person.txIds = Object.values(person.txs)
       .sort((a, b) => a.index - b.index)
       .map((tx) => tx._id);
@@ -86,7 +104,7 @@ class PersonUtils {
     const updated: PersonPatch[] = Object.keys(updatedData.persons)
       .filter((_id) => oldData.persons[_id])
       .map((_id) => {
-        return this._personPatch(
+        return this.personPatch(
           updatedData.persons[_id],
           oldData.persons[_id],
           includeVersionChange
@@ -107,7 +125,7 @@ class PersonUtils {
   }
 
   /** note: return undefined for just version change  */
-  _personPatch(
+  personPatch(
     newPerson: PersonData,
     oldPerson: PersonData,
     /** when true, also includes change containing just version change. */
@@ -318,10 +336,10 @@ class PersonUtils {
       patch.txDiff.added?.forEach((tx) => (newTxs[tx._id] = tx));
       patch.txDiff.deleted?.forEach((id) => delete newTxs[id]);
       patch.txDiff.updated?.forEach((diff) => {
-        if (diff.index) newTxs[diff._id].index = diff.index;
-        if (diff.money) newTxs[diff._id].money = diff.money;
-        if (diff.tag) newTxs[diff._id].tag = diff.tag;
-        if (diff.performedAt || diff.performedAt == null) newTxs[diff._id].performedAt = diff.performedAt;
+        if (diff.index !== undefined) newTxs[diff._id].index = diff.index;
+        if (diff.money !== undefined) newTxs[diff._id].money = diff.money;
+        if (diff.tag !== undefined) newTxs[diff._id].tag = diff.tag;
+        if (diff.performedAt || diff.performedAt === null) newTxs[diff._id].performedAt = diff.performedAt;
       });
       person.txIds = Object.values(person.txs)
         .sort((a, b) => a.index - b.index)

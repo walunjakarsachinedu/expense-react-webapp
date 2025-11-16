@@ -1,5 +1,4 @@
-import { cloneDeep } from "lodash";
-import { MonthData, PersonData, MonthDiff } from "../models/type";
+import { MonthData, MonthDiff } from "../models/type";
 import useExpenseStore from "../store/usePersonStore";
 import Constants from "./constants";
 import { isPageUnloaded } from "./is-page-unloaded";
@@ -83,6 +82,10 @@ class PatchProcessing {
         })
       );
     }
+  }
+
+  setCurrentActionStatus(trackedPromise: TrackedPromise<void>) {
+    if(!this.currentActionStatus) this.currentActionStatus = trackedPromise;
   }
 
   setPrevState(prevState: MonthData) {

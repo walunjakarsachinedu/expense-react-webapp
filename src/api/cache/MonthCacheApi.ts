@@ -28,7 +28,7 @@ class MonthCacheApi {
       .filter((key) => key.startsWith(this.personStorageKey))
       .map((id) => localStorage.getItem(id))
       .map((data) => JSON.parse(data!) as PersonData)
-      .map(personUtils.sanitizePerson);
+      .map((person) => personUtils.normalizePerson(person));
   };
 
   deletePersonWithId = (id: string) => {
@@ -43,7 +43,7 @@ class MonthCacheApi {
   }
 
   storePerson = (person: PersonData) => {
-    person = produce(person, personUtils.sanitizePerson);
+    person = produce(person, personUtils.normalizePerson);
     localStorage.setItem(
       this._getPersonKey(person._id),
       JSON.stringify({ ...person })
