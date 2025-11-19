@@ -12,6 +12,7 @@ import {
   ConflictPerson,
   Filter,
   MonthData,
+  MonthDiff,
   MonthlyNotes,
   PersonData,
   SyncStates,
@@ -50,7 +51,7 @@ export type ExpenseStore = {
 
   setMonthYear: (monthYear: string) => void;
   /** Use to apply changes from server to client. */
-  applyChanges: (persons: ChangedPersons, monthlyNotes?: MonthlyNotes) => void;
+  applyChanges: (updateDiff: MonthDiff) => void;
   setMonthData: (monthYear: string, monthData: MonthData) => void;
   getMonthData: () => MonthData;
   addPerson: (type: TxType) => void;
@@ -151,11 +152,12 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           monthlyNotes: storeApi.getState().monthlyNotes
         };
       },
-      applyChanges: (changedPersons, monthlyNotes) => {
+      applyChanges: (updateDiff: MonthDiff) => {
         set((store) => {
+          const { monthlyNotes } = updateDiff;
           store.persons = personUtils.applyChanges(
             store,
-            changedPersons
+            updateDiff
           );
           store.personIds = Object.values(store.persons)
             .sort((a, b) => a.index - b.index)
@@ -163,7 +165,11 @@ const personStore: StateCreator<ExpenseStore, [], [["zustand/immer", never]]> =
           if(monthlyNotes) store.monthlyNotes = monthlyNotes;
 
           if(store.filter.filteredTxIds) {
-            [...changedPersons.addedPersons, ...changedPersons.updatedPersons].forEach((person) => {
+            [
+              ...updateDiff.added ?? [], 
+              ...updateDiff.updated?.map(({_id}) => storeApi.getState().persons[_id]) ?? []
+            ].forEach((person) => {
+                if(!person) return;
                 Object.values(person.txs)
                   .filter(tx => _isTxSatisfyFilter(tx, store.filter))
                   .forEach(tx => {

@@ -176,9 +176,10 @@ class MonthExpenseRepository {
    * Algorithm :-
    * - move server deletes that conflict with client updates to conflicts
    * - store conflicts to useExpenseStore
-   * - apply changes to useExpenseStore
+   * - calculate updateDiff from server changes to apply to prev & store state
+   * - apply updateDiff to useExpenseStore
+   * - apply updateDiff to patchProcessing
    * - apply changes to cache
-   * - apply changes to patchProcessing
    */
   async _applyServerChanges(monthYear: string, changes: Changes): Promise<void> {
     /// - move server deletes that conflict with client updates to conflicts
@@ -189,25 +190,29 @@ class MonthExpenseRepository {
     /// - store conflicts to useExpenseStore
     useExpenseStore.getState().setConflicts(changes.conflictsPersons);
 
-    /// - apply changes to useExpenseStore
-    useExpenseStore.getState().applyChanges(changedPersons, changes.monthlyNotes);
+    /// - calculate updateDiff from server changes to apply to prev & store state
+    const updateDiff = personUtils.serverChangesToUpdateDiff(changes);
 
-    /// - apply changes to cache
-    monthCacheApi.applyChanges({
-      added: changedPersons.addedPersons, 
-      deleted: changedPersons.deletedPersons, 
-      updated: changedPersons.updatedPersons,
-      monthlyNotes: changes.monthlyNotes 
-    });
+    /// - apply changes to useExpenseStore
+    useExpenseStore.getState().applyChanges(updateDiff);
 
     /// - apply changes to patchProcessing
     if (patchProcessing.prevState) {
       patchProcessing.setPrevState(
         produce(patchProcessing.prevState, (recipe) => {
-          personUtils.applyChanges(recipe, changedPersons, changes.monthlyNotes);
+          personUtils.applyChanges(recipe, updateDiff);
         })
       );
     }
+
+    /// - apply changes to cache
+    const state = useExpenseStore.getState();
+    monthCacheApi.applyChanges({
+      added: changedPersons.addedPersons, 
+      deleted: changedPersons.deletedPersons, 
+      updated: changedPersons.updatedPersons.map(({_id}) => state.persons[_id]),
+      monthlyNotes: changes.monthlyNotes 
+    });
 
     useExpenseStore.getState().setSyncState("synced");
   }
