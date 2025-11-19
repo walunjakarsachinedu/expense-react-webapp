@@ -58,7 +58,11 @@ class MonthExpenseRepository {
     /** 
      * only wait if store is not loaded with cached month data. 
      * waiting will make loading indicator to show until changes from server not applied. */
-    if(!isMonthCached) await promise;
+    if(!isMonthCached) {
+      await promise;
+      /// initialise prevState
+      patchProcessing.setPrevState(useExpenseStore.getState().getMonthData())
+    }
     else {
       patchProcessing.setCurrentActionStatus(new TrackedPromise(promise));
     }
