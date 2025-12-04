@@ -100,7 +100,12 @@ const TxTag = memo(
 
     return (
       <div
-        onClick={() => !readOnlyMode && setIsEditing(true)}
+        onClick={() => {
+          if(!readOnlyMode) {
+            setIsEditing(true);
+            if(!isEditing) setShowExtraInfo(true);
+          }
+        }}
         ref={(ref) => {elRef.current = ref;}}
         className={`TxTag relative 
         ${readOnlyMode ? "readonly" : ""} ${isDeleted ? "deleted" : ""} ${editMode ? "active": ""} ${showExtraInfo ? "expanded" : ""}`}
@@ -128,7 +133,6 @@ const TxTag = memo(
               maxCharacter={24}
               isReadonly={readOnlyMode || isDeleted}
               onFocus={() => {
-                setIsEditing(true);
                 delayDebounceTimer();
               }}
               onKeyUp={(e) => {
@@ -153,7 +157,6 @@ const TxTag = memo(
               numberOnly={true}
               isReadonly={readOnlyMode || isDeleted}
               onFocus={() => {
-                setIsEditing(true);
                 delayDebounceTimer();
               }}
               onKeyUp={(e) => {
