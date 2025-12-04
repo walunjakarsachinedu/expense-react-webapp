@@ -1,17 +1,17 @@
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { MenuItem } from "primereact/menuitem";
-import { memo, useState } from "react";
+import { memo, useContext, useState } from "react";
 import useToast from "../../hooks/useToast";
 import { ConflictPerson } from "../../models/type";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
-import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxs.scss";
 import TxTag from "./TxTag";
 import personUtils from "../../utils/personUtils";
 import { AutoCollapse } from "../AutoCollapse";
+import { CMContext } from "../ContextMenuProvider";
 
 type Props = {
   id: string;
@@ -22,6 +22,7 @@ type Props = {
 
 const PersonTxs = memo(
   ({ id, makeReadOnly = false, conflictMode = false }: Props) => {
+    const { showCtxMenu } = useContext(CMContext);
     const toast = useToast();
     const addExpense = useExpenseStore((store) => store.addExpense);
     const deletePerson = useExpenseStore((store) => store.deletePerson);
@@ -139,7 +140,12 @@ const PersonTxs = memo(
               showAsDeleted={showAsDeleted}
             />
             {!makeReadOnly && !showAsDeleted && addTxTagButton}
-            {!conflictMode && <ContextMenuButton items={actionItems} className="ml-3" />}
+            {!conflictMode &&
+              <div
+                className="ml-3 mr-2 pi pi-ellipsis-h icon-btn add-btn font-semibold"
+                onClick={(e) => showCtxMenu(e, actionItems)}
+              ></div>
+            }
           </div>
           <div className="flex align-items-center">
             <PersonTotal id={id} />

@@ -14,6 +14,7 @@ import { ToastProvider } from "./services/ToasterContext";
 import { BrowserRouter } from "react-router-dom";
 import { InfoDialog } from "./components/info-dialog";
 import { enableMapSet } from "immer";
+import { ContextMenuProvider } from "./components/ContextMenuProvider";
 
 enableMapSet();
 
@@ -21,12 +22,14 @@ function App() {
   return (
     <TimerProvider>
       <PrimeReactProvider>
-        <ToastProvider>
-          <BrowserRouter>
-            <AppRouter></AppRouter>
-            <InfoDialog />
-          </BrowserRouter>
-        </ToastProvider>
+        <ContextMenuProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              <AppRouter></AppRouter>
+              <InfoDialog />
+            </BrowserRouter>
+          </ToastProvider>
+        </ContextMenuProvider>
       </PrimeReactProvider>
     </TimerProvider>
   );

@@ -114,3 +114,16 @@ body {
   backdrop-filter: blur(5px);
   background: rgba(0, 0, 0, 0.3);
 }
+
+
+.p-contextmenu
+  .p-menuitem:not(.p-highlight):not(.p-disabled).p-focus
+  > .p-menuitem-content {
+  background: unset;
+}
+
+.p-contextmenu
+  .p-menuitem:not(.p-highlight):not(.p-disabled)
+  > .p-menuitem-content:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
