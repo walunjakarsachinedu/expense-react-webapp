@@ -11,6 +11,7 @@ import ContextMenuButton from "../ContextMenuButton";
 import "./PersonTxs.scss";
 import TxTag from "./TxTag";
 import personUtils from "../../utils/personUtils";
+import { AutoCollapse } from "../AutoCollapse";
 
 type Props = {
   id: string;
@@ -35,6 +36,8 @@ const PersonTxs = memo(
     const [showAsDeleted, setShowAsDeleted] = useState(
       conflict?.toDelete ?? false
     );
+
+    const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
     const showDeleteCheckBox = conflictMode && conflict?.isDeleted;
 
@@ -69,35 +72,32 @@ const PersonTxs = memo(
       });
     };
 
-    const txList =
-      txIds.length > 0 ? (
-        <>
-          <br />
-          <div className="flex align-items-center flex-wrap gap-2 mt-2">
-            {txIds
-              .slice()
-              .reverse()
-              .map((txId, i) => (
-                <TxTag
-                  key={txId}
-                  id={txId}
-                  personId={id}
-                  alwaysShowAsDeleted={showAsDeleted}
-                  conflictMode={conflictMode}
-                />
-              ))}
-          </div>
-          <br />
-        </>
-      ) : (
+    const txList = txIds.length > 0 && (
+      <>
         <br />
-      );
+        <div className="flex align-items-center flex-wrap gap-2 mt-2">
+          {txIds
+            .slice()
+            .reverse()
+            .map((txId, i) => (
+              <TxTag
+                key={txId}
+                id={txId}
+                personId={id}
+                alwaysShowAsDeleted={showAsDeleted}
+                conflictMode={conflictMode}
+              />
+            ))}
+        </div>
+      </>
+    );
 
     const addTxTagButton = (
       <div
         className="ml-3 pi pi-plus icon-btn add-btn border-primary font-semibold"
         onClick={() => {
           addExpense(id);
+          setIsExpanded(true);
         }}
       ></div>
     );
@@ -127,20 +127,26 @@ const PersonTxs = memo(
                 style={{ transform: "scale(0.70)", transformOrigin: "center" }}
               />
             )}
-            {!conflictMode && <ContextMenuButton items={actionItems} />}
+            {!conflictMode && 
+              <i className="pi pi-angle-down mr-2 cursor-pointer"
+                style={{ transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)" }}
+                onClick={() => setIsExpanded(prev => !prev)}
+              ></i>
+            }
             <PersonName
               id={id}
               makeReadOnly={makeReadOnly}
               showAsDeleted={showAsDeleted}
             />
             {!makeReadOnly && !showAsDeleted && addTxTagButton}
+            {!conflictMode && <ContextMenuButton items={actionItems} className="ml-3" />}
           </div>
           <div className="flex align-items-center">
             <PersonTotal id={id} />
           </div>
         </div>
-        {txList}
-        <Divider className="mt-2"></Divider>
+        <AutoCollapse isOpen={isExpanded}>{txList}</AutoCollapse> 
+        <Divider className="mt-4"></Divider>
       </div>
     );
   }

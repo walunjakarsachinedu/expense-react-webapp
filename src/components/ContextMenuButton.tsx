@@ -5,14 +5,15 @@ import "./ContextMenuButton.scss";
 
 type Props = {
   items: MenuItem[];
+  className?: string;
 };
-const ContextMenuButton = ({ items }: Props) => {
+const ContextMenuButton = ({ items, className='' }: Props) => {
   const cm = useRef<ContextMenu>(null);
 
   return (
-    <div>
+    <div className={className}>
       <div
-        className="mr-2 pi pi-bars icon-btn add-btn font-semibold"
+        className="mr-2 pi pi-ellipsis-h icon-btn add-btn font-semibold"
         onClick={(e) => cm.current?.show(e)}
       ></div>
 
