@@ -129,7 +129,7 @@ const PersonTxs = memo(
               />
             )}
             {!conflictMode && 
-              <i className="pi pi-angle-down mr-2 cursor-pointer"
+              <i className="pi pi-angle-down mt-1 mr-2 cursor-pointer"
                 style={{ transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)" }}
                 onClick={() => setIsExpanded(prev => !prev)}
               ></i>
