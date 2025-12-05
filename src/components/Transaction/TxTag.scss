@@ -1,19 +1,19 @@
 
 .TxTag {
-  --active-bg-color: rgb(21,21,21);
   border-radius: 6px;
+  --surface-border-highlighted: var(--primary-500);
 
   & > .p-tag.p-component {
     display: inline-block;
   }
   
   &.active {
-    background-color: var(--active-bg-color);
+    background-color: var(--surface-bg-color);
   }
 
   &.expanded {
     .extra-info {
-      background-color: var(--active-bg-color);
+      background-color: var(--surface-bg-color);
       position: absolute;
         top: 125%;
         left: 0px;
@@ -22,7 +22,7 @@
       border-radius: 6px;
       border: solid 1px var(--surface-border-highlighted);
       z-index: 1;
-      padding: 0.5rem 0.4rem;
+      padding: 0.4rem 0.4rem;
     }
   }
 
@@ -45,14 +45,14 @@
     left: .3rem;
     right: unset;
     padding: 2px 4px;
-    background-color: var(--primary-color);
+    background-color: var(--surface-bg-color); 
   }
 
   .remove-btn {
     @extend .action-menu; 
-    top: -.4rem;
-    right: -.35rem;
-    background-color: var(--primary-color);
+    top: -0.5rem;
+    right: -0.45rem;
+    background-color: var(--surface-bg-color); 
   }
 
   &.deleted::after {

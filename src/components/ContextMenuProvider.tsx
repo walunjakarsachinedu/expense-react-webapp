@@ -28,7 +28,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
         model={menuItems}
         ref={cm}
         breakpoint="767px"
-        style={{ background: "var(--dark-bg)", scale: "0.9", width: "150px" }}
+        style={{ background: "var(--context-menu-bg-color)", scale: "0.9", width: "150px" }}
       />
     </CMContext.Provider>
   );

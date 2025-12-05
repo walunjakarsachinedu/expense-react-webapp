@@ -196,7 +196,7 @@ const TxTag = memo(
               />
             )}
             {editMode && showExtraInfo && <>
-              <div ref={extraInfoRef} className="extra-info flex flex-column gap-1">
+              <div ref={extraInfoRef} className="extra-info">
                 <div>
                   <span className="text-color-secondary">Performed at: </span> 
                   <EditableElem
