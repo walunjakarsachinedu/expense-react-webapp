@@ -23,7 +23,7 @@ const PasswordField = forwardRef<Password | null, FieldProps>(
     return (
       <>
         <br />
-        <div className="flex flex-column gap-2 w-full">
+        <div className="flex flex-column gap-2 w-full mt-1">
           <div className="flex justify-content-between">
             <label htmlFor={id}>{label}</label>
             {showForgotPasswordLink && (
