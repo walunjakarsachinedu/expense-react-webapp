@@ -42,7 +42,7 @@ const TxSummary = () => {
                 ></LabeledNumber>
               </div>
             }
-            <div className="flex justify-content-center gap-3">
+            <div className="flex justify-content-center align-items-end gap-3">
               <div className="text-2xl text-500">=</div>
               <LabeledNumber
                 label="Remaining"
