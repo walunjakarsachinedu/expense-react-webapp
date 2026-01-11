@@ -26,7 +26,7 @@ const TxSummary = () => {
         >
           <div className="flex justify-content-center flex-wrap row-gap-4 gap-3 md:gap-5 p-4">
             <LabeledNumber label="Income" number={incomeTotal}></LabeledNumber>
-            <div className="flex justify-content-center gap-3">
+            <div className="flex justify-content-center align-items-end gap-3">
               <div className="text-2xl text-500">-</div>
               <LabeledNumber
                 label="Expense"
