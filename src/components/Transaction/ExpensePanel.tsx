@@ -30,9 +30,7 @@ const ExpensePanel = ({ type }: Props) => {
         <AccordionTab
           header={
             <div className="flex justify-content-between align-items-center">
-              <div className="font-bold">
-                {type == TxType.Expense ? "Expense" : "Income"} History{" "}
-              </div>
+              <div className="font-bold">{utils.getTypeDisplayName(type)}</div>
               <div className="flex align-items-center">
                 {/* <div className="pi pi-cog"></div> */}
                 <div className="mx-3"></div>

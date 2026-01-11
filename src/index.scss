@@ -131,3 +131,18 @@ body {
   > .p-menuitem-content:hover {
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
+
+
+.checkbox-sm.p-checkbox {
+  width: 16px;
+  height: unset;
+
+  .p-checkbox-box {
+    border-width: 1px;
+    height: 16px;
+  }
+
+  .p-checkbox-box .p-checkbox-icon.p-icon {
+    height: 10px;
+  }
+}

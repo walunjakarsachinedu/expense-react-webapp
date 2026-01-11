@@ -9,17 +9,14 @@ import ConflictResolutionPanel from "./Transaction/ConflictResolutionPanel";
 function ConflictResolutionDialog() {
   const isConflictsFound = useExpenseStore((store) => store.isConflictsFound);
   const conflicts = useExpenseStore((store) => store.conflicts);
-
   const persons = useExpenseStore((store) => store.persons);
 
-  const isConflictsFoundInExpense =
+  const txTypes = Object.values(TxType) as TxType[];
+  const conflictsByType = txTypes.filter((type) =>
     conflicts?.some(
-      (conflict) => persons[conflict._id]?.type == TxType.Expense
-    ) ?? false;
-  const isConflictsFoundInIncome =
-    conflicts?.some(
-      (conflict) => persons[conflict._id]?.type == TxType.Income
-    ) ?? false;
+      (conflict) => persons[conflict._id]?.type === type
+    )
+  );
 
   const saveAndCloseDialog = () => {
     monthExpenseRepository.processConflicts();
@@ -30,7 +27,7 @@ function ConflictResolutionDialog() {
     <div className="inline-flex align-items-center justify-content-between gap-2 w-full">
       <span className="font-bold white-space-nowrap">Conflict Resolution</span>
       <div>
-        <Button label="Save" size="small" onClick={saveAndCloseDialog}></Button>
+        <Button label="Save" size="small" onClick={saveAndCloseDialog} />
       </div>
     </div>
   );
@@ -44,7 +41,7 @@ function ConflictResolutionDialog() {
       className="col-12 md:col-10 p-0 ConflictResolutionDialog"
       dismissableMask={false}
       maskClassName="blurred-overlay"
-      blockScroll={true}
+      blockScroll
       position="top"
       modal
       draggable={false}
@@ -54,20 +51,14 @@ function ConflictResolutionDialog() {
         server. Please review and select items to delete;&nbsp;
         <b>unselected items will be saved.</b>
       </div>
-      {isConflictsFoundInExpense && (
-        <>
+
+      {conflictsByType.map((type) => (
+        <div key={type}>
           <br />
           <br />
-          <ConflictResolutionPanel type={TxType.Expense} />
-        </>
-      )}
-      {isConflictsFoundInIncome && (
-        <>
-          <br />
-          <br />
-          <ConflictResolutionPanel type={TxType.Income} />
-        </>
-      )}
+          <ConflictResolutionPanel type={type} />
+        </div>
+      ))}
     </Dialog>
   );
 }

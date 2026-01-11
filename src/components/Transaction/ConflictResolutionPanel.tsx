@@ -3,6 +3,7 @@ import { ConflictPerson, TxType } from "../../models/type";
 import CenteredContent from "../common/CenteredContent";
 import useExpenseStore from "../../store/usePersonStore";
 import PersonTxs from "./PersonTxs";
+import utils from "../../utils/utils";
 
 type Props = {
   type: TxType;
@@ -31,9 +32,7 @@ function ConflictResolutionPanel({ type, conflictPersons }: Props) {
         <AccordionTab
           header={
             <div className="flex justify-content-between align-items-center">
-              <div className="font-bold	">
-                {type == TxType.Expense ? "Expense" : "Income"} History{" "}
-              </div>
+              <div className="font-bold	">{utils.getTypeDisplayName(type)}</div>
             </div>
           }
           style={{ backgroundColor: "var(--surface-ground) !important" }}

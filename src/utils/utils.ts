@@ -1,4 +1,4 @@
-import { MonthData, MonthDiff, MonthlyNotes } from "../models/type";
+import { MonthData, MonthDiff, TxType } from "../models/type";
 
 class Utility {
   static readonly provider = new Utility();
@@ -74,6 +74,11 @@ class Utility {
 
   sanitizeMonthData(monthData: MonthData): MonthData {
     return {persons: monthData.persons, monthlyNotes: monthData.monthlyNotes};
+  }
+
+  getTypeDisplayName(txType: TxType) {
+    if(txType == TxType.UpcomingExpense) return "Upcoming Expense";
+    return txType;
   }
 }
 

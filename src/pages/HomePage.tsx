@@ -7,7 +7,6 @@ import ExpensePanel from "../components/Transaction/ExpensePanel";
 import TxSummary from "../components/Transaction/TxSummary";
 import useMonthExpense from "../hooks/useMonthExpense";
 import { TxType } from "../models/type";
-import { Slider } from "primereact/slider";
 import DayRangeFilter from "../components/common/DayRangeFilter";
 
 const HomePage = () => {
@@ -38,6 +37,8 @@ const HomePage = () => {
             <ExpensePanel type={TxType.Expense}></ExpensePanel>
             <br />
             <ExpensePanel type={TxType.Income}></ExpensePanel>
+            <br />
+            <ExpensePanel type={TxType.UpcomingExpense}></ExpensePanel>
             <br /> <br />
           </> 
           : <>

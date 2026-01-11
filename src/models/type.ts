@@ -4,6 +4,7 @@ import { ErrorCodes } from "../api/constants/ErrorContants";
 export enum TxType {
   Expense = "Expense",
   Income = "Income",
+  UpcomingExpense = "UpcomingExpense"
 }
 
 /** Sturcture of person for client use.  */
