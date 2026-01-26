@@ -118,15 +118,33 @@ export default function EditableElem({
     onBlur?.(e);
   };
 
+  const scrollElementAboveKeyboard = (el: HTMLElement, offsetFromKeyboard: number = 50) => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const rect = el.getBoundingClientRect();
+
+    const visibleBottom = vv.offsetTop + vv.height;
+    const desiredBottom = visibleBottom - offsetFromKeyboard; 
+
+    // already visible, so skipping scrolling
+    if (rect.bottom+30 <= desiredBottom) return;
+
+    const delta = rect.bottom - desiredBottom;
+
+    window.scrollBy({
+      top: delta,
+      behavior: "smooth",
+    });
+  };
+
+
   const handleOnFocus = (e: React.FocusEvent<HTMLSpanElement, Element>) => {
     onFocus?.(e);
-    // Fix for mobile keyboard hiding input
     setTimeout(() => {
-      if (!contentRef.current) return;
-      contentRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
+      const el = contentRef.current;
+      if (!el) return;
+      scrollElementAboveKeyboard(el);
     }, 300);
   };
 
