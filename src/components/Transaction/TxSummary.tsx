@@ -52,15 +52,14 @@ const TxSummary = () => {
             </div>
           </div>
           <br />
-          <div className="flex align-items-center gap-3 text-400">
+          <div className="flex align-items-center gap-3 text-500">
             <Checkbox 
-              inputId="ingredient1" name="pizza" value="Cheese" 
               className="checkbox-sm"
               size={1}
               onChange={(_) => setIncludeUpcomingExpense(!includeUpcomingExpense)} 
               checked={includeUpcomingExpense} 
             />
-            include upcoming expense
+            <div onClick={(_) => setIncludeUpcomingExpense(!includeUpcomingExpense)} className="cursor-pointer">include upcoming expense</div>
           </div>
         </AccordionTab>
       </Accordion>
