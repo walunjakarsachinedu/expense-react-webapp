@@ -5,6 +5,7 @@ import utils from "../../utils/utils";
 import CenteredContent from "../common/CenteredContent";
 import { Checkbox } from "primereact/checkbox";
 import { useState } from "react";
+import { InputSwitch } from "primereact/inputswitch";
 
 // TODO: to show only when we have at least on tx enty in both income & expense
 const TxSummary = () => {
@@ -52,12 +53,11 @@ const TxSummary = () => {
             </div>
           </div>
           <br />
-          <div className="flex align-items-center gap-3 text-500">
-            <Checkbox 
-              className="checkbox-sm"
-              size={1}
-              onChange={(_) => setIncludeUpcomingExpense(!includeUpcomingExpense)} 
+          <div className="flex align-items-center gap-2 text-500">
+            <InputSwitch 
               checked={includeUpcomingExpense} 
+              style={{ transform: 'scale(0.7)' }}
+              onChange={(_) => setIncludeUpcomingExpense(!includeUpcomingExpense)} 
             />
             <div onClick={(_) => setIncludeUpcomingExpense(!includeUpcomingExpense)} className="cursor-pointer">include upcoming expense</div>
           </div>
