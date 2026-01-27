@@ -8,6 +8,7 @@ import TxSummary from "../components/Transaction/TxSummary";
 import useMonthExpense from "../hooks/useMonthExpense";
 import { TxType } from "../models/type";
 import DayRangeFilter from "../components/common/DayRangeFilter";
+import InlineSwitch from "../components/common/InlineSwitch";
 
 const HomePage = () => {
   const { isLoading, error } = useMonthExpense();
@@ -21,12 +22,12 @@ const HomePage = () => {
       <CenteredContent>
         <div className="mb-2 flex flex-wrap justify-content-end align-items-center column-gap-2 row-gap-3">
           {viewType == "month" && <DayRangeFilter></DayRangeFilter>}
-          <Switch 
-            values={['month', 'notes']} 
+          <InlineSwitch 
+            values={[{label: "View expense", key: 'month'}, {label: 'View notes', key: 'notes'}]} 
             selectedValue={viewType} 
             onSelect={(value:string) => setViewType(value as "month"|"notes")}
             className="ml-2"
-          ></Switch>
+          ></InlineSwitch>
         </div>
       </CenteredContent>
       {
