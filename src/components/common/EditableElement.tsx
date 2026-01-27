@@ -25,6 +25,8 @@ interface Props {
   className?: string;
   /** select all text on focus of input. */
   selectAllOnFocus?: boolean;
+  /** extra spacing to keep element above the on-screen keyboard */
+  keyboardOffset?: number; 
 }
 
 export default function EditableElem({
@@ -38,6 +40,7 @@ export default function EditableElem({
   className = "",
   isReadonly = false,
   selectAllOnFocus,
+  keyboardOffset,
   onChange,
   onFocus,
   onBlur,
@@ -128,7 +131,7 @@ export default function EditableElem({
     const desiredBottom = visibleBottom - offsetFromKeyboard; 
 
     // already visible, so skipping scrolling
-    if (rect.bottom+30 <= desiredBottom) return;
+    if (rect.bottom <= desiredBottom) return;
 
     const delta = rect.bottom - desiredBottom;
 
@@ -144,7 +147,7 @@ export default function EditableElem({
     setTimeout(() => {
       const el = contentRef.current;
       if (!el) return;
-      scrollElementAboveKeyboard(el);
+      scrollElementAboveKeyboard(el, keyboardOffset);
     }, 300);
   };
 

@@ -208,6 +208,7 @@ const TxTag = memo(
                     maxNumber={utils.getLastDayOfMonth(monthYear)}
                     className="underline"
                     selectAllOnFocus={true}
+                    keyboardOffset={10}
                     onKeyUp={(e) => {
                       const target = e.target as HTMLElement;
                       performedAt.current = utils.parseNumber(
