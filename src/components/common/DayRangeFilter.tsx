@@ -48,7 +48,7 @@ export default function DayRangeFilter() {
               value={value} 
               step={1} 
               min={1}
-              max={31}
+              max={utils.getLastDayOfMonth(monthYear)}
               onChange={(e) => handleOnRangeChange(e)} 
               className="w-14rem slider-my-date-range" range 
             />
