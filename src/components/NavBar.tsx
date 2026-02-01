@@ -35,7 +35,7 @@ export default function NavBar() {
               <div className="text-color-secondary ">Are you sure you want to logout?</div>
               <div className="flex justify-content-end pt-4 gap-2">
                 <Button label="Yes"  className="flex-grow-1" size="small" onClick={() => authService.logout(navigate)} />
-                <Button label="No" size="small"  className="flex-grow-1"  style={{backgroundColor: "var(--surface-ground-light)"}} text onClick={() => setIsLogoutDialogVisible(false)} />
+                <Button label="No" size="small"  className="flex-grow-1"  style={{backgroundColor: "var(--secondary-interactive)"}} text onClick={() => setIsLogoutDialogVisible(false)} />
               </div>
           </p>
       </Dialog>
