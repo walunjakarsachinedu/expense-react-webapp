@@ -374,8 +374,7 @@ function setupDebounceTimer(): Timer {
 }
 
 function _isTxSatisfyFilter(tx: Tx, filter: Filter) {
-  return tx.performedAt
-  && (tx.performedAt >= filter.startDay! && tx.performedAt <= filter.endDay!); 
+  return !tx.performedAt || (tx.performedAt >= filter.startDay! && tx.performedAt <= filter.endDay!); 
 }
 
 
