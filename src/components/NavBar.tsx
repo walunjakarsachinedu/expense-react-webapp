@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moneyIcon from "../images/app-icon.svg";
 import useExpenseStore, { timer } from "../store/usePersonStore";
@@ -7,13 +7,16 @@ import MonthPicker from "./MonthPicker";
 import "./NavBar.scss";
 import authService from "../core/authService";
 import OfflineAlert from "./OfflineAlert";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import SyncState from "./SyncState";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
 
 export default function NavBar() {
   const month = useExpenseStore((store) => store.monthYear);
   const setMonthYear = useExpenseStore((store) => store.setMonthYear);
   const navigate = useNavigate();
+
+  const [isLogoutDialogVisible, setIsLogoutDialogVisible] = useState(false);
 
   const onMonthChange = (monthYear: string) => {
     setMonthYear(monthYear);
@@ -21,20 +24,22 @@ export default function NavBar() {
 
   const logout = () => {
     timer.timeout();
-    confirmDialog({
-      message: "Are you sure you want to log out?",
-      header: "Logout Confirmation",
-      icon: "pi pi-info-circle",
-      position: "top",
-      accept: () => {
-        authService.logout(navigate);
-      },
-    });
+    setIsLogoutDialogVisible(true);
+ 
   };
 
   return (
     <div className="nav-bar">
-      <ConfirmDialog />
+      <Dialog header="Logout" position="top" style={{width: "20rem"}} draggable={false} visible={isLogoutDialogVisible}  onHide={() => {if (!isLogoutDialogVisible) return; setIsLogoutDialogVisible(false); }}>
+          <p className="flex justify-content-center flex-column mt-1 m-0">
+              <div className="text-color-secondary ">Are you sure you want to logout?</div>
+              <div className="flex justify-content-end pt-4 gap-2">
+                <Button label="Yes"  className="flex-grow-1" size="small" onClick={() => authService.logout(navigate)} />
+                <Button label="No" size="small"  className="flex-grow-1"  style={{backgroundColor: "var(--surface-ground-light)"}} text onClick={() => setIsLogoutDialogVisible(false)} />
+              </div>
+          </p>
+      </Dialog>
+
       <OfflineAlert></OfflineAlert>
       <div
         className="blur-bg flex justify-content-center align-items-center"
