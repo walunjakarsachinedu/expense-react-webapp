@@ -1,0 +1,24 @@
+.MarkdownEditor {
+  $brand: #818cf8;
+  $selection-bg: rgba(129, 140, 248, 0.35);
+
+  border: 1px solid $brand;
+  padding: 10px 0px;
+  border-radius: 8px;
+
+  .bn-default-styles {
+    font-family: var(--font-family) !important;
+    font-variant-ligatures: contextual discretionary-ligatures;
+    font-size: 14px;
+  }
+
+  .bn-editor {
+    background-color: var(--surface-ground);
+    background-color: transparent;
+    padding-inline: 30px;
+  }
+
+  .bn-editor ::selection {
+    background: $selection-bg;
+  }
+}

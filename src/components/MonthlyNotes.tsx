@@ -1,15 +1,15 @@
 import useExpenseStore from "../store/usePersonStore";
-import PlainTextEditor from "./common/PlainTextEditor"
+import MarkdownEditor from "./common/MarkdownEditor"
 
 function MonthlyNotes() {
   const monthlyNotes = useExpenseStore((store) => store.monthlyNotes.notes);
   const updateNotes = useExpenseStore((store) => store.updateMonthlyNotes);
   return (
-    <PlainTextEditor 
+    <MarkdownEditor
       placeholderText="Enter notes..."
-      value={monthlyNotes} 
+      initialValue={monthlyNotes} 
       onChange={updateNotes}
-    ></PlainTextEditor>
+    ></MarkdownEditor>
   )
 }
 
