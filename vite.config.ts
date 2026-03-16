@@ -33,6 +33,7 @@ export default defineConfig(async ({ mode }) => {
     plugins: [react()],
     define: {
       __APP_CONFIG_: JSON.stringify(finalConfig),
+      __MODE_: JSON.stringify(mode)
     },
   };
 });

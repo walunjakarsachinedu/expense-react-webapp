@@ -27,6 +27,7 @@ import personUtils from "../utils/personUtils";
 import Timer from "../utils/Timer";
 import utils from "../utils/utils";
 import { monthCacheApi } from "../api/cache/MonthCacheApi";
+import { mode } from "../config";
 
 export type ExpenseStore = {
   syncState: SyncStates;
@@ -382,6 +383,6 @@ export { timer };
 
 export default useExpenseStore;
 
-if (process.env.NODE_ENV === "development") {
+if (mode === "default") {
   mountStoreDevtool("ExpenseStore", useExpenseStore);
 }
