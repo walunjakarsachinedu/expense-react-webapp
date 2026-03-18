@@ -29,7 +29,8 @@
     "rxjs": "7.8.1",
     "simple-zustand-devtools": "1.1.0",
     "yup": "1.6.1",
-    "zustand": "5.0.1"
+    "zustand": "5.0.1",
+    "compress-json": "3.4.0"
   },
   "devDependencies": {
     "@eslint/js": "9.15.0",
