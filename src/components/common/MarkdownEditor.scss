@@ -21,4 +21,9 @@
   .bn-editor ::selection {
     background: $selection-bg;
   }
+
+  .bn-toolbar {
+    width: 240px;
+    flex-wrap: wrap;
+  }
 }
