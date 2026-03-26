@@ -3,7 +3,7 @@ import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { memo, useRef, useState } from "react";
 import useClickOutside from "../../hooks/onClickOutside";
-import { usePreventRightOverflow } from "../../hooks/usePreventRightOverflow";
+import { usePreventHorizontalOverflow } from "../../hooks/usePreventHorizontalOverflow";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
 import EditableElem from "../common/EditableElement";
@@ -96,7 +96,7 @@ const TxTag = memo(
 
 
     // make sures extra-info panel is always visible
-    usePreventRightOverflow(extraInfoRef, [showExtraInfo]);
+    usePreventHorizontalOverflow(extraInfoRef, [showExtraInfo]);
 
     return (
       <div

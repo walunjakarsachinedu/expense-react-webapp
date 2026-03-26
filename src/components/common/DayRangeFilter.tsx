@@ -1,80 +1,84 @@
-
 import { Button } from "primereact/button";
-import { Slider, SliderChangeEvent } from "primereact/slider";
-import { Tooltip } from "primereact/tooltip";
-import { useEffect, useState } from "react";
+import { Calendar } from "primereact/calendar";
+import { useClickOutside } from "primereact/hooks";
+import { RefObject, useEffect, useRef, useState } from "react";
+import { usePreventHorizontalOverflow } from "../../hooks/usePreventHorizontalOverflow";
 import useExpenseStore from "../../store/usePersonStore";
 import utils from "../../utils/utils";
+import "./DayRangeFilter.scss";
 
 export default function DayRangeFilter() {
-    const filter = useExpenseStore(store => store.filter);
-    const monthYear = useExpenseStore((store) => store.monthYear);
-    const updateFilter = useExpenseStore(store => store.updateFilter);
+  const filter = useExpenseStore(store => store.filter);
+  const monthYear = useExpenseStore(store => store.monthYear);
+  const updateFilter = useExpenseStore(store => store.updateFilter);
 
-    const [isSliderVisible, setIsSliderVisible] = useState<boolean>(false);
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
-    const value: [number, number] = [filter.startDay ?? 1, filter.endDay ?? utils.getLastDayOfMonth(monthYear)];
-    const [lowerValue, upperValue] = [...value].sort((a,b) => a-b); 
+  const [month, year] = monthYear.split("-").map(Number); // expects "MM-yyyy"
+  const lastDay = utils.getLastDayOfMonth(monthYear);
+  const firstDate = new Date(year, month - 1, 1);
+  const lastDate = new Date(year, month - 1, lastDay);
+  const [localValue, setLocalValue] = useState<[Date | null, Date | null] | null>([firstDate, lastDate]);
 
-    const handleOnRangeChange = (e: SliderChangeEvent) => {
-      const value = e.value as [number, number];
-      const [lowerValue, upperValue] = [...value].sort((a,b) => a-b); 
-      updateFilter({ startDay: lowerValue, endDay: upperValue });
-    }
+  const calendarRef = useRef<HTMLSpanElement|undefined>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-      return () => {
-        updateFilter({});
-      }
-    }, [updateFilter]);
+  const startDay = filter.startDay ?? 1;
+  const endDay = filter.endDay ?? lastDay;
+  const label = `${startDay.toString().padStart(2, "0")} - ${endDay.toString().padStart(2, "0")}`;
 
-    return (
-      <div className="flex">
-        {isSliderVisible && <>
-          <div className="px-4" style={{backgroundColor: "#818cf826", padding: ".9rem", borderTopLeftRadius: "8px", borderBottomLeftRadius: "10px"}}>
-            <Tooltip 
-              target={`.slider-my-date-range>.p-slider-handle-start`}
-              position="top"
-              event="hover"
-              content={`${value[0]}`}
-            />
-            <Tooltip
-              target={`.slider-my-date-range>.p-slider-handle-end`}
-              position="top"
-              event="hover"
-              content={`${value[1]}`}
-            />
-            <Slider 
-              value={value} 
-              step={1} 
-              min={1}
-              max={utils.getLastDayOfMonth(monthYear)}
-              onChange={(e) => handleOnRangeChange(e)} 
-              className="w-14rem slider-my-date-range" range 
-            />
-          </div>
-        </>
-        }
-        <Button 
+  const handleButtonClick = () => {
+    setIsCalendarVisible((v) => !v);
+  };
+
+  useClickOutside(calendarRef as RefObject<Element>, (event: Event) => {
+    if (buttonRef.current?.contains(event.target as Node)) return;
+    setIsCalendarVisible(false);
+  });
+
+  useEffect(() => {
+    return () => {
+      updateFilter({});
+    };
+  }, [updateFilter]);
+
+  usePreventHorizontalOverflow(calendarRef, [isCalendarVisible]);
+
+  return (
+    <div className="relative">
+      <div ref={buttonRef}>
+       <Button 
           size="small" 
           className="w-100 flex items-center justify-center white-space-nowrap" 
-          style={{
-            padding: "0.4rem 0.5rem", 
-            maxWidth: "9rem", 
-            borderTopRightRadius: "8px", 
-            borderBottomRightRadius: "8px", 
-            ...(isSliderVisible ? {
-              borderTopLeftRadius: "0px", 
-              borderBottomLeftRadius: "0px"
-            } : {})
-          }} 
-          onClick={() => setIsSliderVisible(!isSliderVisible)}
+          style={{ padding: "0.4rem 0.5rem" }} 
+          onClick={handleButtonClick}
           outlined
         >
-          <div>
-          Day Fliter ({lowerValue.toString().padStart(2, "0")}, {upperValue.toString().padStart(2, "0")})
-          </div>
+          <div className="flex items-center"> Day Filter ({label}) &nbsp; <i className="pi pi-calendar"></i></div>
         </Button>
       </div>
-    )
+
+      {isCalendarVisible && (
+        <Calendar
+          ref={(ref) => {calendarRef.current = ref?.getElement()}}
+          className="day-range-picker"
+          value={localValue}
+          onChange={(e) => {
+            const range = e.value as [Date | null, Date | null];
+            setLocalValue(range);
+            const [start, end] = range ?? [];
+            // Only commit to store + close once both ends are picked
+            if (start && end) {
+              updateFilter({ startDay: start.getDate(), endDay: end.getDate() });
+              setTimeout(() => setIsCalendarVisible(false), 400);
+            }
+          }}
+          selectionMode="range"
+          viewDate={firstDate}
+          onViewDateChange={() => {}} // lock navigation
+          inline
+        />
+      )}
+    </div>
+  );
 }
