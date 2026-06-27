@@ -6,6 +6,16 @@ import fs from "fs";
 import path from "path";
 
 export default defineConfig(async ({ mode }) => {
+  return {
+    plugins: [react()],
+    define: {
+      __APP_CONFIG_: JSON.stringify(await extractConfig(mode)),
+      __MODE_: JSON.stringify(mode)
+    },
+  };
+});
+
+async function extractConfig(mode: string) {
   const configDir = path.resolve(__dirname, "src/config");
 
   // Validate mode by checking for corresponding config files
@@ -29,11 +39,5 @@ export default defineConfig(async ({ mode }) => {
 
   const finalConfig = deepmerge(defaultConfig, envConfig);
 
-  return {
-    plugins: [react()],
-    define: {
-      __APP_CONFIG_: JSON.stringify(finalConfig),
-      __MODE_: JSON.stringify(mode)
-    },
-  };
-});
+  return finalConfig;
+}
