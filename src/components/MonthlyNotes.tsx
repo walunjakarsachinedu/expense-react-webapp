@@ -6,7 +6,7 @@ function MonthlyNotes() {
   const updateNotes = useExpenseStore((store) => store.updateMonthlyNotes);
   return (
     <MarkdownEditor
-      placeholderText="Enter notes..."
+      placeholderText="Enter notes for this month..."
       initialValue={monthlyNotes} 
       onChange={updateNotes}
     ></MarkdownEditor>

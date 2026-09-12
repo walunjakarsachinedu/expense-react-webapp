@@ -18,7 +18,8 @@ export default function MarkdownEditor(props: Props) {
 
   const editor = useCreateBlockNote({
     placeholders: {
-      default: props.placeholderText ?? "Write something..."
+      emptyDocument: props.placeholderText ?? "Write something...",
+      default: ""
     },
     trailingBlock: false
   })
