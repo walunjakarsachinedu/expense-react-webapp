@@ -1,14 +1,15 @@
+import { Block, BlockNoteEditor } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { DragHandleButton, FormattingToolbar, FormattingToolbarController, SideMenu, SideMenuController, useCreateBlockNote } from "@blocknote/react";
 import { flip, offset, shift } from "@floating-ui/react";
-import { useEffect, useRef, useState } from "react";
-import "./MarkdownEditor.scss";
-import { Block, BlockNoteEditor } from "@blocknote/core";
 import { compress, decompress } from "compress-json";
+import { useEffect, useState } from "react";
+import { useExternalValueSync } from "../../hooks/useExternalValueSync";
+import "./MarkdownEditor.scss";
 
 type Props = {
-  initialValue?: string
+  value?: string
   onChange?: (txt: string) => void
   placeholderText?: string
 }
@@ -24,41 +25,36 @@ export default function MarkdownEditor(props: Props) {
     trailingBlock: false
   })
 
-  const loadedRef = useRef(false)
-  const loadingRef = useRef(true)
+  const { updateFromInternal, isInitialSync } = useExternalValueSync({
+    value: props.value ?? "",
+    apply: async (value) => {
+      const blocks = await strToBlocks(value, editor);
 
-  useEffect(() => {
-    async function load(): Promise<void> {
-      if (loadedRef.current) return;
-
-      if (props.initialValue) {
-        const blocks = await strToBlocks(props.initialValue, editor);
-        if (blocks) {
-          editor.replaceBlocks(editor.document, blocks);
-        }
+      if (blocks) {
+        editor.replaceBlocks(editor.document, blocks);
       }
+    },
+    isEqual: (a, b) => a == b
+  });
 
-      loadedRef.current = true;
 
-      setTimeout(() => {
-        loadingRef.current = false;
-      }, 0);
-    }
-
-    load();
-  }, [editor, props.initialValue]);
 
   function handleChange(): void {
-    if (loadingRef.current) return
-    if (!loadedRef.current || !props.onChange) return
+    if(isInitialSync.current || !props.onChange) return
 
     const jsonString = blocksToStr(editor.document)
     props.onChange(jsonString)
+    updateFromInternal(jsonString);
   }
 
   return (
     <div className="MarkdownEditor">
-      <BlockNoteView editor={editor} onChange={handleChange} sideMenu={false} formattingToolbar={false}>
+      <BlockNoteView 
+        editor={editor} 
+        onChange={handleChange} 
+        sideMenu={false} 
+        formattingToolbar={false}
+      >
         <SideMenuController
           sideMenu={(props) => (
             <SideMenu {...props}>

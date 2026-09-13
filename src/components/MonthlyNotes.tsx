@@ -7,7 +7,7 @@ function MonthlyNotes() {
   return (
     <MarkdownEditor
       placeholderText="Add notes for this month..."
-      initialValue={monthlyNotes} 
+      value={monthlyNotes} 
       onChange={updateNotes}
     ></MarkdownEditor>
   )
